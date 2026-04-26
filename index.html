@@ -278,6 +278,7 @@ function load(){
 
 function save(){
   try{localStorage.setItem('blurt3',JSON.stringify(state));}catch(e){}
+}
 
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
