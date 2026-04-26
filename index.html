@@ -599,5 +599,10 @@ function deleteCard(tid,cid,stid){
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
 load();
 </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./service-worker.js');
+  }
+</script>
 </body>
 </html>
