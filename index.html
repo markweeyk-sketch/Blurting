@@ -289,8 +289,21 @@ function save(){
 
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
 
+function esc(s){
+  if(!s)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function escAnswer(s){
+  if(!s)return'';
+  // Escape HTML but preserve line breaks as <br>
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>');
+}
 function toggleTheme(){state.theme=state.theme==='dark'?'light':'dark';applyTheme();save();}
 function applyTheme(){document.documentElement.setAttribute('data-theme',state.theme);document.getElementById('themeBtn').textContent=state.theme==='dark'?'☀':'☾';}
 
@@ -411,8 +424,8 @@ function cardHTML(tid,c,stid){
       <button class="card-btn" onclick="openPanel('card','${c.id}','${tid}','${stid||''}')">Edit</button>
       <button class="card-btn red" onclick="deleteCard('${tid}','${c.id}','${stid||''}')">Delete</button>
     </div>
-    <div class="answer-box" id="ans-${c.id}">${c.answer?esc(c.answer):''}</div>
-    ${hasNote?`<div class="my-note" id="note-${c.id}"><div class="my-note-label">My note</div><div class="my-note-text">${esc(c.myNote)}</div></div>`:''}
+    <div class="answer-box" id="ans-${c.id}">${c.answer?escAnswer(c.answer):''}</div>
+    ${hasNote?`<div class="my-note" id="note-${c.id}"><div class="my-note-label">My note</div><div class="my-note-text">${escAnswer(c.myNote)}</div></div>`:''}
   </div>`;
 }
 
