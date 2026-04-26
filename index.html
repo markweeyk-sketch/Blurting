@@ -262,8 +262,12 @@ let state={subjects:[],activeSubId:null,activeTopicId:null,theme:'light',sidebar
 let panel={type:null,editId:null,topicId:null,subtopicId:null,selColor:PALETTE[0].c};
 let _closeTimer=null;
 
-async function load(){
-  try{const r=await window.storage.get('blurt3');if(r&&r.value)state=JSON.parse(r.value);}catch(e){}
+
+function load(){
+  try{
+    const raw=localStorage.getItem('blurt3');
+    if(raw) state=JSON.parse(raw);
+  }catch(e){}
   if(!state.subjects)state.subjects=[];
   if(!state.theme)state.theme='light';
   if(state.sidebarOpen===undefined)state.sidebarOpen=true;
@@ -271,7 +275,11 @@ async function load(){
   applyTheme();applySidebar();renderSidebar();
   if(state.activeSubId)renderMain();
 }
-async function save(){try{await window.storage.set('blurt3',JSON.stringify(state));}catch(e){}}
+
+function save(){
+  try{localStorage.setItem('blurt3',JSON.stringify(state));}catch(e){}
+
+
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
 
