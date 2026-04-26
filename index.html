@@ -3,13 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#111111">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="./android-chrome-192x192.png">
-
 <title>Blurt</title>
 <style>
 :root{
@@ -34,15 +32,8 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;transition:background .25s,color .25s}
 input,textarea,select,button{font-family:inherit;color:var(--text)}
-
 .app{display:flex;height:100vh;overflow:hidden}
-
-.sidebar{
-  width:var(--sidebar-w);min-width:var(--sidebar-w);
-  border-right:1px solid var(--border);background:var(--bg3);
-  display:flex;flex-direction:column;overflow:hidden;
-  transition:background .25s,width .3s cubic-bezier(.4,0,.2,1),min-width .3s cubic-bezier(.4,0,.2,1);
-}
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);border-right:1px solid var(--border);background:var(--bg3);display:flex;flex-direction:column;overflow:hidden;transition:background .25s,width .3s cubic-bezier(.4,0,.2,1),min-width .3s cubic-bezier(.4,0,.2,1)}
 .sidebar.collapsed{width:0;min-width:0;border-right:none}
 .sidebar-top{padding:18px 16px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .app-title{font-size:16px;font-weight:600;letter-spacing:-.3px;white-space:nowrap;overflow:hidden}
@@ -65,7 +56,6 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .sidebar-footer{padding:8px 8px 14px;border-top:1px solid var(--border);flex-shrink:0}
 .add-subject-btn{width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--border2);border-radius:8px;background:transparent;cursor:pointer;color:var(--text2);text-align:left;display:flex;align-items:center;gap:8px;transition:background .15s,color .15s,transform .15s;white-space:nowrap}
 .add-subject-btn:hover{background:var(--bg);color:var(--text);transform:translateX(2px)}
-
 .sidebar-toggle{width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;color:var(--text2)}
 .sidebar-toggle:hover{background:var(--bg2);color:var(--text)}
 .toggle-icon{display:flex;flex-direction:column;gap:4px;width:14px}
@@ -73,14 +63,12 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .sidebar.collapsed ~ .main .toggle-icon span:nth-child(1){transform:translateY(5.5px) rotate(45deg)}
 .sidebar.collapsed ~ .main .toggle-icon span:nth-child(2){opacity:0;transform:scaleX(0)}
 .sidebar.collapsed ~ .main .toggle-icon span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
-
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg2);min-width:0}
 .topbar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--bg);transition:background .25s;flex-shrink:0}
 .topbar-info{flex:1;min-width:0}
 .topbar-title{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .topbar-sub{font-size:11px;color:var(--text3);margin-top:1px}
 .topbar-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
-
 .btn{padding:7px 14px;font-size:12px;font-weight:500;border:1px solid var(--border2);border-radius:8px;background:transparent;cursor:pointer;color:var(--text2);transition:background .15s,color .15s,transform .1s;white-space:nowrap}
 .btn:hover{background:var(--bg2);color:var(--text)}
 .btn:active{transform:scale(.97)}
@@ -89,23 +77,25 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .btn-danger{color:var(--red-text);border-color:var(--red-border)}
 .btn-danger:hover{background:var(--red-bg)}
 .btn-sm{padding:5px 10px;font-size:11px;border-radius:6px}
-
 .content{flex:1;overflow-y:auto;padding:24px;min-width:0}
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
 .stat-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;transition:background .25s}
 .stat-n{font-size:24px;font-weight:600;letter-spacing:-.5px}
 .stat-l{font-size:10px;color:var(--text3);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-
-.tab-bar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:20px;background:var(--bg3);padding:4px;border-radius:10px;border:1px solid var(--border);transition:background .25s}
+.tab-bar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;background:var(--bg3);padding:4px;border-radius:10px;border:1px solid var(--border);transition:background .25s}
 .tab{padding:6px 14px;font-size:12px;font-weight:500;border:none;border-radius:7px;background:transparent;cursor:pointer;color:var(--text2);transition:background .15s,color .15s}
 .tab:hover{color:var(--text)}
 .tab.active{background:var(--bg);color:var(--text)}
-
+.spec-filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.spec-filter-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);flex-shrink:0}
+.spec-filter-chips{display:flex;gap:5px;flex-wrap:wrap}
+.spec-chip{padding:4px 10px;font-size:11px;font-weight:500;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);transition:background .15s,color .15s,border-color .15s}
+.spec-chip:hover{background:var(--bg);color:var(--text)}
+.spec-chip.active{background:var(--text);color:var(--bg);border-color:transparent}
 .topic-block{margin-bottom:28px}
 .topic-header{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .topic-label{font-size:13px;font-weight:600;color:var(--text);flex:1}
 .topic-actions{display:flex;gap:5px}
-
 .subtopic-list{margin-bottom:8px}
 .subtopic-row{border:1px solid var(--border);border-radius:10px;margin-bottom:6px;overflow:hidden;background:var(--bg);transition:background .25s}
 .subtopic-header{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;user-select:none;transition:background .15s}
@@ -117,12 +107,10 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .subtopic-body{display:none;padding:0 10px 10px}
 .subtopic-row.open .subtopic-body{display:block}
 .subtopic-actions{display:flex;gap:5px;padding:6px 12px 8px;border-top:1px solid var(--border)}
-
 .progress-wrap{margin-bottom:10px}
 .progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:4px}
 .progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width .4s}
 .progress-label{font-size:11px;color:var(--text3)}
-
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:9px}
 .card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:15px;transition:border-color .15s,background .25s}
 .card:hover{border-color:var(--border2)}
@@ -146,45 +134,15 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .my-note.vis{display:block}
 .my-note-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--green-text);margin-bottom:3px}
 .my-note-text{color:var(--green-text)}
-
 .empty{text-align:center;padding:70px 20px 40px;color:var(--text2)}
 .empty-title{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--text)}
 .empty-sub{font-size:13px;margin-bottom:20px}
 .dashed-add{font-size:12px;color:var(--text3);margin-bottom:8px;padding:11px 14px;background:var(--bg);border:1px dashed var(--border2);border-radius:8px;cursor:pointer;transition:background .15s,color .15s}
 .dashed-add:hover{background:var(--bg2);color:var(--text2)}
-
-/* ── Panel — slide + fade ── */
-.panel-backdrop{
-  position:fixed;inset:0;z-index:200;
-  display:flex;justify-content:flex-end;
-  /* backdrop fades in/out */
-  background:rgba(0,0,0,0);
-  transition:background .28s ease;
-  /* hidden by default via pointer-events + visibility */
-  pointer-events:none;
-  visibility:hidden;
-}
-.panel-backdrop.open{
-  pointer-events:all;
-  visibility:visible;
-  background:rgba(0,0,0,.28);
-}
-.panel{
-  position:relative;
-  width:400px;max-width:100vw;height:100%;
-  background:var(--bg);
-  border-left:1px solid var(--border);
-  display:flex;flex-direction:column;
-  /* starts off-screen AND invisible */
-  transform:translateX(100%);
-  opacity:0;
-  transition:transform .3s cubic-bezier(.4,0,.2,1), opacity .25s ease;
-  will-change:transform,opacity;
-}
-.panel-backdrop.open .panel{
-  transform:translateX(0);
-  opacity:1;
-}
+.panel-backdrop{position:fixed;inset:0;z-index:200;display:flex;justify-content:flex-end;background:rgba(0,0,0,0);transition:background .28s ease;pointer-events:none;visibility:hidden}
+.panel-backdrop.open{pointer-events:all;visibility:visible;background:rgba(0,0,0,.28)}
+.panel{position:relative;width:400px;max-width:100vw;height:100%;background:var(--bg);border-left:1px solid var(--border);display:flex;flex-direction:column;transform:translateX(100%);opacity:0;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .25s ease;will-change:transform,opacity}
+.panel-backdrop.open .panel{transform:translateX(0);opacity:1}
 .panel-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .panel-title{font-size:15px;font-weight:600}
 .panel-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border2);background:transparent;cursor:pointer;font-size:15px;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:background .15s}
@@ -192,7 +150,6 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .panel-body{flex:1;overflow-y:auto;padding:20px 22px}
 .panel-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;background:var(--bg)}
 .spacer{flex:1}
-
 .field{margin-bottom:18px}
 .field-label{display:block;font-size:10px;font-weight:700;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em}
 .field-input{width:100%;padding:10px 13px;border:1px solid var(--input-border);border-radius:9px;font-size:14px;background:var(--input-bg);color:var(--text);transition:border-color .15s,background .25s;line-height:1.5}
@@ -201,15 +158,10 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .field-hint{font-size:11px;color:var(--text3);margin-top:4px}
 .divider{height:1px;background:var(--border);margin:20px 0}
 .section-note{font-size:12px;color:var(--text3)}
-
 .color-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .color-swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s}
 .color-swatch:hover{transform:scale(1.12)}
 .color-swatch.sel{border-color:var(--text);transform:scale(1.15)}
-
-
-
-
 .account-area{border-top:1px solid var(--border);margin-top:8px;padding-top:10px}
 .account-signed-out{display:flex;flex-direction:column;gap:6px}
 .account-hint{font-size:10px;color:var(--text3);line-height:1.5;padding:0 2px}
@@ -226,120 +178,54 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .account-sync-label{font-size:10px;color:var(--green-text)}
 .account-signout-btn{width:100%;padding:5px 8px;font-size:11px;font-weight:500;border-radius:6px;border:1px solid var(--red-border);background:transparent;cursor:pointer;color:var(--red-text);transition:background .15s}
 .account-signout-btn:hover{background:var(--red-bg)}
-
-
 </style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCSLOk9TuRlGlpbDBoPkdlOtdXE0-rlEHk",
-  authDomain: "blurt-fe2a5.firebaseapp.com",
-  projectId: "blurt-fe2a5",
-  storageBucket: "blurt-fe2a5.firebasestorage.app",
-  messagingSenderId: "138136838097",
-  appId: "1:138136838097:web:99e50d3ca3e301f1604af0"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-async function signIn(){
-  const provider = new GoogleAuthProvider();
-  await signInWithPopup(auth, provider);
-}
-
-async function loadFromFirestore(uid){
-  const ref = doc(db, 'users', uid);
-  const snap = await getDoc(ref);
-  if(snap.exists()) return snap.data().state;
-  return null;
-}
-
-async function saveToFirestore(uid, state){
-  const ref = doc(db, 'users', uid);
-  await setDoc(ref, { state });
-}
-onAuthStateChanged(auth, async user => {
+const firebaseConfig={apiKey:"AIzaSyCSLOk9TuRlGlpbDBoPkdlOtdXE0-rlEHk",authDomain:"blurt-fe2a5.firebaseapp.com",projectId:"blurt-fe2a5",storageBucket:"blurt-fe2a5.firebasestorage.app",messagingSenderId:"138136838097",appId:"1:138136838097:web:99e50d3ca3e301f1604af0"};
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const auth=getAuth(app);
+async function signIn(){const provider=new GoogleAuthProvider();await signInWithPopup(auth,provider);}
+async function loadFromFirestore(uid){const ref=doc(db,'users',uid);const snap=await getDoc(ref);if(snap.exists())return snap.data().state;return null;}
+async function saveToFirestore(uid,state){const ref=doc(db,'users',uid);await setDoc(ref,{state});}
+onAuthStateChanged(auth,async user=>{
   if(user){
-    window._blurtUser = user;
-    const cloudState = await loadFromFirestore(user.uid);
-    const localRaw = localStorage.getItem('blurt3');
-    const localState = localRaw ? JSON.parse(localRaw) : null;
-    const hasLocal = localState && localState.subjects && localState.subjects.length > 0;
-    const hasCloud = cloudState && cloudState.subjects && cloudState.subjects.length > 0;
-    const conflictResolved = localStorage.getItem('blurt-conflict-resolved');
-
-    if(hasCloud && hasLocal && !conflictResolved){
-      // Both have data and conflict hasn't been resolved yet
-      window._pendingCloudState = cloudState;
-      window._pendingLocalState = localState;
-      document.getElementById('conflictModal').style.display = 'flex';
-    } else if(hasLocal && !hasCloud){
-      // Guest data only — silently migrate
-      await saveToFirestore(user.uid, localState);
-      updateAccountUI(user);
-    } else if(hasCloud){
-      // Cloud data — load it
-      window._setState(cloudState);
-      updateAccountUI(user);
-    } else {
-      updateAccountUI(user);
-    }
-  } else {
-    window._blurtUser = null;
-    updateAccountUI(null);
-  }
+    window._blurtUser=user;
+    const cloudState=await loadFromFirestore(user.uid);
+    const localRaw=localStorage.getItem('blurt3');
+    const localState=localRaw?JSON.parse(localRaw):null;
+    const hasLocal=localState&&localState.subjects&&localState.subjects.length>0;
+    const hasCloud=cloudState&&cloudState.subjects&&cloudState.subjects.length>0;
+    const conflictResolved=localStorage.getItem('blurt-conflict-resolved');
+    if(hasCloud&&hasLocal&&!conflictResolved){
+      window._pendingCloudState=cloudState;window._pendingLocalState=localState;
+      document.getElementById('conflictModal').style.display='flex';
+    }else if(hasLocal&&!hasCloud){await saveToFirestore(user.uid,localState);updateAccountUI(user);}
+    else if(hasCloud){window._setState(cloudState);updateAccountUI(user);}
+    else{updateAccountUI(user);}
+  }else{window._blurtUser=null;updateAccountUI(null);}
 });
-
 function updateAccountUI(user){
-  const out = document.getElementById('accountSignedOut');
-  const inn = document.getElementById('accountSignedIn');
+  const out=document.getElementById('accountSignedOut'),inn=document.getElementById('accountSignedIn');
   if(user){
-    out.style.display = 'none';
-    inn.style.display = 'flex';
-    const name = user.displayName ? user.displayName.split(' ')[0] : 'User';
-    document.getElementById('accountName').textContent = name;
-    document.getElementById('accountEmail').textContent = user.email;
-    document.getElementById('accountInitials').textContent =
-      (user.displayName || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-  } else {
-    out.style.display = 'flex';
-    inn.style.display = 'none';
-  }
+    out.style.display='none';inn.style.display='flex';
+    const name=user.displayName?user.displayName.split(' ')[0]:'User';
+    document.getElementById('accountName').textContent=name;
+    document.getElementById('accountEmail').textContent=user.email;
+    document.getElementById('accountInitials').textContent=(user.displayName||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  }else{out.style.display='flex';inn.style.display='none';}
 }
-
-// Conflict modal buttons
-document.getElementById('keepLocalBtn').onclick = async () => {
-  await saveToFirestore(window._blurtUser.uid, window._pendingLocalState);
-  localStorage.setItem('blurt-conflict-resolved', 'true'); // add this
-  document.getElementById('conflictModal').style.display = 'none';
-  updateAccountUI(window._blurtUser);
-};
-
-document.getElementById('keepCloudBtn').onclick = async () => {
-  window._setState(window._pendingCloudState);
-  localStorage.setItem('blurt-conflict-resolved', 'true'); // add this
-  document.getElementById('conflictModal').style.display = 'none';
-  updateAccountUI(window._blurtUser);
-};
-
-window.firebaseSignIn = signIn;
-window.firebaseSignOut = () => auth.signOut();
-window.firestoreSave = (state) => {
-  if(window._blurtUser) saveToFirestore(window._blurtUser.uid, state);
-};
+document.getElementById('keepLocalBtn').onclick=async()=>{await saveToFirestore(window._blurtUser.uid,window._pendingLocalState);localStorage.setItem('blurt-conflict-resolved','true');document.getElementById('conflictModal').style.display='none';updateAccountUI(window._blurtUser);};
+document.getElementById('keepCloudBtn').onclick=async()=>{window._setState(window._pendingCloudState);localStorage.setItem('blurt-conflict-resolved','true');document.getElementById('conflictModal').style.display='none';updateAccountUI(window._blurtUser);};
+window.firebaseSignIn=signIn;
+window.firebaseSignOut=()=>auth.signOut();
+window.firestoreSave=(state)=>{if(window._blurtUser)saveToFirestore(window._blurtUser.uid,state);};
 </script>
 </head>
 
-
-
-
-  
 <body>
 <div class="app">
   <div class="sidebar" id="sidebar">
@@ -356,43 +242,34 @@ window.firestoreSave = (state) => {
     </div>
     <div class="subject-list" id="subjectList"></div>
     <div class="sidebar-footer">
-  <button class="add-subject-btn" onclick="openPanel('subject')">
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-      <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-    Add subject
-  </button>
-
-  <div class="account-area">
-    <div id="accountSignedOut" class="account-signed-out">
-      <p class="account-hint">Sign in to sync across devices</p>
-      <button class="account-google-btn" onclick="firebaseSignIn()">
-        <svg width="13" height="13" viewBox="0 0 18 18" fill="none">
-          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
-          <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
-          <path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
-          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
-        </svg>
-        Continue with Google
+      <button class="add-subject-btn" onclick="openPanel('subject')">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Add subject
       </button>
-    </div>
-
-    <div id="accountSignedIn" class="account-signed-in" style="display:none">
-      <div class="account-row">
-        <div class="account-avatar" id="accountInitials"></div>
-        <div class="account-info">
-          <div class="account-name" id="accountName"></div>
-          <div class="account-email" id="accountEmail"></div>
+      <div class="account-area">
+        <div id="accountSignedOut" class="account-signed-out">
+          <p class="account-hint">Sign in to sync across devices</p>
+          <button class="account-google-btn" onclick="firebaseSignIn()">
+            <svg width="13" height="13" viewBox="0 0 18 18" fill="none"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/><path d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+            Continue with Google
+          </button>
+        </div>
+        <div id="accountSignedIn" class="account-signed-in" style="display:none">
+          <div class="account-row">
+            <div class="account-avatar" id="accountInitials"></div>
+            <div class="account-info">
+              <div class="account-name" id="accountName"></div>
+              <div class="account-email" id="accountEmail"></div>
+            </div>
+          </div>
+          <div class="account-sync-row">
+            <span class="account-sync-dot"></span>
+            <span class="account-sync-label">Synced</span>
+          </div>
+          <button class="account-signout-btn" onclick="firebaseSignOut()">Sign out</button>
         </div>
       </div>
-      <div class="account-sync-row">
-        <span class="account-sync-dot"></span>
-        <span class="account-sync-label">Synced</span>
-      </div>
-      <button class="account-signout-btn" onclick="firebaseSignOut()">Sign out</button>
     </div>
-  </div>
-</div>
   </div>
 
   <div class="main">
@@ -427,65 +304,67 @@ window.firestoreSave = (state) => {
   </div>
 </div>
 
+<div id="conflictModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;width:420px;max-width:90vw;overflow:hidden">
+    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--border)">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px">You have cards in two places</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5">You have local cards on this device and existing cards in your account. Which would you like to keep? The other will be deleted.</div>
+    </div>
+    <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button id="keepLocalBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">This device</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictLocalInfo"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Your guest data</div>
+      </button>
+      <button id="keepCloudBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">Your account</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictCloudInfo"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Previously synced</div>
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 const PALETTE=[{c:'#534AB7'},{c:'#0F6E56'},{c:'#993C1D'},{c:'#185FA5'},{c:'#854F0B'},{c:'#993556'},{c:'#3B6D11'},{c:'#555555'}];
-let state={subjects:[],activeSubId:null,activeTopicId:null,theme:'light',sidebarOpen:true,sortOrder:'az'};
+let state={subjects:[],activeSubId:null,activeTopicId:null,activeSpFilter:null,theme:'light',sidebarOpen:true,sortOrder:'az'};
 let panel={type:null,editId:null,topicId:null,subtopicId:null,selColor:PALETTE[0].c};
 let _closeTimer=null;
 
-
 function load(){
-  try{
-    const raw=localStorage.getItem('blurt3');
-    if(raw) state=JSON.parse(raw);
-  }catch(e){}
+  try{const raw=localStorage.getItem('blurt3');if(raw)state=JSON.parse(raw);}catch(e){}
   if(!state.subjects)state.subjects=[];
   if(!state.theme)state.theme='light';
   if(state.sidebarOpen===undefined)state.sidebarOpen=true;
   if(!state.sortOrder)state.sortOrder='az';
+  if(!state.activeSpFilter)state.activeSpFilter=null;
   applyTheme();applySidebar();renderSidebar();
   if(state.activeSubId)renderMain();
 }
 
-
-
-window._setState = function(newState){
-  state = newState;
-  if(!state.subjects) state.subjects = [];
-  if(!state.theme) state.theme = 'light';
-  if(state.sidebarOpen === undefined) state.sidebarOpen = true;
-  if(!state.sortOrder) state.sortOrder = 'az';
-  localStorage.setItem('blurt3', JSON.stringify(state));
-  applyTheme();
-  applySidebar();
-  renderSidebar();
-  if(state.activeSubId) renderMain();
+window._setState=function(newState){
+  state=newState;
+  if(!state.subjects)state.subjects=[];
+  if(!state.theme)state.theme='light';
+  if(state.sidebarOpen===undefined)state.sidebarOpen=true;
+  if(!state.sortOrder)state.sortOrder='az';
+  state.activeSpFilter=null;
+  localStorage.setItem('blurt3',JSON.stringify(state));
+  applyTheme();applySidebar();renderSidebar();
+  if(state.activeSubId)renderMain();
 };
 
 function save(){
-  try{ localStorage.setItem('blurt3', JSON.stringify(state)); }catch(e){}
-  if(window.firestoreSave) window.firestoreSave(state); // add this line
+  try{localStorage.setItem('blurt3',JSON.stringify(state));}catch(e){}
+  if(window.firestoreSave)window.firestoreSave(state);
 }
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAnswer(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
 
-function esc(s){
-  if(!s)return'';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function escAnswer(s){
-  if(!s)return'';
-  // Escape HTML but preserve line breaks as <br>
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/\n/g,'<br>');
-}
 function toggleTheme(){state.theme=state.theme==='dark'?'light':'dark';applyTheme();save();}
 function applyTheme(){document.documentElement.setAttribute('data-theme',state.theme);document.getElementById('themeBtn').textContent=state.theme==='dark'?'☀':'☾';}
-
 function toggleSidebar(){state.sidebarOpen=!state.sidebarOpen;applySidebar();save();}
 function applySidebar(){document.getElementById('sidebar').classList.toggle('collapsed',!state.sidebarOpen);}
 
@@ -495,10 +374,23 @@ function setSortOrder(o){
   document.getElementById('sortNew').classList.toggle('active',o==='new');
   save();renderSidebar();
 }
+
 function sortedSubjects(){const s=[...state.subjects];if(state.sortOrder==='az')s.sort((a,b)=>a.name.localeCompare(b.name));return s;}
 function sortedTopics(topics){return[...topics].sort((a,b)=>{const na=topicNum(a.name),nb=topicNum(b.name);if(na!==null&&nb!==null)return na-nb;if(na!==null)return-1;if(nb!==null)return 1;return a.name.localeCompare(b.name);});}
 function topicNum(n){const m=n.match(/^(?:topic\s*)?(\d+(\.\d+)?)/i);return m?parseFloat(m[1]):null;}
 function sortedSubtopics(s){return sortedTopics(s);}
+
+function getSpecPoints(topic){
+  const points=new Set();
+  (topic.cards||[]).forEach(c=>{if(c.sp&&c.sp.trim())points.add(c.sp.trim());});
+  (topic.subtopics||[]).forEach(st=>{(st.cards||[]).forEach(c=>{if(c.sp&&c.sp.trim())points.add(c.sp.trim());});});
+  return[...points].sort();
+}
+
+function setSpFilter(sp){
+  state.activeSpFilter=sp;
+  renderMain();
+}
 
 function renderSidebar(){
   const el=document.getElementById('subjectList');
@@ -515,7 +407,7 @@ function renderSidebar(){
 }
 
 function allCards(t){let c=[...(t.cards||[])];(t.subtopics||[]).forEach(st=>c=c.concat(st.cards||[]));return c;}
-function openSubject(id){state.activeSubId=id;state.activeTopicId=null;save();renderSidebar();renderMain();}
+function openSubject(id){state.activeSubId=id;state.activeTopicId=null;state.activeSpFilter=null;save();renderSidebar();renderMain();}
 
 function renderMain(){
   const sub=state.subjects.find(s=>s.id===state.activeSubId);
@@ -531,6 +423,14 @@ function renderMain(){
     <button class="btn btn-sm" onclick="openPanel('subject','${sub.id}')">Edit</button>
     <button class="btn btn-sm btn-danger" onclick="deleteSubject('${sub.id}')">Delete</button>`;
   if(!topics.length){document.getElementById('mainContent').innerHTML=`<div class="empty"><div class="empty-title">No topics yet</div><div class="empty-sub">Add a topic to start creating revision cards.</div><button class="btn btn-primary" onclick="openPanel('topic')">Add first topic</button></div>`;return;}
+
+  const shown=state.activeTopicId?ts.filter(t=>t.id===state.activeTopicId):ts;
+
+  // Collect spec points from shown topics only
+  const allSpSet=new Set();
+  shown.forEach(t=>getSpecPoints(t).forEach(sp=>allSpSet.add(sp)));
+  const allSps=[...allSpSet].sort();
+
   let html=`<div class="stats-row">
     <div class="stat-card"><div class="stat-n">${topics.length}</div><div class="stat-l">Topics</div></div>
     <div class="stat-card"><div class="stat-n">${totalCards}</div><div class="stat-l">Cards</div></div>
@@ -540,28 +440,53 @@ function renderMain(){
     <button class="tab${!state.activeTopicId?' active':''}" onclick="setTopic(null)">All</button>
     ${ts.map(t=>`<button class="tab${state.activeTopicId===t.id?' active':''}" onclick="setTopic('${t.id}')">${esc(t.name)}</button>`).join('')}
   </div>`;
-  const shown=state.activeTopicId?ts.filter(t=>t.id===state.activeTopicId):ts;
+
+  if(allSps.length>0){
+    html+=`<div class="spec-filter-bar">
+      <span class="spec-filter-label">Filter by spec point</span>
+      <div class="spec-filter-chips">
+        <button class="spec-chip${!state.activeSpFilter?' active':''}" onclick="setSpFilter(null)">All</button>
+        ${allSps.map(sp=>`<button class="spec-chip${state.activeSpFilter===sp?' active':''}" onclick="setSpFilter('${sp.replace(/'/g,"\\'")}')">${esc(sp)}</button>`).join('')}
+      </div>
+    </div>`;
+  }
+
   shown.forEach(t=>{
-    const dc=t.cards||[],sts=sortedSubtopics(t.subtopics||[]),allC=allCards(t),notedC=allC.filter(c=>c.myNote&&c.myNote.trim()).length,pct=allC.length?Math.round(notedC/allC.length*100):0;
+    const sts=sortedSubtopics(t.subtopics||[]);
+    const allC=allCards(t);
+    const notedC=allC.filter(c=>c.myNote&&c.myNote.trim()).length;
+    const pct=allC.length?Math.round(notedC/allC.length*100):0;
+
+    // Filter direct cards
+    const filteredDc=(t.cards||[]).filter(c=>!state.activeSpFilter||c.sp===state.activeSpFilter);
+
     html+=`<div class="topic-block"><div class="topic-header"><span class="topic-label">${esc(t.name)}</span><div class="topic-actions">
       <button class="btn btn-sm" onclick="openPanel('subtopic',null,'${t.id}')">+ Subtopic</button>
       <button class="btn btn-sm" onclick="openPanel('card',null,'${t.id}',null)">+ Card</button>
       <button class="btn btn-sm btn-danger" onclick="deleteTopic('${t.id}')">Delete</button>
     </div></div>`;
+
     if(allC.length)html+=`<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div><div class="progress-label">${notedC} of ${allC.length} cards with your notes · ${pct}%</div></div>`;
+
     if(sts.length){
       html+=`<div class="subtopic-list">`;
       sts.forEach(st=>{
-        const sc=st.cards||[],sn=sc.filter(c=>c.myNote&&c.myNote.trim()).length,sp=sc.length?Math.round(sn/sc.length*100):0;
+        // Filter subtopic cards
+        const sc=(st.cards||[]).filter(c=>!state.activeSpFilter||c.sp===state.activeSpFilter);
+        const scAll=st.cards||[];
+        const sn=scAll.filter(c=>c.myNote&&c.myNote.trim()).length;
+        const sp=scAll.length?Math.round(sn/scAll.length*100):0;
         html+=`<div class="subtopic-row" id="st-${st.id}">
           <div class="subtopic-header" onclick="toggleSubtopic('${st.id}')">
             <span class="subtopic-chevron">▶</span>
             <span class="subtopic-name">${esc(st.name)}</span>
-            <span class="subtopic-count">${sc.length} card${sc.length!==1?'s':''} · ${sp}%</span>
+            <span class="subtopic-count">${scAll.length} card${scAll.length!==1?'s':''} · ${sp}%</span>
           </div>
           <div class="subtopic-body">
-            ${sc.length?`<div class="progress-wrap" style="padding:8px 2px 4px"><div class="progress-bar"><div class="progress-fill" style="width:${sp}%"></div></div><div class="progress-label">${sn} of ${sc.length} noted</div></div>`:''}
-            ${sc.length?`<div class="cards-grid">${sc.map(c=>cardHTML(t.id,c,st.id)).join('')}</div>`:`<div class="dashed-add" onclick="openPanel('card',null,'${t.id}','${st.id}')">+ Add first card to this subtopic</div>`}
+            ${scAll.length?`<div class="progress-wrap" style="padding:8px 2px 4px"><div class="progress-bar"><div class="progress-fill" style="width:${sp}%"></div></div><div class="progress-label">${sn} of ${scAll.length} noted</div></div>`:''}
+            ${sc.length?`<div class="cards-grid">${sc.map(c=>cardHTML(t.id,c,st.id)).join('')}</div>`
+              :state.activeSpFilter?`<div style="font-size:12px;color:var(--text3);padding:8px 2px">No cards match this spec point.</div>`
+              :`<div class="dashed-add" onclick="openPanel('card',null,'${t.id}','${st.id}')">+ Add first card to this subtopic</div>`}
           </div>
           <div class="subtopic-actions">
             <button class="btn btn-sm" onclick="openPanel('card',null,'${t.id}','${st.id}')">+ Card</button>
@@ -572,10 +497,19 @@ function renderMain(){
       });
       html+=`</div>`;
     }
-    if(dc.length){if(sts.length)html+=`<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin:10px 0 8px">General cards</div>`;html+=`<div class="cards-grid">${dc.map(c=>cardHTML(t.id,c,null)).join('')}</div>`;}
-    else if(!sts.length)html+=`<div class="dashed-add" onclick="openPanel('card',null,'${t.id}',null)">+ Add first card to this topic</div>`;
+
+    if(filteredDc.length){
+      if(sts.length)html+=`<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin:10px 0 8px">General cards</div>`;
+      html+=`<div class="cards-grid">${filteredDc.map(c=>cardHTML(t.id,c,null)).join('')}</div>`;
+    } else if(!sts.length&&!state.activeSpFilter){
+      html+=`<div class="dashed-add" onclick="openPanel('card',null,'${t.id}',null)">+ Add first card to this topic</div>`;
+    } else if(!sts.length&&state.activeSpFilter){
+      html+=`<div style="font-size:12px;color:var(--text3);padding:8px 2px">No cards match this spec point.</div>`;
+    }
+
     html+=`</div>`;
   });
+
   document.getElementById('mainContent').innerHTML=html;
   (state.openSubtopics||[]).forEach(id=>{const el=document.getElementById('st-'+id);if(el)el.classList.add('open');});
 }
@@ -616,11 +550,11 @@ function saveNote(tid,cid,stid){
   const c=findCard(tid,cid,stid);if(!c)return;
   c.myNote=val.trim();save();
   const noteEl=document.getElementById('note-'+cid);
-  if(noteEl){noteEl.querySelector('.my-note-text').innerHTML=esc(c.myNote);noteEl.classList.add('vis');}
+  if(noteEl){noteEl.querySelector('.my-note-text').innerHTML=escAnswer(c.myNote);noteEl.classList.add('vis');}
   else{
     const card=document.getElementById('card-'+cid);
     const nd=document.createElement('div');nd.className='my-note vis';nd.id='note-'+cid;
-    nd.innerHTML=`<div class="my-note-label">My note</div><div class="my-note-text">${esc(c.myNote)}</div>`;
+    nd.innerHTML=`<div class="my-note-label">My note</div><div class="my-note-text">${escAnswer(c.myNote)}</div>`;
     card.appendChild(nd);
     const acts=card.querySelector('.card-actions');
     if(!acts.querySelector('.card-btn.green[onclick*="toggleNote"]')){
@@ -637,9 +571,8 @@ function findCard(tid,cid,stid){
   return(t.cards||[]).find(c=>c.id===cid);
 }
 
-function setTopic(id){state.activeTopicId=id;renderMain();}
+function setTopic(id){state.activeTopicId=id;state.activeSpFilter=null;renderMain();}
 
-/* ── Panel open/close with animation ── */
 function openPanel(type,editId,topicId,subtopicId){
   if(_closeTimer){clearTimeout(_closeTimer);_closeTimer=null;}
   panel.type=type;panel.editId=editId||null;panel.topicId=topicId||null;panel.subtopicId=subtopicId||null;
@@ -660,7 +593,6 @@ function closePanel(){
 }
 
 function _backdropClick(e){if(e.target===document.getElementById('panelBackdrop'))closePanel();}
-
 function setPanelColor(c){panel.selColor=c;document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('sel',s.dataset.color===c));}
 
 function buildSubjectPanel(editId){
@@ -799,31 +731,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
 load();
 </script>
 <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-  }
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
 </script>
-
-<div id="conflictModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
-  <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;width:420px;max-width:90vw;overflow:hidden">
-    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--border)">
-      <div style="font-size:15px;font-weight:600;margin-bottom:4px">You have cards in two places</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5">You have local cards on this device and existing cards in your account. Which would you like to keep? The other will be deleted.</div>
-    </div>
-    <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <button id="keepLocalBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left">
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">This device</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictLocalInfo"></div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">Your guest data</div>
-      </button>
-      <button id="keepCloudBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left">
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">Your account</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictCloudInfo"></div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">Previously synced</div>
-      </button>
-    </div>
-  </div>
-</div>
-  
 </body>
 </html>
