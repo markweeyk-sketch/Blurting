@@ -264,7 +264,6 @@ async function saveToFirestore(uid, state){
   const ref = doc(db, 'users', uid);
   await setDoc(ref, { state });
 }
-
 onAuthStateChanged(auth, async user => {
   if(user){
     window._blurtUser = user;
@@ -273,22 +272,22 @@ onAuthStateChanged(auth, async user => {
     const localState = localRaw ? JSON.parse(localRaw) : null;
     const hasLocal = localState && localState.subjects && localState.subjects.length > 0;
     const hasCloud = cloudState && cloudState.subjects && cloudState.subjects.length > 0;
+    const conflictResolved = localStorage.getItem('blurt-conflict-resolved');
 
-    if(hasCloud && hasLocal){
-      // Both have data — show conflict modal
+    if(hasCloud && hasLocal && !conflictResolved){
+      // Both have data and conflict hasn't been resolved yet
       window._pendingCloudState = cloudState;
       window._pendingLocalState = localState;
       document.getElementById('conflictModal').style.display = 'flex';
     } else if(hasLocal && !hasCloud){
-      // Guest data only — silently migrate to cloud
+      // Guest data only — silently migrate
       await saveToFirestore(user.uid, localState);
       updateAccountUI(user);
     } else if(hasCloud){
-      // Cloud data only — load it
+      // Cloud data — load it
       window._setState(cloudState);
       updateAccountUI(user);
     } else {
-      // No data anywhere — fresh start
       updateAccountUI(user);
     }
   } else {
@@ -317,12 +316,14 @@ function updateAccountUI(user){
 // Conflict modal buttons
 document.getElementById('keepLocalBtn').onclick = async () => {
   await saveToFirestore(window._blurtUser.uid, window._pendingLocalState);
+  localStorage.setItem('blurt-conflict-resolved', 'true'); // add this
   document.getElementById('conflictModal').style.display = 'none';
   updateAccountUI(window._blurtUser);
 };
 
 document.getElementById('keepCloudBtn').onclick = async () => {
   window._setState(window._pendingCloudState);
+  localStorage.setItem('blurt-conflict-resolved', 'true'); // add this
   document.getElementById('conflictModal').style.display = 'none';
   updateAccountUI(window._blurtUser);
 };
