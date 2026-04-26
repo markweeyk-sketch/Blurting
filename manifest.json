@@ -1,0 +1,25 @@
+{
+  "name": "Blurt – Revision App",
+  "short_name": "Blurt",
+  "description": "Your personal flashcard and blurting revision workspace",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f0ede8",
+  "theme_color": "#111111",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
