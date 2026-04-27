@@ -410,13 +410,25 @@ function getSpecPoints(topic){
   return[...points].sort();
 }
 
-// Replace setSpFilter:
+let _spFilterTimer = null;
+
 function setSpFilter(sp){
   state.activeSpFilter = sp ? sp.trim() : null;
   state.activeSubtopicSpFilters = state.activeSubtopicSpFilters || {};
-  renderMain();
+  
+  // Debounce the full re-render so typing feels instant
+  clearTimeout(_spFilterTimer);
+  _spFilterTimer = setTimeout(() => {
+    renderMain();
+    // Restore focus and cursor position to the search input
+    const input = document.querySelector('.spec-search-input');
+    if(input){
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  }, 150);
 }
-
 // Add these two new functions below it:
 function setSubtopicSpFilter(stid, sp){
   if(!state.activeSubtopicSpFilters) state.activeSubtopicSpFilters = {};
