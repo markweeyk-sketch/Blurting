@@ -85,8 +85,8 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .tab-bar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;background:var(--bg3);padding:4px;border-radius:10px;border:1px solid var(--border);transition:background .25s}
 .tab{padding:6px 14px;font-size:12px;font-weight:500;border:none;border-radius:7px;background:transparent;cursor:pointer;color:var(--text2);transition:background .15s,color .15s}
 .tab:hover{color:var(--text)}
-.tab.active{background:var(--bg);color:var(--text)}
-.spec-filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.tab.active{background:var(--bg);color:var(--text)}.
+spec-filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .spec-filter-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);flex-shrink:0}
 .spec-filter-chips{display:flex;gap:5px;flex-wrap:wrap}
 .spec-chip{padding:4px 10px;font-size:11px;font-weight:500;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);transition:background .15s,color .15s,border-color .15s}
@@ -407,9 +407,23 @@ function getSpecPoints(topic){
   return[...points].sort();
 }
 
+// Replace setSpFilter:
 function setSpFilter(sp){
-  state.activeSpFilter=sp;
+  state.activeSpFilter = sp ? sp.trim() : null;
+  state.activeSubtopicSpFilters = state.activeSubtopicSpFilters || {};
   renderMain();
+}
+
+// Add these two new functions below it:
+function setSubtopicSpFilter(stid, sp){
+  if(!state.activeSubtopicSpFilters) state.activeSubtopicSpFilters = {};
+  state.activeSubtopicSpFilters[stid] = sp ? sp.trim() : null;
+  renderMain();
+}
+
+function getSubtopicSpFilter(stid){
+  if(!state.activeSubtopicSpFilters) return null;
+  return state.activeSubtopicSpFilters[stid] || null;
 }
 
 function renderSidebar(){
@@ -427,8 +441,15 @@ function renderSidebar(){
 }
 
 function allCards(t){let c=[...(t.cards||[])];(t.subtopics||[]).forEach(st=>c=c.concat(st.cards||[]));return c;}
-function openSubject(id){state.activeSubId=id;state.activeTopicId=null;state.activeSpFilter=null;save();renderSidebar();renderMain();}
-
+function openSubject(id){
+  state.activeSubId = id;
+  state.activeTopicId = null;
+  state.activeSpFilter = null;
+  state.activeSubtopicSpFilters = {};
+  save();
+  renderSidebar();
+  renderMain();
+}
 function renderMain(){
   const sub=state.subjects.find(s=>s.id===state.activeSubId);
   if(!sub){document.getElementById('mainContent').innerHTML='<div class="empty"><div class="empty-title">Subject not found</div></div>';return;}
@@ -446,7 +467,7 @@ function renderMain(){
 
   const shown=state.activeTopicId?ts.filter(t=>t.id===state.activeTopicId):ts;
 
-  // Collect spec points from shown topics only
+  // Collect all spec points from shown topics for global search
   const allSpSet=new Set();
   shown.forEach(t=>getSpecPoints(t).forEach(sp=>allSpSet.add(sp)));
   const allSps=[...allSpSet].sort();
@@ -461,13 +482,18 @@ function renderMain(){
     ${ts.map(t=>`<button class="tab${state.activeTopicId===t.id?' active':''}" onclick="setTopic('${t.id}')">${esc(t.name)}</button>`).join('')}
   </div>`;
 
+  // Global spec point search
   if(allSps.length>0){
-    html+=`<div class="spec-filter-bar">
-      <span class="spec-filter-label">Filter by spec point</span>
-      <div class="spec-filter-chips">
-        <button class="spec-chip${!state.activeSpFilter?' active':''}" onclick="setSpFilter(null)">All</button>
-        ${allSps.map(sp=>`<button class="spec-chip${state.activeSpFilter===sp?' active':''}" onclick="setSpFilter('${sp.replace(/'/g,"\\'")}')">${esc(sp)}</button>`).join('')}
-      </div>
+    html+=`<div class="spec-search-bar">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0;color:var(--text3)"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <input
+        class="spec-search-input"
+        type="text"
+        placeholder="Search spec point e.g. 1.1"
+        value="${state.activeSpFilter||''}"
+        oninput="setSpFilter(this.value)"
+      >
+      ${state.activeSpFilter?`<button class="spec-search-clear" onclick="setSpFilter(null)">✕</button>`:''}
     </div>`;
   }
 
@@ -476,9 +502,7 @@ function renderMain(){
     const allC=allCards(t);
     const notedC=allC.filter(c=>c.myNote&&c.myNote.trim()).length;
     const pct=allC.length?Math.round(notedC/allC.length*100):0;
-
-    // Filter direct cards
-    const filteredDc=(t.cards||[]).filter(c=>!state.activeSpFilter||c.sp===state.activeSpFilter);
+    const filteredDc=(t.cards||[]).filter(c=>!state.activeSpFilter||(c.sp||'').trim()===state.activeSpFilter.trim());
 
     html+=`<div class="topic-block"><div class="topic-header"><span class="topic-label">${esc(t.name)}</span><div class="topic-actions">
       <button class="btn btn-sm" onclick="openPanel('subtopic',null,'${t.id}')">+ Subtopic</button>
@@ -491,11 +515,20 @@ function renderMain(){
     if(sts.length){
       html+=`<div class="subtopic-list">`;
       sts.forEach(st=>{
-        // Filter subtopic cards
-        const sc=(st.cards||[]).filter(c=>!state.activeSpFilter||c.sp===state.activeSpFilter);
+        const stSpFilter=getSubtopicSpFilter(st.id);
         const scAll=st.cards||[];
+        // Apply both global and subtopic-level filter
+        const sc=scAll.filter(c=>{
+          const globalMatch=!state.activeSpFilter||(c.sp||'').trim()===state.activeSpFilter.trim();
+          const localMatch=!stSpFilter||(c.sp||'').trim()===stSpFilter.trim();
+          return globalMatch&&localMatch;
+        });
         const sn=scAll.filter(c=>c.myNote&&c.myNote.trim()).length;
         const sp=scAll.length?Math.round(sn/scAll.length*100):0;
+
+        // Get spec points for this subtopic only
+        const stSps=[...new Set(scAll.filter(c=>c.sp&&c.sp.trim()).map(c=>c.sp.trim()))].sort();
+
         html+=`<div class="subtopic-row" id="st-${st.id}">
           <div class="subtopic-header" onclick="toggleSubtopic('${st.id}')">
             <span class="subtopic-chevron">▶</span>
@@ -504,8 +537,12 @@ function renderMain(){
           </div>
           <div class="subtopic-body">
             ${scAll.length?`<div class="progress-wrap" style="padding:8px 2px 4px"><div class="progress-bar"><div class="progress-fill" style="width:${sp}%"></div></div><div class="progress-label">${sn} of ${scAll.length} noted</div></div>`:''}
+            ${stSps.length>0?`<div class="subtopic-filter-bar">
+              <button class="subtopic-chip${!stSpFilter?' active':''}" onclick="setSubtopicSpFilter('${st.id}',null)">All</button>
+              ${stSps.map(s=>`<button class="subtopic-chip${stSpFilter===s?' active':''}" onclick="setSubtopicSpFilter('${st.id}','${s.replace(/'/g,"\\'")}')">${esc(s)}</button>`).join('')}
+            </div>`:''}
             ${sc.length?`<div class="cards-grid">${sc.map(c=>cardHTML(t.id,c,st.id)).join('')}</div>`
-              :state.activeSpFilter?`<div style="font-size:12px;color:var(--text3);padding:8px 2px">No cards match this spec point.</div>`
+              :(stSpFilter||state.activeSpFilter)?`<div style="font-size:12px;color:var(--text3);padding:8px 2px">No cards match this spec point.</div>`
               :`<div class="dashed-add" onclick="openPanel('card',null,'${t.id}','${st.id}')">+ Add first card to this subtopic</div>`}
           </div>
           <div class="subtopic-actions">
@@ -533,7 +570,6 @@ function renderMain(){
   document.getElementById('mainContent').innerHTML=html;
   (state.openSubtopics||[]).forEach(id=>{const el=document.getElementById('st-'+id);if(el)el.classList.add('open');});
 }
-
 function toggleSubtopic(id){
   const el=document.getElementById('st-'+id);if(!el)return;
   el.classList.toggle('open');
@@ -591,7 +627,13 @@ function findCard(tid,cid,stid){
   return(t.cards||[]).find(c=>c.id===cid);
 }
 
-function setTopic(id){state.activeTopicId=id;state.activeSpFilter=null;renderMain();}
+function setTopic(id){
+  state.activeTopicId = id;
+  state.activeSpFilter = null;
+  state.activeSubtopicSpFilters = {};
+  renderMain();
+}
+
 
 function openPanel(type,editId,topicId,subtopicId){
   if(_closeTimer){clearTimeout(_closeTimer);_closeTimer=null;}
