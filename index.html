@@ -116,9 +116,23 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .card:hover{border-color:var(--border2)}
 .card-sp{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
 .card-q{font-size:13px;font-weight:600;margin-bottom:3px;line-height:1.4}
-.card-hint{font-size:11px;color:var(--text3);margin-bottom:10px;font-style:italic}
-.blurt-field{width:100%;min-height:68px;padding:9px 11px;border-radius:8px;border:1px solid var(--input-border);background:var(--input-bg);font-size:12px;resize:vertical;line-height:1.6;color:var(--text);transition:border-color .15s,background .25s}
-.blurt-field:focus{outline:none;border-color:var(--border2)}
+.card-hint{font-size:11px;color:var(--text3);margin-bottom:10px;font-style:italic}/* Replace your existing .blurt-field with this */
+.blurt-field{
+  width:100%;
+  min-height:68px;
+  padding:9px 11px;
+  border-radius:8px;
+  border:1px solid var(--input-border);
+  background:var(--input-bg);
+  font-size:12px;
+  resize:none;         /* remove manual resize handle */
+  overflow:hidden;     /* hides scrollbar as it grows */
+  line-height:1.6;
+  color:var(--text);
+  transition:border-color .15s,background .25s;
+  box-sizing:border-box;
+}
+.blurt-field:focus{outline:none;border-color:var(--border2)}.blurt-field:focus{outline:none;border-color:var(--border2)}
 .card-actions{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
 .card-btn{padding:5px 10px;font-size:11px;font-weight:500;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--text2);transition:background .1s,color .1s;white-space:nowrap}
 .card-btn:hover{background:var(--bg2);color:var(--text)}
@@ -178,6 +192,12 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .account-sync-label{font-size:10px;color:var(--green-text)}
 .account-signout-btn{width:100%;padding:5px 8px;font-size:11px;font-weight:500;border-radius:6px;border:1px solid var(--red-border);background:transparent;cursor:pointer;color:var(--red-text);transition:background .15s}
 .account-signout-btn:hover{background:var(--red-bg)}
+/* ── Sleek scrollbar ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+* {scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
 </style>
 
 <script type="module">
@@ -729,6 +749,13 @@ function deleteCard(tid,cid,stid){
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
 load();
+// Auto-expand textareas as user types
+document.addEventListener('input', e => {
+  if(e.target.classList.contains('blurt-field')){
+    e.target.style.height = 'auto';
+    e.target.style.height = e.target.scrollHeight + 'px';
+  }
+});
 </script>
 <script>
   if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
