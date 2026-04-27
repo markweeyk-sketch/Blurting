@@ -544,6 +544,7 @@ function renderMain(){
     html+=`<div class="topic-block"><div class="topic-header"><span class="topic-label">${esc(t.name)}</span><div class="topic-actions">
       <button class="btn btn-sm" onclick="openPanel('subtopic',null,'${t.id}')">+ Subtopic</button>
       <button class="btn btn-sm" onclick="openPanel('card',null,'${t.id}',null)">+ Card</button>
+      <button class="btn btn-sm" onclick="openPanel('topic','${t.id}')">Edit</button>
       <button class="btn btn-sm btn-danger" onclick="deleteTopic('${t.id}')">Delete</button>
     </div></div>`;
 
@@ -708,7 +709,6 @@ function buildSubjectPanel(editId){
     <button class="btn" onclick="closePanel()">Cancel</button>
     <button class="btn btn-primary" onclick="saveSubject()">Save</button>`;
 }
-
 function buildTopicPanel(editId){
   const sub=state.subjects.find(s=>s.id===state.activeSubId);
   const t=editId&&sub?sub.topics.find(t=>t.id===editId):null;
