@@ -135,8 +135,7 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
   transition:border-color .15s,background .25s;
   box-sizing:border-box;
 }
-.blurt-field:focus{outline:none;border-color:var(--border2)}.blurt-field:focus{outline:none;border-color:var(--border2)}
-.card-actions{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
+.blurt-field:focus{outline:none;border-color:var(--border2)}
 .card-btn{padding:5px 10px;font-size:11px;font-weight:500;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--text2);transition:background .1s,color .1s;white-space:nowrap}
 .card-btn:hover{background:var(--bg2);color:var(--text)}
 .card-btn.green{color:var(--green-text);border-color:var(--green-border)}
@@ -398,63 +397,43 @@ function setSortOrder(o){
   save();renderSidebar();
 }
 
-function sortedSubjects(){const s=[...state.subjects];if(state.sortOrder==='az')s.sort((a,b)=>a.name.localeCompare(b.name));return s;}
+function sortedSubjects(){
+  const s=[...state.subjects];
+  if(state.sortOrder==='az')s.sort((a,b)=>a.name.localeCompare(b.name));
+  return s;
+}
+
+function topicNum(name){
+  const m=name.match(/^(?:topic\s*)?(\d+(?:\.\d+)*)/i);
+  if(!m)return null;
+  return m[1].split('.').map(n=>n.padStart(4,'0')).join('.');
+}
+
+function sortedTopics(topics){
+  return[...topics].sort((a,b)=>{
+    const na=topicNum(a.name),nb=topicNum(b.name);
+    if(na!==null&&nb!==null)return na.localeCompare(nb);
+    if(na!==null)return-1;
+    if(nb!==null)return 1;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+function sortedSubtopics(subtopics){
+  return[...subtopics].sort((a,b)=>{
+    const na=topicNum(a.name),nb=topicNum(b.name);
+    if(na!==null&&nb!==null)return na.localeCompare(nb);
+    if(na!==null)return-1;
+    if(nb!==null)return 1;
+    return a.name.localeCompare(b.name);
+  });
+}
 
 function getSpecPoints(topic){
   const points=new Set();
-  // Replace topicNum:
-function topicNum(name){
-  // Match numbers like 1, 1.2, 1.29, 1.3.1 at the start of the name
-  const m = name.match(/^(?:topic\s*)?(\d+(?:\.\d+)*)/i);
-  if(!m) return null;
-  // Convert "1.3.1" into a sortable padded string "001.003.001"
-  return m[1].split('.').map(n => n.padStart(4,'0')).join('.');
-}
-
-// Replace sortedTopics:
-function sortedTopics(topics){
-  return [...topics].sort((a,b)=>{
-    const na = topicNum(a.name), nb = topicNum(b.name);
-    if(na !== null && nb !== null) return na.localeCompare(nb);
-    if(na !== null) return -1;
-    if(nb !== null) return 1;
-    return a.name.localeCompare(b.name);
-  });
-}
-
-// Replace sortedSubtopics — now sorts alphabetically:
-function sortedSubtopics(subtopics){
-  return [...subtopics].sort((a,b)=>{
-    const na = topicNum(a.name), nb = topicNum(b.name);
-    if(na !== null && nb !== null) return na.localeCompare(nb);
-    if(na !== null) return -1;
-    if(nb !== null) return 1;
-    return a.name.localeCompare(b.name);
-  });
-}
   (topic.cards||[]).forEach(c=>{if(c.sp&&c.sp.trim())points.add(c.sp.trim());});
   (topic.subtopics||[]).forEach(st=>{(st.cards||[]).forEach(c=>{if(c.sp&&c.sp.trim())points.add(c.sp.trim());});});
   return[...points].sort();
-}
-
-let _spFilterTimer = null;
-
-function setSpFilter(sp){
-  state.activeSpFilter = sp ? sp.trim() : null;
-  state.activeSubtopicSpFilters = state.activeSubtopicSpFilters || {};
-  
-  // Debounce the full re-render so typing feels instant
-  clearTimeout(_spFilterTimer);
-  _spFilterTimer = setTimeout(() => {
-    renderMain();
-    // Restore focus and cursor position to the search input
-    const input = document.querySelector('.spec-search-input');
-    if(input){
-      input.focus();
-      const len = input.value.length;
-      input.setSelectionRange(len, len);
-    }
-  }, 150);
 }
 // Add these two new functions below it:
 function setSubtopicSpFilter(stid, sp){
@@ -468,6 +447,22 @@ function getSubtopicSpFilter(stid){
   return state.activeSubtopicSpFilters[stid] || null;
 }
 
+
+let _spFilterTimer = null;
+function setSpFilter(sp){
+  state.activeSpFilter = sp ? sp.trim() : null;
+  state.activeSubtopicSpFilters = state.activeSubtopicSpFilters || {};
+  clearTimeout(_spFilterTimer);
+  _spFilterTimer = setTimeout(() => {
+    renderMain();
+    const input = document.querySelector('.spec-search-input');
+    if(input){
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  }, 150);
+}
 function renderSidebar(){
   const el=document.getElementById('subjectList');
   const subs=sortedSubjects();
