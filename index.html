@@ -85,13 +85,16 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .tab-bar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;background:var(--bg3);padding:4px;border-radius:10px;border:1px solid var(--border);transition:background .25s}
 .tab{padding:6px 14px;font-size:12px;font-weight:500;border:none;border-radius:7px;background:transparent;cursor:pointer;color:var(--text2);transition:background .15s,color .15s}
 .tab:hover{color:var(--text)}
-.tab.active{background:var(--bg);color:var(--text)}.
-spec-filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.spec-filter-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);flex-shrink:0}
-.spec-filter-chips{display:flex;gap:5px;flex-wrap:wrap}
-.spec-chip{padding:4px 10px;font-size:11px;font-weight:500;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);transition:background .15s,color .15s,border-color .15s}
-.spec-chip:hover{background:var(--bg);color:var(--text)}
-.spec-chip.active{background:var(--text);color:var(--bg);border-color:transparent}
+.tab.active{background:var(--bg);color:var(--text)}
+.spec-search-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px}
+.spec-search-input{flex:1;border:none;background:transparent;font-size:13px;color:var(--text);outline:none}
+.spec-search-input::placeholder{color:var(--text3)}
+.spec-search-clear{background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 2px;line-height:1}
+.spec-search-clear:hover{color:var(--text)}
+.subtopic-filter-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;margin-top:4px}
+.subtopic-chip{padding:3px 9px;font-size:11px;font-weight:500;border-radius:20px;border:0.5px solid var(--border2);background:transparent;cursor:pointer;color:var(--text2);transition:background .15s,color .15s}
+.subtopic-chip:hover{background:var(--bg2);color:var(--text)}
+.subtopic-chip.active{background:var(--text);color:var(--bg);border-color:transparent}
 .topic-block{margin-bottom:28px}
 .topic-header{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .topic-label{font-size:13px;font-weight:600;color:var(--text);flex:1}
