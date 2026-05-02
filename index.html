@@ -402,11 +402,14 @@ function sortedSubjects(){
   if(state.sortOrder==='az')s.sort((a,b)=>a.name.localeCompare(b.name));
   return s;
 }
-
+  
 function topicNum(name){
-  const m=name.match(/^(?:topic\s*)?(\d+(?:\.\d+)*)/i);
+  const m=name.match(/^(?:topic\s*)?(\d+(?:\.\d+)*)(?:\(([a-z])\))?/i);
   if(!m)return null;
-  return m[1].split('.').map(n=>n.padStart(4,'0')).join('.');
+  // Pad the number parts, then append the letter (or 'a' as default so numbered-only sorts first)
+  const numPart=m[1].split('.').map(n=>n.padStart(4,'0')).join('.');
+  const letterPart=m[2]?m[2].toLowerCase():'';
+  return numPart+letterPart;
 }
 
 function sortedTopics(topics){
