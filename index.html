@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="./android-chrome-192x192.png">
 <title>Blurt</title>
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 <style>
 :root{
   --bg:#ffffff;--bg2:#f7f7f5;--bg3:#f0ede8;
@@ -119,23 +120,13 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .card:hover{border-color:var(--border2)}
 .card-sp{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
 .card-q{font-size:13px;font-weight:600;margin-bottom:3px;line-height:1.4}
-.card-hint{font-size:11px;color:var(--text3);margin-bottom:10px;font-style:italic}/* Replace your existing .blurt-field with this */
-.blurt-field{
-  width:100%;
-  min-height:68px;
-  padding:9px 11px;
-  border-radius:8px;
-  border:1px solid var(--input-border);
-  background:var(--input-bg);
-  font-size:12px;
-  resize:none;         /* remove manual resize handle */
-  overflow:hidden;     /* hides scrollbar as it grows */
-  line-height:1.6;
-  color:var(--text);
-  transition:border-color .15s,background .25s;
-  box-sizing:border-box;
-}
-.blurt-field:focus{outline:none;border-color:var(--border2)}
+.card-hint{font-size:11px;color:var(--text3);margin-bottom:10px;font-style:italic}
+.blurt-field{width:100%;border-radius:8px;font-size:12px;line-height:1.6;color:var(--text);transition:border-color .15s,background .25s;box-sizing:border-box}
+.blurt-field.ql-container.ql-snow{border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);font-family:inherit}
+.blurt-field.ql-container.ql-snow:focus-within{border-color:var(--border2)}
+.blurt-field .ql-editor{padding:9px 11px;min-height:68px;line-height:1.6;color:var(--text);background:transparent}
+.blurt-field .ql-editor.ql-blank::before{color:var(--text3);font-style:normal;left:11px;right:11px}
+.card-actions{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px}
 .card-btn{padding:5px 10px;font-size:11px;font-weight:500;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--text2);transition:background .1s,color .1s;white-space:nowrap}
 .card-btn:hover{background:var(--bg2);color:var(--text)}
 .card-btn.green{color:var(--green-text);border-color:var(--green-border)}
@@ -194,6 +185,29 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .account-sync-label{font-size:10px;color:var(--green-text)}
 .account-signout-btn{width:100%;padding:5px 8px;font-size:11px;font-weight:500;border-radius:6px;border:1px solid var(--red-border);background:transparent;cursor:pointer;color:var(--red-text);transition:background .15s}
 .account-signout-btn:hover{background:var(--red-bg)}
+/* ── Quill answer editor (panel) ── */
+.quill-answer-wrap{border:1px solid var(--input-border);border-radius:9px;overflow:hidden;background:var(--input-bg);transition:border-color .15s,background .25s}
+.quill-answer-wrap:focus-within{border-color:var(--border2)}
+.quill-answer-wrap .ql-toolbar.ql-snow{border:none;border-bottom:1px solid var(--border2);background:var(--bg3);padding:5px 8px;flex-wrap:wrap}
+.quill-answer-wrap .ql-container.ql-snow{border:none;font-size:13px;font-family:inherit}
+.quill-answer-wrap .ql-editor{min-height:100px;padding:10px 13px;color:var(--text);background:transparent;line-height:1.65;word-break:break-word}
+.quill-answer-wrap .ql-editor.ql-blank::before{color:var(--text3);font-style:normal;left:13px;right:13px}
+/* ── Quill dark mode ── */
+[data-theme="dark"] .ql-snow .ql-stroke{stroke:var(--text2)}
+[data-theme="dark"] .ql-snow .ql-fill{fill:var(--text2)}
+[data-theme="dark"] .ql-snow .ql-picker{color:var(--text2)}
+[data-theme="dark"] .ql-toolbar.ql-snow button:hover .ql-stroke,[data-theme="dark"] .ql-toolbar.ql-snow button.ql-active .ql-stroke{stroke:var(--text)}
+[data-theme="dark"] .ql-toolbar.ql-snow button:hover .ql-fill,[data-theme="dark"] .ql-toolbar.ql-snow button.ql-active .ql-fill{fill:var(--text)}
+[data-theme="dark"] .ql-snow .ql-tooltip{background:var(--bg3);border-color:var(--border2);color:var(--text);box-shadow:none}
+[data-theme="dark"] .ql-snow .ql-tooltip input[type=text]{background:var(--input-bg);border-color:var(--border2);color:var(--text);outline:none}
+[data-theme="dark"] .ql-snow .ql-tooltip a{color:var(--text2)}
+[data-theme="dark"] .ql-picker-options{background:var(--bg3) !important;border-color:var(--border2) !important}
+/* ── Rich content in answer-box and my-note ── */
+.answer-box ol{padding-left:1.1rem;margin-top:4px}
+.answer-box img{max-width:100%;border-radius:4px;margin-top:4px}
+.my-note-text ul,.my-note-text ol{padding-left:1.1rem;margin-top:4px}
+.my-note-text li{margin-bottom:3px}
+.my-note-text img{max-width:100%;border-radius:4px;margin-top:4px}
 /* ── Sleek scrollbar ── */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -347,11 +361,14 @@ window.firestoreSave=(state)=>{if(window._blurtUser)saveToFirestore(window._blur
   </div>
 </div>
 
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script>
 const PALETTE=[{c:'#534AB7'},{c:'#0F6E56'},{c:'#993C1D'},{c:'#185FA5'},{c:'#854F0B'},{c:'#993556'},{c:'#3B6D11'},{c:'#555555'}];
 let state={subjects:[],activeSubId:null,activeTopicId:null,activeSpFilter:null,theme:'light',sidebarOpen:true,sortOrder:'az'};
 let panel={type:null,editId:null,topicId:null,subtopicId:null,selColor:PALETTE[0].c};
 let _closeTimer=null;
+let _answerQuill=null;
+let _blurtQuills={};
 
 function load(){
   try{const raw=localStorage.getItem('blurt3');if(raw)state=JSON.parse(raw);}catch(e){}
@@ -384,6 +401,7 @@ function save(){
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function escAnswer(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+function renderAnswer(s){if(!s)return'';return s.trim().startsWith('<')?s:escAnswer(s);}
 
 function toggleTheme(){state.theme=state.theme==='dark'?'light':'dark';applyTheme();save();}
 function applyTheme(){document.documentElement.setAttribute('data-theme',state.theme);document.getElementById('themeBtn').textContent=state.theme==='dark'?'☀':'☾';}
@@ -610,6 +628,7 @@ function renderMain(){
 
   document.getElementById('mainContent').innerHTML=html;
   (state.openSubtopics||[]).forEach(id=>{const el=document.getElementById('st-'+id);if(el)el.classList.add('open');});
+  initBlurtEditors();
 }
 function toggleSubtopic(id){
   const el=document.getElementById('st-'+id);if(!el)return;
@@ -626,7 +645,7 @@ function cardHTML(tid,c,stid){
     ${c.sp?`<div class="card-sp">${esc(c.sp)}</div>`:''}
     <div class="card-q">${esc(c.q)}</div>
     ${c.hint?`<div class="card-hint">${esc(c.hint)}</div>`:''}
-    <textarea class="blurt-field" id="ta-${c.id}" placeholder="Write everything you know..." rows="3"></textarea>
+    <div class="blurt-field" id="bq-${c.id}" data-cid="${c.id}"></div>
     <div class="card-actions">
       <button class="card-btn" id="ans-btn-${c.id}" onclick="toggleAnswer('${c.id}')">Show answer</button>
       ${hasNote?`<button class="card-btn green" onclick="toggleNote('${c.id}')">My note</button>`:''}
@@ -634,8 +653,8 @@ function cardHTML(tid,c,stid){
       <button class="card-btn" onclick="openPanel('card','${c.id}','${tid}','${stid||''}')">Edit</button>
       <button class="card-btn red" onclick="deleteCard('${tid}','${c.id}','${stid||''}')">Delete</button>
     </div>
-    <div class="answer-box" id="ans-${c.id}">${c.answer?escAnswer(c.answer):''}</div>
-    ${hasNote?`<div class="my-note" id="note-${c.id}"><div class="my-note-label">My note</div><div class="my-note-text">${escAnswer(c.myNote)}</div></div>`:''}
+    <div class="answer-box" id="ans-${c.id}">${c.answer?renderAnswer(c.answer):''}</div>
+    ${hasNote?`<div class="my-note" id="note-${c.id}"><div class="my-note-label">My note</div><div class="my-note-text">${renderAnswer(c.myNote)}</div></div>`:''}
   </div>`;
 }
 
@@ -643,15 +662,17 @@ function toggleAnswer(id){const a=document.getElementById('ans-'+id),b=document.
 function toggleNote(id){const n=document.getElementById('note-'+id);if(n)n.classList.toggle('vis');}
 
 function saveNote(tid,cid,stid){
-  const val=(document.getElementById('ta-'+cid)||{}).value||'';if(!val.trim())return;
+  const quill=_blurtQuills[cid];if(!quill)return;
+  const html=quill.root.innerHTML;
+  if(!quill.getText().trim())return;
   const c=findCard(tid,cid,stid);if(!c)return;
-  c.myNote=val.trim();save();
+  c.myNote=html;save();
   const noteEl=document.getElementById('note-'+cid);
-  if(noteEl){noteEl.querySelector('.my-note-text').innerHTML=escAnswer(c.myNote);noteEl.classList.add('vis');}
+  if(noteEl){noteEl.querySelector('.my-note-text').innerHTML=renderAnswer(c.myNote);noteEl.classList.add('vis');}
   else{
     const card=document.getElementById('card-'+cid);
     const nd=document.createElement('div');nd.className='my-note vis';nd.id='note-'+cid;
-    nd.innerHTML=`<div class="my-note-label">My note</div><div class="my-note-text">${escAnswer(c.myNote)}</div>`;
+    nd.innerHTML=`<div class="my-note-label">My note</div><div class="my-note-text">${renderAnswer(c.myNote)}</div>`;
     card.appendChild(nd);
     const acts=card.querySelector('.card-actions');
     if(!acts.querySelector('.card-btn.green[onclick*="toggleNote"]')){
@@ -755,12 +776,21 @@ function buildCardPanel(editId,topicId,subtopicId){
     <div class="field"><label class="field-label">Hint <span style="opacity:.5;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
       <input class="field-input" id="p-hint" placeholder="e.g. Think: arithmetic and logic..." value="${c?esc(c.hint||''):''}"></div>
     <div class="field"><label class="field-label">Model answer</label>
-      <textarea class="field-input textarea" id="p-ans" placeholder="The ALU performs arithmetic and logic operations...">${c?esc(c.answer||''):''}</textarea></div>
+      <div class="quill-answer-wrap"><div id="p-ans-editor"></div></div></div>
     <div class="section-note">Adding to: <strong>${st?esc(st.name)+' › ':''} ${t?esc(t.name):'–'}</strong></div>`;
   document.getElementById('panelFooter').innerHTML=`
     ${c?`<button class="btn btn-danger" onclick="deleteCard('${topicId}','${c.id}','${subtopicId||''}');closePanel()">Delete</button><span class="spacer"></span>`:''}
     <button class="btn" onclick="closePanel()">Cancel</button>
     <button class="btn btn-primary" onclick="saveCard()">Save card</button>`;
+  _answerQuill=new Quill('#p-ans-editor',{
+    theme:'snow',
+    placeholder:'The ALU performs arithmetic and logic operations...',
+    modules:{toolbar:[['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}],[{indent:'-1'},{indent:'+1'}],['image']]}
+  });
+  if(c&&c.answer){
+    if(c.answer.trim().startsWith('<'))_answerQuill.clipboard.dangerouslyPasteHTML(c.answer);
+    else _answerQuill.setText(c.answer);
+  }
 }
 
 function saveSubject(){
@@ -791,11 +821,25 @@ function saveCard(){
   const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
   const t=sub.topics.find(t=>t.id===panel.topicId);if(!t)return;
   const cardList=panel.subtopicId?((t.subtopics||[]).find(st=>st.id===panel.subtopicId)||{cards:[]}).cards:(t.cards=t.cards||[]);
-  if(panel.editId){const c=cardList.find(c=>c.id===panel.editId);if(c){c.sp=v('p-sp');c.q=q.trim();c.hint=v('p-hint');c.answer=v('p-ans');}}
-  else cardList.push({id:uid(),sp:v('p-sp'),q:q.trim(),hint:v('p-hint'),answer:v('p-ans'),myNote:''});
+  const rawAns=_answerQuill?_answerQuill.root.innerHTML:'';
+  const answer=(rawAns==='<p><br></p>'||!rawAns)?'':rawAns;
+  if(panel.editId){const c=cardList.find(c=>c.id===panel.editId);if(c){c.sp=v('p-sp');c.q=q.trim();c.hint=v('p-hint');c.answer=answer;}}
+  else cardList.push({id:uid(),sp:v('p-sp'),q:q.trim(),hint:v('p-hint'),answer:answer,myNote:''});
   save();closePanel();renderMain();
 }
 function v(id){return(document.getElementById(id)||{}).value||'';}
+
+function initBlurtEditors(){
+  _blurtQuills={};
+  document.querySelectorAll('.blurt-field[data-cid]').forEach(el=>{
+    const cid=el.dataset.cid;
+    _blurtQuills[cid]=new Quill(el,{
+      theme:'snow',
+      placeholder:'Write everything you know...',
+      modules:{toolbar:false}
+    });
+  });
+}
 
 function deleteSubject(id){
   if(!confirm('Delete this subject and everything in it?'))return;
@@ -831,13 +875,6 @@ function deleteCard(tid,cid,stid){
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
 load();
-// Auto-expand textareas as user types
-document.addEventListener('input', e => {
-  if(e.target.classList.contains('blurt-field')){
-    e.target.style.height = 'auto';
-    e.target.style.height = e.target.scrollHeight + 'px';
-  }
-});
 </script>
 <script>
   if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
