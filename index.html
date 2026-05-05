@@ -235,15 +235,31 @@ onAuthStateChanged(auth,async user=>{
     const localState=localRaw?JSON.parse(localRaw):null;
     const hasLocal=localState&&localState.subjects&&localState.subjects.length>0;
     const hasCloud=cloudState&&cloudState.subjects&&cloudState.subjects.length>0;
-    const conflictResolved=localStorage.getItem('blurt-conflict-resolved');
-    if(hasCloud&&hasLocal&&!conflictResolved){
-      window._pendingCloudState=cloudState;window._pendingLocalState=localState;
+    if(hasCloud){
+      window._pendingCloudState=cloudState;
+      window._pendingLocalState=localState||{subjects:[]};
+      const localCount=(window._pendingLocalState.subjects||[]).length;
+      const cloudCount=cloudState.subjects.length;
+      document.getElementById('conflictLocalInfo').textContent=`${localCount} subject${localCount!==1?'s':''}`;
+      document.getElementById('conflictCloudInfo').textContent=`${cloudCount} subject${cloudCount!==1?'s':''}`;
+      const mergedCount=mergeSubjects(window._pendingLocalState,cloudState).subjects.length;
+      document.getElementById('conflictMergeInfo').textContent=`${mergedCount} subject${mergedCount!==1?'s':''}`;
+      document.getElementById('conflictModalDesc').textContent=hasLocal
+        ?'Both this device and your account have data. Choose what to load — or merge them.'
+        :'Your account has existing data. What would you like to load?';
       document.getElementById('conflictModal').style.display='flex';
-    }else if(hasLocal&&!hasCloud){await saveToFirestore(user.uid,localState);updateAccountUI(user);}
-    else if(hasCloud){window._setState(cloudState);updateAccountUI(user);}
-    else{updateAccountUI(user);}
+    }else if(hasLocal){
+      await saveToFirestore(user.uid,localState);updateAccountUI(user);
+    }else{updateAccountUI(user);}
   }else{window._blurtUser=null;updateAccountUI(null);}
 });
+function mergeSubjects(local,cloud){
+  const merged=Object.assign({},cloud);
+  const cloudNames=new Set((cloud.subjects||[]).map(s=>s.name.trim().toLowerCase()));
+  const extra=(local.subjects||[]).filter(s=>!cloudNames.has(s.name.trim().toLowerCase()));
+  merged.subjects=[...(cloud.subjects||[]),...extra];
+  return merged;
+}
 function updateAccountUI(user){
   const out=document.getElementById('accountSignedOut'),inn=document.getElementById('accountSignedIn');
   if(user){
@@ -254,8 +270,22 @@ function updateAccountUI(user){
     document.getElementById('accountInitials').textContent=(user.displayName||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   }else{out.style.display='flex';inn.style.display='none';}
 }
-document.getElementById('keepLocalBtn').onclick=async()=>{await saveToFirestore(window._blurtUser.uid,window._pendingLocalState);localStorage.setItem('blurt-conflict-resolved','true');document.getElementById('conflictModal').style.display='none';updateAccountUI(window._blurtUser);};
-document.getElementById('keepCloudBtn').onclick=async()=>{window._setState(window._pendingCloudState);localStorage.setItem('blurt-conflict-resolved','true');document.getElementById('conflictModal').style.display='none';updateAccountUI(window._blurtUser);};
+function hideConflictModal(){document.getElementById('conflictModal').style.display='none';}
+document.getElementById('keepLocalBtn').onclick=async()=>{
+  await saveToFirestore(window._blurtUser.uid,window._pendingLocalState);
+  window._setState(window._pendingLocalState);
+  hideConflictModal();updateAccountUI(window._blurtUser);
+};
+document.getElementById('keepCloudBtn').onclick=async()=>{
+  window._setState(window._pendingCloudState);
+  hideConflictModal();updateAccountUI(window._blurtUser);
+};
+document.getElementById('mergeBothBtn').onclick=async()=>{
+  const merged=mergeSubjects(window._pendingLocalState,window._pendingCloudState);
+  await saveToFirestore(window._blurtUser.uid,merged);
+  window._setState(merged);
+  hideConflictModal();updateAccountUI(window._blurtUser);
+};
 window.firebaseSignIn=signIn;
 window.firebaseSignOut=()=>auth.signOut();
 window.firestoreSave=(state)=>{if(window._blurtUser)saveToFirestore(window._blurtUser.uid,state);};
@@ -281,6 +311,10 @@ window.firestoreSave=(state)=>{if(window._blurtUser)saveToFirestore(window._blur
       <button class="add-subject-btn" onclick="openPanel('subject')">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         Add subject
+      </button>
+      <button class="add-subject-btn" onclick="exportData()" style="margin-top:4px">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 9V1M3 6l3.5 3.5L10 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 10.5v1a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Export data
       </button>
       <div class="account-area">
         <div id="accountSignedOut" class="account-signed-out">
@@ -343,19 +377,24 @@ window.firestoreSave=(state)=>{if(window._blurtUser)saveToFirestore(window._blur
 <div id="conflictModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
   <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;width:420px;max-width:90vw;overflow:hidden">
     <div style="padding:18px 20px 14px;border-bottom:1px solid var(--border)">
-      <div style="font-size:15px;font-weight:600;margin-bottom:4px">You have cards in two places</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5">You have local cards on this device and existing cards in your account. Which would you like to keep? The other will be deleted.</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px">Choose which data to keep</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5" id="conflictModalDesc">Your account has existing data. Choose what to load.</div>
     </div>
     <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button id="keepLocalBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left">
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">This device</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictLocalInfo"></div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">Your guest data</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictLocalInfo">0 subjects</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Local data</div>
       </button>
       <button id="keepCloudBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left">
         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">Your account</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictCloudInfo"></div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">Previously synced</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictCloudInfo">0 subjects</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Cloud data</div>
+      </button>
+      <button id="mergeBothBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left;grid-column:1/-1">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">Merge both</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictMergeInfo">Combine all subjects</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Subjects with the same name are deduplicated</div>
       </button>
     </div>
   </div>
@@ -399,6 +438,16 @@ function save(){
 }
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`blurt-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function escAnswer(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
 function renderAnswer(s){if(!s)return'';return s.trim().startsWith('<')?s:escAnswer(s);}
