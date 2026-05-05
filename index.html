@@ -122,9 +122,9 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .card-q{font-size:13px;font-weight:600;margin-bottom:3px;line-height:1.4}
 .card-hint{font-size:11px;color:var(--text3);margin-bottom:10px;font-style:italic}
 .blurt-field{width:100%;border-radius:8px;font-size:12px;line-height:1.6;color:var(--text);transition:border-color .15s,background .25s;box-sizing:border-box}
-.blurt-field.ql-container.ql-snow{border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);font-family:inherit}
+.blurt-field.ql-container.ql-snow{border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);font-family:inherit;height:auto}
 .blurt-field.ql-container.ql-snow:focus-within{border-color:var(--border2)}
-.blurt-field .ql-editor{padding:9px 11px;min-height:68px;line-height:1.6;color:var(--text);background:transparent}
+.blurt-field .ql-editor{padding:9px 11px;min-height:68px;height:auto;overflow-y:visible;line-height:1.6;color:var(--text);background:transparent}
 .blurt-field .ql-editor.ql-blank::before{color:var(--text3);font-style:normal;left:11px;right:11px}
 .card-actions{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px}
 .card-btn{padding:5px 10px;font-size:11px;font-weight:500;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--text2);transition:background .1s,color .1s;white-space:nowrap}
@@ -189,8 +189,8 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .quill-answer-wrap{border:1px solid var(--input-border);border-radius:9px;overflow:hidden;background:var(--input-bg);transition:border-color .15s,background .25s}
 .quill-answer-wrap:focus-within{border-color:var(--border2)}
 .quill-answer-wrap .ql-toolbar.ql-snow{border:none;border-bottom:1px solid var(--border2);background:var(--bg3);padding:5px 8px;flex-wrap:wrap}
-.quill-answer-wrap .ql-container.ql-snow{border:none;font-size:13px;font-family:inherit}
-.quill-answer-wrap .ql-editor{min-height:100px;padding:10px 13px;color:var(--text);background:transparent;line-height:1.65;word-break:break-word}
+.quill-answer-wrap .ql-container.ql-snow{border:none;font-size:13px;font-family:inherit;height:auto}
+.quill-answer-wrap .ql-editor{min-height:100px;height:auto;overflow-y:visible;padding:10px 13px;color:var(--text);background:transparent;line-height:1.65;word-break:break-word}
 .quill-answer-wrap .ql-editor.ql-blank::before{color:var(--text3);font-style:normal;left:13px;right:13px}
 /* ── Quill dark mode ── */
 [data-theme="dark"] .ql-snow .ql-stroke{stroke:var(--text2)}
