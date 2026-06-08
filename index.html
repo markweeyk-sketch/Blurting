@@ -318,6 +318,7 @@ async function saveToFirestore(uid,state){try{const ref=doc(db,'users',uid);awai
 onAuthStateChanged(auth,async user=>{
   if(user){
     window._blurtUser=user;
+    updateAccountUI(user);
     const cloudState=await loadFromFirestore(user.uid);
     const localRaw=localStorage.getItem('blurt3');
     const localState=localRaw?JSON.parse(localRaw):null;
@@ -337,8 +338,8 @@ onAuthStateChanged(auth,async user=>{
         :'Your account has existing data. What would you like to load?';
       document.getElementById('conflictModal').style.display='flex';
     }else if(hasLocal){
-      await saveToFirestore(user.uid,localState);updateAccountUI(user);
-    }else{updateAccountUI(user);}
+      await saveToFirestore(user.uid,localState);
+    }
   }else{window._blurtUser=null;updateAccountUI(null);}
 });
 function mergeSubjects(local,cloud){
