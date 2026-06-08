@@ -312,8 +312,8 @@ const db=getFirestore(app);
 const auth=getAuth(app);
 getRedirectResult(auth).catch(err=>console.error('Sign-in redirect error:',err));
 async function signIn(){const provider=new GoogleAuthProvider();await signInWithRedirect(auth,provider);}
-async function loadFromFirestore(uid){const ref=doc(db,'users',uid);const snap=await getDoc(ref);if(snap.exists())return snap.data().state;return null;}
-async function saveToFirestore(uid,state){const ref=doc(db,'users',uid);await setDoc(ref,{state});}
+async function loadFromFirestore(uid){try{const ref=doc(db,'users',uid);const snap=await getDoc(ref);if(snap.exists())return snap.data().state;}catch(e){}return null;}
+async function saveToFirestore(uid,state){try{const ref=doc(db,'users',uid);await setDoc(ref,{state});}catch(e){}}
 onAuthStateChanged(auth,async user=>{
   if(user){
     window._blurtUser=user;
