@@ -982,18 +982,48 @@ function openPanel(type,editId,topicId,subtopicId){
   const bd=document.getElementById('panelBackdrop');
   bd.classList.add('open');
   bd.addEventListener('click',_backdropClick);
-  document.getElementById('panelBody').onkeydown=_panelKeydown;
-  setTimeout(()=>{const f=document.querySelector('#panelBody input:not([type=hidden]),#panelBody textarea');if(f)f.focus();},320);
+  const body=document.getElementById('panelBody');
+  body.onkeydown=_panelKeydown;
+  // Stop Chrome from offering autofill / form-history suggestions on the fields.
+  body.querySelectorAll('input').forEach(i=>{
+    i.setAttribute('autocomplete','off');
+    i.setAttribute('autocorrect','off');
+    i.setAttribute('autocapitalize','off');
+    i.setAttribute('spellcheck','false');
+  });
+  setTimeout(()=>{const f=body.querySelector('input:not([type=hidden]),textarea');if(f)f.focus();},320);
 }
 
-// Pressing Enter in any single-line panel field saves the whole panel.
-function _panelKeydown(e){
-  if(e.key!=='Enter'||e.target.tagName!=='INPUT')return;
-  e.preventDefault();
+function _savePanel(){
   if(panel.type==='subject')saveSubject();
   else if(panel.type==='topic')saveTopic();
   else if(panel.type==='subtopic')saveSubtopic();
   else if(panel.type==='card')saveCard();
+}
+
+// Ordered list of navigable fields in the panel (inputs, then the answer editor).
+function _panelFields(){
+  const body=document.getElementById('panelBody');
+  const fields=[...body.querySelectorAll('input.field-input')];
+  const ed=body.querySelector('#p-ans-editor .ql-editor');
+  if(ed)fields.push(ed);
+  return fields;
+}
+
+// Enter saves the panel; Up/Down arrows move between fields.
+function _panelKeydown(e){
+  if(e.target.tagName!=='INPUT')return;
+  if(e.key==='Enter'){e.preventDefault();_savePanel();return;}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    const fields=_panelFields();
+    const i=fields.indexOf(e.target);
+    const ni=e.key==='ArrowDown'?i+1:i-1;
+    if(i===-1||ni<0||ni>=fields.length)return;
+    e.preventDefault();
+    const next=fields[ni];
+    if(next.classList.contains('ql-editor')&&_answerQuill)_answerQuill.focus();
+    else next.focus();
+  }
 }
 
 function closePanel(){
@@ -1073,7 +1103,7 @@ function buildCardPanel(editId,topicId,subtopicId){
     placeholder:'The ALU performs arithmetic and logic operations...',
     modules:{
       toolbar:[['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}],[{indent:'-1'},{indent:'+1'}],['image']],
-      keyboard:{bindings:editorBindings(()=>saveCard())}
+      keyboard:{bindings:editorBindings(()=>saveCard(),()=>{const h=document.getElementById('p-hint');if(h)h.focus();})}
     }
   });
   if(c&&c.answer){
@@ -1140,13 +1170,16 @@ function hotkeyLabel(hk){
 
 // Shared Quill keyboard bindings: Enter runs onEnter (save), Shift+Enter makes a
 // new line, and the configurable list shortcuts toggle bullet & numbered lists.
-function editorBindings(onEnter){
+function editorBindings(onEnter,onArrowUpTop){
   const hk=state.hotkeys||defaultHotkeys();
-  return {
+  const b={
     saveEnter:{key:13,shiftKey:false,handler:function(){if(onEnter)onEnter();return false;}},
     bulletList:Object.assign(hkToBinding(hk.bulletList),{handler:function(range,context){this.quill.format('list',context.format.list==='bullet'?false:'bullet','user');return false;}}),
     orderedList:Object.assign(hkToBinding(hk.orderedList),{handler:function(range,context){this.quill.format('list',context.format.list==='ordered'?false:'ordered','user');return false;}})
   };
+  // ArrowUp at the very start of the editor jumps back up to the field above.
+  if(onArrowUpTop)b.exitUp={key:38,handler:function(range){if(range&&range.index===0&&range.length===0){onArrowUpTop();return false;}return true;}};
+  return b;
 }
 
 // ---- Settings ----
