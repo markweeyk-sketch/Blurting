@@ -624,11 +624,25 @@ function sortedSubtopics(subtopics){
   });
 }
 
+// Natural-order comparison for spec points like "4.2.3": compare each run of
+// digits numerically (so 4.10 > 4.2) and each run of text alphabetically.
+function compareSpecPoints(a,b){
+  const ta=String(a).match(/\d+|\D+/g)||[];
+  const tb=String(b).match(/\d+|\D+/g)||[];
+  for(let i=0;i<Math.min(ta.length,tb.length);i++){
+    const x=ta[i],y=tb[i];
+    const xn=/^\d/.test(x),yn=/^\d/.test(y);
+    if(xn&&yn){const d=parseInt(x,10)-parseInt(y,10);if(d)return d;}
+    else{const d=x.localeCompare(y);if(d)return d;}
+  }
+  return ta.length-tb.length;
+}
+
 function getSpecPoints(topic){
   const points=new Set();
   (topic.cards||[]).forEach(c=>{if(c.sp&&c.sp.trim())points.add(c.sp.trim());});
   (topic.subtopics||[]).forEach(st=>{(st.cards||[]).forEach(c=>{if(c.sp&&c.sp.trim())points.add(c.sp.trim());});});
-  return[...points].sort();
+  return[...points].sort(compareSpecPoints);
 }
 // Add these two new functions below it:
 function setSubtopicSpFilter(stid, sp){
@@ -938,7 +952,18 @@ function openPanel(type,editId,topicId,subtopicId){
   const bd=document.getElementById('panelBackdrop');
   bd.classList.add('open');
   bd.addEventListener('click',_backdropClick);
+  document.getElementById('panelBody').onkeydown=_panelKeydown;
   setTimeout(()=>{const f=document.querySelector('#panelBody input:not([type=hidden]),#panelBody textarea');if(f)f.focus();},320);
+}
+
+// Pressing Enter in any single-line panel field saves the whole panel.
+function _panelKeydown(e){
+  if(e.key!=='Enter'||e.target.tagName!=='INPUT')return;
+  e.preventDefault();
+  if(panel.type==='subject')saveSubject();
+  else if(panel.type==='topic')saveTopic();
+  else if(panel.type==='subtopic')saveSubtopic();
+  else if(panel.type==='card')saveCard();
 }
 
 function closePanel(){
@@ -1016,7 +1041,10 @@ function buildCardPanel(editId,topicId,subtopicId){
   _answerQuill=new Quill('#p-ans-editor',{
     theme:'snow',
     placeholder:'The ALU performs arithmetic and logic operations...',
-    modules:{toolbar:[['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}],[{indent:'-1'},{indent:'+1'}],['image']]}
+    modules:{
+      toolbar:[['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}],[{indent:'-1'},{indent:'+1'}],['image']],
+      keyboard:{bindings:editorBindings(()=>saveCard())}
+    }
   });
   if(c&&c.answer){
     if(c.answer.trim().startsWith('<'))_answerQuill.clipboard.dangerouslyPasteHTML(c.answer);
@@ -1060,6 +1088,28 @@ function saveCard(){
 }
 function v(id){return(document.getElementById(id)||{}).value||'';}
 
+// Shared Quill keyboard bindings: Enter runs onEnter (save), Shift+Enter makes a
+// new line, and Ctrl/Cmd+Shift+8 / +7 toggle bullet & numbered lists.
+function editorBindings(onEnter){
+  return {
+    saveEnter:{key:13,shiftKey:false,handler:function(){if(onEnter)onEnter();return false;}},
+    bulletList:{key:56,shortKey:true,shiftKey:true,handler:function(range,context){this.quill.format('list',context.format.list==='bullet'?false:'bullet','user');return false;}},
+    orderedList:{key:55,shortKey:true,shiftKey:true,handler:function(range,context){this.quill.format('list',context.format.list==='ordered'?false:'ordered','user');return false;}}
+  };
+}
+
+// Find which topic/subtopic a card belongs to within the active subject.
+function locateCard(cid){
+  const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return null;
+  for(const t of (sub.topics||[])){
+    if((t.cards||[]).some(c=>c.id===cid))return{tid:t.id,stid:null};
+    for(const st of (t.subtopics||[])){
+      if((st.cards||[]).some(c=>c.id===cid))return{tid:t.id,stid:st.id};
+    }
+  }
+  return null;
+}
+
 function initBlurtEditors(){
   _blurtQuills={};
   document.querySelectorAll('.blurt-field[data-cid]').forEach(el=>{
@@ -1067,7 +1117,10 @@ function initBlurtEditors(){
     _blurtQuills[cid]=new Quill(el,{
       theme:'snow',
       placeholder:'Write everything you know...',
-      modules:{toolbar:false}
+      modules:{
+        toolbar:false,
+        keyboard:{bindings:editorBindings(()=>{const loc=locateCard(cid);if(loc)saveNote(loc.tid,cid,loc.stid);})}
+      }
     });
   });
 }
