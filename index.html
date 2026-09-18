@@ -82,6 +82,11 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .hotkey-btn{font-size:12px;font-weight:500;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;padding:5px 10px;min-width:96px;text-align:center;border:1px solid var(--border2);border-radius:7px;background:var(--bg2,transparent);color:var(--text);cursor:pointer;transition:border-color .15s,color .15s}
 .hotkey-btn:hover{border-color:var(--text3)}
 .hotkey-btn.recording{border-color:#534AB7;color:#534AB7;font-family:inherit;font-style:italic}
+#offlineBanner{position:fixed;top:0;left:0;right:0;z-index:400;display:flex;align-items:center;gap:9px;padding:9px 16px;font-size:12.5px;line-height:1.4;color:#7a3a00;background:#ffedcc;border-bottom:1px solid #f0c67a;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+#offlineBanner strong{font-weight:600}
+.offline-dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;background:#e8892b;box-shadow:0 0 0 3px rgba(232,137,43,.25)}
+body.has-offline-banner .app{padding-top:38px}
+[data-theme=dark] #offlineBanner{color:#ffd9a1;background:#3a2a12;border-bottom-color:#5a4322}
 .content{flex:1;overflow-y:auto;padding:24px;min-width:0}
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
 .stat-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;transition:background .25s}
@@ -316,42 +321,43 @@ const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 const auth=getAuth(app);
 async function signIn(){const provider=new GoogleAuthProvider();await signInWithPopup(auth,provider);}
-async function loadFromFirestore(uid){try{const ref=doc(db,'users',uid);const snap=await getDoc(ref);if(snap.exists())return snap.data().state;}catch(e){}return null;}
+// Returns {ok:true,state} on a successful read (state may be null if the cloud
+// doc is empty), or {ok:false} if the read failed (offline / transient error).
+// The distinction matters: on a failed read we must NOT push local over the
+// cloud, or we risk overwriting good cloud data (the original data-loss bug).
+async function loadFromFirestore(uid){try{const ref=doc(db,'users',uid);const snap=await getDoc(ref);return{ok:true,state:snap.exists()?snap.data().state:null};}catch(e){return{ok:false,state:null};}}
 async function saveToFirestore(uid,state){try{const ref=doc(db,'users',uid);await setDoc(ref,{state});}catch(e){}}
 onAuthStateChanged(auth,async user=>{
   if(user){
     window._blurtUser=user;
     updateAccountUI(user);
-    const cloudState=await loadFromFirestore(user.uid);
+    const res=await loadFromFirestore(user.uid);
+    if(!res.ok){
+      // Couldn't reach the cloud. Keep working locally; do not push over cloud.
+      window._cloudReady=false;
+      if(window.updateSyncStatus)window.updateSyncStatus();
+      return;
+    }
+    window._cloudReady=true;
+    const cloudState=res.state;
     const localRaw=localStorage.getItem('blurt3');
     const localState=localRaw?JSON.parse(localRaw):null;
-    const hasLocal=localState&&localState.subjects&&localState.subjects.length>0;
     const hasCloud=cloudState&&cloudState.subjects&&cloudState.subjects.length>0;
+    const hasLocal=localState&&localState.subjects&&localState.subjects.length>0;
     if(hasCloud){
-      window._pendingCloudState=cloudState;
-      window._pendingLocalState=localState||{subjects:[]};
-      const localCount=(window._pendingLocalState.subjects||[]).length;
-      const cloudCount=cloudState.subjects.length;
-      document.getElementById('conflictLocalInfo').textContent=`${localCount} subject${localCount!==1?'s':''}`;
-      document.getElementById('conflictCloudInfo').textContent=`${cloudCount} subject${cloudCount!==1?'s':''}`;
-      const mergedCount=mergeSubjects(window._pendingLocalState,cloudState).subjects.length;
-      document.getElementById('conflictMergeInfo').textContent=`${mergedCount} subject${mergedCount!==1?'s':''}`;
-      document.getElementById('conflictModalDesc').textContent=hasLocal
-        ?'Both this device and your account have data. Choose what to load — or merge them.'
-        :'Your account has existing data. What would you like to load?';
-      document.getElementById('conflictModal').style.display='flex';
+      // Cloud is the source of truth (online saves keep it current) — adopt it.
+      window._setState(cloudState);
     }else if(hasLocal){
+      // Cloud confirmed empty — seed it from this device's data.
       await saveToFirestore(user.uid,localState);
     }
-  }else{window._blurtUser=null;updateAccountUI(null);}
+    if(window.updateSyncStatus)window.updateSyncStatus();
+  }else{
+    window._blurtUser=null;window._cloudReady=false;
+    updateAccountUI(null);
+    if(window.updateSyncStatus)window.updateSyncStatus();
+  }
 });
-function mergeSubjects(local,cloud){
-  const merged=Object.assign({},cloud);
-  const cloudNames=new Set((cloud.subjects||[]).map(s=>s.name.trim().toLowerCase()));
-  const extra=(local.subjects||[]).filter(s=>!cloudNames.has(s.name.trim().toLowerCase()));
-  merged.subjects=[...(cloud.subjects||[]),...extra];
-  return merged;
-}
 function updateAccountUI(user){
   const out=document.getElementById('accountSignedOut'),inn=document.getElementById('accountSignedIn');
   if(user){
@@ -362,29 +368,17 @@ function updateAccountUI(user){
     document.getElementById('accountInitials').textContent=(user.displayName||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   }else{out.style.display='flex';inn.style.display='none';}
 }
-function hideConflictModal(){document.getElementById('conflictModal').style.display='none';}
-document.getElementById('keepLocalBtn').onclick=async()=>{
-  await saveToFirestore(window._blurtUser.uid,window._pendingLocalState);
-  window._setState(window._pendingLocalState);
-  hideConflictModal();updateAccountUI(window._blurtUser);
-};
-document.getElementById('keepCloudBtn').onclick=async()=>{
-  window._setState(window._pendingCloudState);
-  hideConflictModal();updateAccountUI(window._blurtUser);
-};
-document.getElementById('mergeBothBtn').onclick=async()=>{
-  const merged=mergeSubjects(window._pendingLocalState,window._pendingCloudState);
-  await saveToFirestore(window._blurtUser.uid,merged);
-  window._setState(merged);
-  hideConflictModal();updateAccountUI(window._blurtUser);
-};
 async function saveSessionToFirestore(uid,sessionData){
   try{const ref=collection(db,'users',uid,'sessions');await addDoc(ref,sessionData);}catch(e){}
 }
 window.firebaseSignIn=signIn;
 window.firebaseSignOut=()=>auth.signOut();
-window.firestoreSave=(state)=>{if(window._blurtUser)saveToFirestore(window._blurtUser.uid,state);};
-window.firestoreSaveSession=(sessionData)=>{if(window._blurtUser)saveSessionToFirestore(window._blurtUser.uid,sessionData);};
+// Write through to the cloud on every save, but only while online — offline
+// saves stay local (the offline banner warns about the loss risk).
+window.firestoreSave=(state)=>{if(window._blurtUser&&navigator.onLine)saveToFirestore(window._blurtUser.uid,state);};
+window.firestoreSaveSession=(sessionData)=>{if(window._blurtUser&&navigator.onLine)saveSessionToFirestore(window._blurtUser.uid,sessionData);};
+// Push the current in-memory state to the cloud (used to flush after reconnecting).
+window.firestoreFlush=()=>{if(window._blurtUser&&navigator.onLine&&window._currentState)saveToFirestore(window._blurtUser.uid,window._currentState());};
 </script>
 </head>
 
@@ -474,30 +468,9 @@ window.firestoreSaveSession=(sessionData)=>{if(window._blurtUser)saveSessionToFi
   </div>
 </div>
 
-<div id="conflictModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
-  <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;width:420px;max-width:90vw;overflow:hidden">
-    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--border)">
-      <div style="font-size:15px;font-weight:600;margin-bottom:4px">Choose which data to keep</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5" id="conflictModalDesc">Your account has existing data. Choose what to load.</div>
-    </div>
-    <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <button id="keepLocalBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left">
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">This device</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictLocalInfo">0 subjects</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">Local data</div>
-      </button>
-      <button id="keepCloudBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left">
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">Your account</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictCloudInfo">0 subjects</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">Cloud data</div>
-      </button>
-      <button id="mergeBothBtn" style="padding:12px;border-radius:10px;border:1px solid var(--border2);background:transparent;cursor:pointer;text-align:left;grid-column:1/-1">
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">Merge both</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text)" id="conflictMergeInfo">Combine all subjects</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">Subjects with the same name are deduplicated</div>
-      </button>
-    </div>
-  </div>
+<div id="offlineBanner" style="display:none">
+  <span class="offline-dot"></span>
+  <span><strong>You're offline.</strong> Changes are saved on this device only — they are <strong>not</strong> syncing to the cloud and could be lost if you open Blurt on another device or clear this browser. Reconnect to sync.</span>
 </div>
 
 <div id="settingsModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
@@ -572,6 +545,7 @@ function load(){
   if(!state.hotkeys)state.hotkeys=defaultHotkeys();
   applyTheme();applySidebar();renderSidebar();
   if(state.activeSubId)renderMain();
+  if(window.updateSyncStatus)window.updateSyncStatus();
 }
 
 window._setState=function(newState){
@@ -591,6 +565,26 @@ function save(){
   try{localStorage.setItem('blurt3',JSON.stringify(state));}catch(e){}
   if(window.firestoreSave)window.firestoreSave(state);
 }
+
+// Lets the Firebase layer read the latest state (e.g. to flush after reconnect).
+window._currentState=()=>state;
+
+// Show the offline warning whenever the browser is offline and the user is
+// signed in (so cloud sync is expected but not happening).
+window.updateSyncStatus=function(){
+  const banner=document.getElementById('offlineBanner');
+  if(!banner)return;
+  const show=!navigator.onLine&&!!window._blurtUser;
+  banner.style.display=show?'flex':'none';
+  document.body.classList.toggle('has-offline-banner',show);
+};
+window.addEventListener('offline',()=>window.updateSyncStatus());
+window.addEventListener('online',()=>{
+  // Back online: push whatever is in memory so offline edits reach the cloud,
+  // then hide the warning.
+  if(window.firestoreFlush)window.firestoreFlush();
+  window.updateSyncStatus();
+});
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 
@@ -674,6 +668,18 @@ function getSpecPoints(topic){
   (topic.subtopics||[]).forEach(st=>{(st.cards||[]).forEach(c=>{if(c.sp&&c.sp.trim())points.add(c.sp.trim());});});
   return[...points].sort(compareSpecPoints);
 }
+
+// Order cards by spec point (natural numeric order); cards without a spec
+// point keep their original order and sit after the tagged ones.
+function sortCardsBySpec(cards){
+  return cards.map((c,i)=>[c,i]).sort((a,b)=>{
+    const sa=(a[0].sp||'').trim(),sb=(b[0].sp||'').trim();
+    if(sa&&sb){const d=compareSpecPoints(sa,sb);return d||a[1]-b[1];}
+    if(sa)return-1;
+    if(sb)return 1;
+    return a[1]-b[1];
+  }).map(pair=>pair[0]);
+}
 // Add these two new functions below it:
 function setSubtopicSpFilter(stid, sp){
   if(!state.activeSubtopicSpFilters) state.activeSubtopicSpFilters = {};
@@ -747,7 +753,7 @@ function renderMain(){
   // Collect all spec points from shown topics for global search
   const allSpSet=new Set();
   shown.forEach(t=>getSpecPoints(t).forEach(sp=>allSpSet.add(sp)));
-  const allSps=[...allSpSet].sort();
+  const allSps=[...allSpSet].sort(compareSpecPoints);
 
   let html=`<div class="stats-row">
     <div class="stat-card"><div class="stat-n">${topics.length}</div><div class="stat-l">Topics</div></div>
@@ -779,7 +785,7 @@ function renderMain(){
     const allC=allCards(t);
     const notedC=allC.filter(c=>c.myNote&&c.myNote.trim()).length;
     const pct=allC.length?Math.round(notedC/allC.length*100):0;
-    const filteredDc=(t.cards||[]).filter(c=>!state.activeSpFilter||(c.sp||'').trim()===state.activeSpFilter.trim());
+    const filteredDc=sortCardsBySpec((t.cards||[]).filter(c=>!state.activeSpFilter||(c.sp||'').trim()===state.activeSpFilter.trim()));
 
     html+=`<div class="topic-block"><div class="topic-header"><span class="topic-label">${esc(t.name)}</span><div class="topic-actions">
       <button class="btn btn-sm" onclick="openPanel('subtopic',null,'${t.id}')">+ Subtopic</button>
@@ -796,16 +802,16 @@ function renderMain(){
         const stSpFilter=getSubtopicSpFilter(st.id);
         const scAll=st.cards||[];
         // Apply both global and subtopic-level filter
-        const sc=scAll.filter(c=>{
+        const sc=sortCardsBySpec(scAll.filter(c=>{
           const globalMatch=!state.activeSpFilter||(c.sp||'').trim()===state.activeSpFilter.trim();
           const localMatch=!stSpFilter||(c.sp||'').trim()===stSpFilter.trim();
           return globalMatch&&localMatch;
-        });
+        }));
         const sn=scAll.filter(c=>c.myNote&&c.myNote.trim()).length;
         const sp=scAll.length?Math.round(sn/scAll.length*100):0;
 
         // Get spec points for this subtopic only
-        const stSps=[...new Set(scAll.filter(c=>c.sp&&c.sp.trim()).map(c=>c.sp.trim()))].sort();
+        const stSps=[...new Set(scAll.filter(c=>c.sp&&c.sp.trim()).map(c=>c.sp.trim()))].sort(compareSpecPoints);
 
         html+=`<div class="subtopic-row" id="st-${st.id}">
           <div class="subtopic-header" onclick="toggleSubtopic('${st.id}')">
