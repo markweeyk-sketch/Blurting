@@ -94,6 +94,13 @@ Key functions in `index.html`, grouped by area:
   and `retryMissed` re-runs only the missed cards.
 - **Weak areas** — `buildWeakAreasHTML` surfaces low-confidence cards for
   focused revision.
+- **Tables** — Quill 1 has no table format, so `TableBlot` is a custom block
+  embed (`<table class="blurt-table">`, not editable in place; clicking it opens
+  the table editor via `openTableEditor`). Cells are sanitized to
+  sub/sup/bold/italic/line breaks (`sanitizeCell`). `attachTableSupport` wires
+  every editor: pasted HTML tables convert through Quill's clipboard, and
+  `tableFromPlainText` spots tab-separated or one-cell-per-paragraph text and
+  offers a "Paste as table" preview.
 
 ## Working on this project
 

@@ -1,4 +1,4 @@
-const CACHE = 'blurt-v6';
+const CACHE = 'blurt-v7';
 const ASSETS = [
   './',
   './index.html',

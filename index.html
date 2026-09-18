@@ -87,6 +87,34 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .offline-dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;background:#e8892b;box-shadow:0 0 0 3px rgba(232,137,43,.25)}
 body.has-offline-banner .app{padding-top:38px}
 [data-theme=dark] #offlineBanner{color:#ffd9a1;background:#3a2a12;border-bottom-color:#5a4322}
+.blurt-table{border-collapse:collapse;width:100%;margin:8px 0;line-height:1.45}
+.blurt-table th,.blurt-table td{border:1px solid var(--border2);padding:6px 9px;vertical-align:top;text-align:left}
+.blurt-table th{background:var(--bg3);font-weight:600}
+.ql-editor .blurt-table{cursor:pointer;user-select:none;white-space:normal}
+.ql-editor .blurt-table:hover{outline:2px solid #534AB7;outline-offset:2px}
+.tm-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:16px}
+.tm-overlay[hidden]{display:none}
+.tm-box{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:14px;width:780px;max-width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.tm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+.tm-title{font-size:15px;font-weight:600}
+.tm-sub{font-size:12px;color:var(--text2);margin-top:3px}
+.tm-body{padding:14px 20px;overflow:auto;flex:1}
+.tm-titlefield{display:block;margin-bottom:12px}
+.tm-titlefield span{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:5px}
+.tm-titlefield input{width:100%}
+.tm-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-bottom:12px;font-size:12px;color:var(--text2)}
+.tm-step{display:flex;align-items:center;gap:6px}
+.tm-step b{min-width:16px;text-align:center;color:var(--text)}
+.tm-step .btn:disabled{opacity:.4;cursor:default}
+.tm-check{display:flex;align-items:center;gap:6px;cursor:pointer}
+.tm-grid-wrap{overflow-x:auto}
+.tm-grid{margin:0}
+.tm-grid th,.tm-grid td{padding:0;cursor:text}
+.tm-cell{min-height:32px;min-width:80px;padding:6px 9px;outline:none;word-break:break-word}
+.tm-cell:focus{box-shadow:inset 0 0 0 2px #534AB7}
+.tm-hint{font-size:11px;color:var(--text3);margin-top:8px}
+.tm-foot{display:flex;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--border)}
+.tm-foot .spacer{flex:1}
 .content{flex:1;overflow-y:auto;padding:24px;min-width:0}
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
 .stat-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;transition:background .25s}
@@ -542,7 +570,7 @@ function load(){
   if(state.sidebarOpen===undefined)state.sidebarOpen=true;
   if(!state.sortOrder)state.sortOrder='az';
   if(!state.activeSpFilter)state.activeSpFilter=null;
-  if(!state.hotkeys)state.hotkeys=defaultHotkeys();
+  state.hotkeys=Object.assign(defaultHotkeys(),state.hotkeys||{});
   applyTheme();applySidebar();renderSidebar();
   if(state.activeSubId)renderMain();
   if(window.updateSyncStatus)window.updateSyncStatus();
@@ -554,7 +582,7 @@ window._setState=function(newState){
   if(!state.theme)state.theme='light';
   if(state.sidebarOpen===undefined)state.sidebarOpen=true;
   if(!state.sortOrder)state.sortOrder='az';
-  if(!state.hotkeys)state.hotkeys=defaultHotkeys();
+  state.hotkeys=Object.assign(defaultHotkeys(),state.hotkeys||{});
   state.activeSpFilter=null;
   localStorage.setItem('blurt3',JSON.stringify(state));
   applyTheme();applySidebar();renderSidebar();
@@ -945,7 +973,7 @@ function toggleNote(id){const n=document.getElementById('note-'+id);if(n)n.class
 function saveNote(tid,cid,stid){
   const quill=_blurtQuills[cid];if(!quill)return;
   const html=quill.root.innerHTML;
-  if(!quill.getText().trim())return;
+  if(!quill.getText().trim()&&!quill.root.querySelector('table'))return;
   const c=findCard(tid,cid,stid);if(!c)return;
   c.myNote=html;save();
   const noteEl=document.getElementById('note-'+cid);
@@ -1108,10 +1136,16 @@ function buildCardPanel(editId,topicId,subtopicId){
     theme:'snow',
     placeholder:'The ALU performs arithmetic and logic operations...',
     modules:{
-      toolbar:[['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}],[{indent:'-1'},{indent:'+1'}],['image']],
+      toolbar:{
+        container:[['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}],[{indent:'-1'},{indent:'+1'}],['image','table']],
+        handlers:{table:function(){openInsertTable(this.quill);}}
+      },
       keyboard:{bindings:editorBindings(()=>saveCard(),()=>{const h=document.getElementById('p-hint');if(h)h.focus();})}
     }
   });
+  attachTableSupport(_answerQuill);
+  const tblBtn=_answerQuill.getModule('toolbar').container.querySelector('.ql-table');
+  if(tblBtn)tblBtn.title=`Insert table (${hotkeyLabel(state.hotkeys.insertTable)})`;
   if(c&&c.answer){
     if(c.answer.trim().startsWith('<'))_answerQuill.clipboard.dangerouslyPasteHTML(c.answer);
     else _answerQuill.setText(c.answer);
@@ -1159,7 +1193,8 @@ function v(id){return(document.getElementById(id)||{}).value||'';}
 function defaultHotkeys(){
   return {
     bulletList:{code:56,key:'8',shortKey:true,shiftKey:true,altKey:false},
-    orderedList:{code:55,key:'7',shortKey:true,shiftKey:true,altKey:false}
+    orderedList:{code:55,key:'7',shortKey:true,shiftKey:true,altKey:false},
+    insertTable:{code:84,key:'T',shortKey:true,shiftKey:false,altKey:true}
   };
 }
 function hkToBinding(hk){const h=hk||{};return{key:h.code,shortKey:!!h.shortKey,shiftKey:!!h.shiftKey,altKey:!!h.altKey};}
@@ -1181,7 +1216,8 @@ function editorBindings(onEnter,onArrowUpTop){
   const b={
     saveEnter:{key:13,shiftKey:false,handler:function(){if(onEnter)onEnter();return false;}},
     bulletList:Object.assign(hkToBinding(hk.bulletList),{handler:function(range,context){this.quill.format('list',context.format.list==='bullet'?false:'bullet','user');return false;}}),
-    orderedList:Object.assign(hkToBinding(hk.orderedList),{handler:function(range,context){this.quill.format('list',context.format.list==='ordered'?false:'ordered','user');return false;}})
+    orderedList:Object.assign(hkToBinding(hk.orderedList),{handler:function(range,context){this.quill.format('list',context.format.list==='ordered'?false:'ordered','user');return false;}}),
+    insertTable:Object.assign(hkToBinding(hk.insertTable),{handler:function(){openInsertTable(this.quill);return false;}})
   };
   // ArrowUp at the very start of the editor jumps back up to the field above.
   if(onArrowUpTop)b.exitUp={key:38,handler:function(range){if(range&&range.index===0&&range.length===0){onArrowUpTop();return false;}return true;}};
@@ -1194,7 +1230,7 @@ function openSettings(){renderHotkeyRows();document.getElementById('settingsModa
 function closeSettings(){cancelRecordHotkey();document.getElementById('settingsModal').style.display='none';}
 function renderHotkeyRows(){
   if(!state.hotkeys)state.hotkeys=defaultHotkeys();
-  const rows=[{k:'bulletList',label:'Bullet list'},{k:'orderedList',label:'Numbered list'}];
+  const rows=[{k:'bulletList',label:'Bullet list'},{k:'orderedList',label:'Numbered list'},{k:'insertTable',label:'Insert table'}];
   document.getElementById('settingsHotkeyRows').innerHTML=rows.map(r=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:13px;color:var(--text)">${r.label}</span>
@@ -1236,6 +1272,244 @@ function locateCard(cid){
   return null;
 }
 
+// ---- Tables ----
+// Quill 1 has no table format, so a table is a single block embed. It isn't
+// editable in place: clicking it opens the table editor. Cells hold sanitized
+// HTML (sub/sup/bold/italic/line breaks only), so pasted formulas keep their
+// subscripts but nothing else from the source page survives.
+const TABLE_CELL_TAGS={SUB:1,SUP:1,B:1,STRONG:1,I:1,EM:1};
+function escAttr(s){return esc(s).replace(/"/g,'&quot;');}
+function sanitizeCell(html){
+  const tpl=document.createElement('template');tpl.innerHTML=html||'';
+  const walk=n=>{let out='';n.childNodes.forEach(ch=>{
+    if(ch.nodeType===3){out+=esc(ch.nodeValue.replace(/\s+/g,' '));return;}
+    if(ch.nodeType!==1||/^(SCRIPT|STYLE|TEMPLATE)$/.test(ch.tagName))return;
+    const t=ch.tagName;
+    if(t==='BR'){out+='<br>';return;}
+    const inner=walk(ch);
+    if(TABLE_CELL_TAGS[t]){const tag=t.toLowerCase();out+=`<${tag}>${inner}</${tag}>`;}
+    else if(/^(P|DIV|LI)$/.test(t))out+=(out&&!/<br>\s*$/.test(out)?'<br>':'')+inner;
+    else out+=inner;
+  });return out;};
+  return walk(tpl.content).replace(/^(\s|<br>)+|(\s|<br>)+$/g,'');
+}
+function normTable(d){
+  const rows=((d&&d.rows)||[]).map(r=>r.map(c=>String(c==null?'':c)));
+  const cols=Math.max(1,...rows.map(r=>r.length));
+  rows.forEach(r=>{while(r.length<cols)r.push('');});
+  return{header:!!(d&&d.header),rows:rows.length?rows:[Array(cols).fill('')]};
+}
+function fillTableNode(node,value){
+  const d=normTable(value);
+  node.setAttribute('contenteditable','false');
+  node.innerHTML='';
+  const body=document.createElement('tbody');
+  d.rows.forEach((r,ri)=>{
+    const tr=document.createElement('tr');
+    r.forEach(c=>{const cell=document.createElement(d.header&&ri===0?'th':'td');cell.innerHTML=sanitizeCell(c);tr.appendChild(cell);});
+    body.appendChild(tr);
+  });
+  node.appendChild(body);
+}
+// Reads Blurt's own tables and arbitrary pasted HTML tables alike.
+function readTableNode(node){
+  const rows=[...node.querySelectorAll('tr')].filter(tr=>tr.closest('table')===node)
+    .map(tr=>[...tr.children].filter(c=>c.tagName==='TD'||c.tagName==='TH').map(c=>sanitizeCell(c.innerHTML)))
+    .filter(r=>r.length);
+  const first=node.querySelector('tr');
+  const header=!!node.querySelector('thead')||!!(first&&first.children.length&&[...first.children].every(c=>c.tagName==='TH'));
+  return normTable({header,rows});
+}
+const BlockEmbed=Quill.import('blots/block/embed');
+class TableBlot extends BlockEmbed{
+  static create(value){const node=super.create(value);fillTableNode(node,value);return node;}
+  static value(node){return readTableNode(node);}
+}
+TableBlot.blotName='table';TableBlot.tagName='table';TableBlot.className='blurt-table';
+Quill.register(TableBlot);
+Quill.import('ui/icons').table='<svg viewBox="0 0 18 18"><rect class="ql-stroke" x="3" y="3" width="12" height="12" rx="1"/><line class="ql-stroke" x1="3" x2="15" y1="7" y2="7"/><line class="ql-stroke" x1="3" x2="15" y1="11" y2="11"/><line class="ql-stroke" x1="9" x2="9" y1="7" y2="15"/></svg>';
+
+function reflowCells(flat,n){
+  const rows=[];
+  for(let i=0;i<flat.length;i+=n){const r=flat.slice(i,i+n);while(r.length<n)r.push('');rows.push(r);}
+  return rows.length?rows:[Array(n).fill('')];
+}
+
+// Spot a table in pasted plain text. Handles tab-separated rows (spreadsheets,
+// Word) and one-cell-per-paragraph text like tables copied from revision
+// sites: a short header run ("Mixture", "Products", ...) sets the column count.
+// Returns null for ordinary prose so normal pastes are left alone.
+function tableFromPlainText(text){
+  const t=(text||'').replace(/\r\n?/g,'\n').replace(/ /g,' ');
+  const lines=t.split('\n').filter(l=>l.trim());
+  if(lines.length>=2&&lines.every(l=>l.includes('\t'))){
+    return{rows:lines.map(l=>l.split('\t').map(c=>esc(c.trim()))),title:''};
+  }
+  const blocks=t.split(/\n[ \t]*\n/).map(b=>b.trim()).filter(Boolean);
+  if(blocks.length<6)return null;
+  let title='';const cells=blocks.slice();
+  const first=cells[0].split('\n').map(s=>s.trim()).filter(Boolean);
+  if(first.length>1){title=first.slice(0,-1).join(' ');cells[0]=first[first.length-1];}
+  if(cells.some(c=>c.includes('\n')||c.length>300))return null;
+  const headerRun=a=>{let h=0;while(h<a.length&&h<8&&a[h].length<=40&&!/[.!?]$/.test(a[h]))h++;return h;};
+  const fits=(a,n)=>n>=2&&n<=8&&a.length%n===0&&a.length/n>=2;
+  // A header run that ends at a longer cell (not at the cap) still looks tabular
+  // even when the cell count doesn't divide evenly — e.g. a missing cell.
+  const endsAtBody=(a,n)=>n>=2&&n<=6&&n<a.length&&a.length>=n*2;
+  const h=headerRun(cells);
+  if(fits(cells,h))return{flat:cells.map(esc),cols:h,title};
+  // Title pasted as its own paragraph: it only lines up once it's set aside.
+  // A real title is longer than the column headers beneath it.
+  if(!title){
+    const rest=cells.slice(1),h2=headerRun(rest);
+    if(fits(rest,h2)&&cells[0].length>Math.max(...rest.slice(0,h2).map(c=>c.length)))
+      return{flat:rest.map(esc),cols:h2,title:cells[0]};
+  }
+  if(endsAtBody(cells,h))return{flat:cells.map(esc),cols:h,title};
+  return null;
+}
+
+// Insert a table (and optional bold heading line) at index, on its own line.
+function insertTableInto(q,index,data,title){
+  let i=Math.max(0,Math.min(index,q.getLength()-1));
+  const [,offset]=q.getLine(i);
+  if(offset>0){q.insertText(i,'\n','user');i++;}
+  if(title){q.insertText(i,title+'\n',{bold:true},'user');i+=title.length+1;}
+  q.insertEmbed(i,'table',data,'user');
+  q.setSelection(i+1,0,'user');
+}
+
+// Table editor modal — one dialog for inserting, editing, and confirming a paste.
+let _tbl=null;
+function ensureTableModal(){
+  let m=document.getElementById('tableModal');if(m)return m;
+  m=document.createElement('div');m.id='tableModal';m.className='tm-overlay';m.hidden=true;
+  document.body.appendChild(m);
+  m.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();cancelTableEditor(false);}
+    else if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();e.stopPropagation();confirmTableEditor();}
+  });
+  m.addEventListener('mousedown',e=>{if(e.target===m)cancelTableEditor(false);});
+  // Pasting into a cell takes plain text only.
+  m.addEventListener('paste',e=>{
+    if(!(e.target.closest&&e.target.closest('.tm-cell')))return;
+    e.preventDefault();
+    document.execCommand('insertText',false,(e.clipboardData.getData('text/plain')||'').replace(/\r\n?/g,'\n'));
+  });
+  return m;
+}
+function openTableEditor(o){
+  let rows;
+  if(o.mode==='edit')rows=normTable(o.data).rows;
+  else if(o.flat)rows=reflowCells(o.flat,o.cols);
+  else if(o.rows)rows=normTable({rows:o.rows}).rows;
+  else rows=[['','',''],['','',''],['','','']];
+  _tbl={mode:o.mode,quill:o.quill,index:o.index,rows,header:o.mode==='edit'?!!(o.data&&o.data.header):true,
+    title:o.title||'',reflow:!!o.flat,plain:(o.plain||'').replace(/\r\n?/g,'\n')};
+  renderTableEditor();
+  const m=document.getElementById('tableModal');
+  const f=o.mode==='paste'?m.querySelector('.btn-primary'):m.querySelector('.tm-cell');
+  if(f)f.focus();
+}
+function renderTableEditor(){
+  const t=_tbl,m=ensureTableModal(),cols=t.rows[0].length,rowsN=t.rows.length;
+  const isMac=/Mac|iPhone|iPad/i.test(navigator.platform||navigator.userAgent);
+  const heading={insert:'Insert table',paste:'Paste as table',edit:'Edit table'}[t.mode];
+  m.innerHTML=`<div class="tm-box" role="dialog" aria-label="${heading}">
+    <div class="tm-head">
+      <div><div class="tm-title">${heading}</div>${t.mode==='paste'?'<div class="tm-sub">This looks like a table. Check the columns line up, then insert it.</div>':''}</div>
+      <button class="panel-close" onclick="cancelTableEditor(false)">✕</button>
+    </div>
+    <div class="tm-body">
+      ${t.mode==='paste'?`<label class="tm-titlefield"><span>Heading above table</span><input id="tm-title" class="field-input" autocomplete="off" spellcheck="false" placeholder="Optional" value="${escAttr(t.title)}"></label>`:''}
+      <div class="tm-controls">
+        <div class="tm-step"><span>Columns</span><button class="btn btn-sm" onclick="tableEditorCols(-1)" ${cols<=1?'disabled':''}>−</button><b>${cols}</b><button class="btn btn-sm" onclick="tableEditorCols(1)" ${cols>=8?'disabled':''}>+</button></div>
+        <div class="tm-step"><span>Rows</span><button class="btn btn-sm" onclick="tableEditorRows(-1)" ${rowsN<=1?'disabled':''}>−</button><b>${rowsN}</b><button class="btn btn-sm" onclick="tableEditorRows(1)">+</button></div>
+        <label class="tm-check"><input type="checkbox" ${t.header?'checked':''} onchange="tableEditorHeader(this.checked)"> Header row</label>
+      </div>
+      <div class="tm-grid-wrap"><table class="blurt-table tm-grid"><tbody>${t.rows.map((r,ri)=>`<tr>${r.map((c,ci)=>{
+        const tag=t.header&&ri===0?'th':'td';
+        return`<${tag}><div class="tm-cell" contenteditable="true" data-r="${ri}" data-c="${ci}">${sanitizeCell(c)}</div></${tag}>`;
+      }).join('')}</tr>`).join('')}</tbody></table></div>
+      <div class="tm-hint">Tab moves between cells · ${isMac?'Cmd':'Ctrl'}+Enter to ${t.mode==='edit'?'save':'insert'}${t.reflow?' · Changing columns re-flows the pasted cells':''}</div>
+    </div>
+    <div class="tm-foot">
+      ${t.mode==='edit'?'<button class="btn btn-danger" onclick="deleteTableFromEditor()">Delete table</button>':''}
+      <span class="spacer"></span>
+      ${t.mode==='paste'?'<button class="btn" onclick="cancelTableEditor(true)">Paste as plain text</button>':'<button class="btn" onclick="cancelTableEditor(false)">Cancel</button>'}
+      <button class="btn btn-primary" onclick="confirmTableEditor()">${t.mode==='edit'?'Save table':'Insert table'}</button>
+    </div>
+  </div>`;
+  m.hidden=false;
+}
+function syncTableEditor(){
+  const m=document.getElementById('tableModal');if(!m||!_tbl)return;
+  m.querySelectorAll('.tm-cell').forEach(el=>{
+    const r=+el.dataset.r,c=+el.dataset.c;
+    if(_tbl.rows[r]&&c<_tbl.rows[r].length)_tbl.rows[r][c]=sanitizeCell(el.innerHTML);
+  });
+  const ti=document.getElementById('tm-title');if(ti)_tbl.title=ti.value;
+}
+function tableEditorCols(d){
+  syncTableEditor();const t=_tbl,cols=t.rows[0].length,n=Math.min(8,Math.max(1,cols+d));
+  if(n===cols)return;
+  if(t.reflow){const flat=[].concat(...t.rows);while(flat.length&&!flat[flat.length-1])flat.pop();t.rows=reflowCells(flat,n);}
+  else if(d>0)t.rows.forEach(r=>r.push(''));
+  else t.rows.forEach(r=>r.pop());
+  renderTableEditor();
+}
+function tableEditorRows(d){
+  syncTableEditor();const t=_tbl;
+  if(d>0)t.rows.push(Array(t.rows[0].length).fill(''));
+  else if(t.rows.length>1)t.rows.pop();
+  renderTableEditor();
+}
+function tableEditorHeader(on){syncTableEditor();_tbl.header=on;renderTableEditor();}
+function closeTableEditor(){const m=document.getElementById('tableModal');if(m){m.hidden=true;m.innerHTML='';}_tbl=null;}
+function cancelTableEditor(asPlain){
+  const t=_tbl;if(!t)return;closeTableEditor();
+  if(asPlain&&t.plain){t.quill.insertText(t.index,t.plain,'user');t.quill.setSelection(t.index+t.plain.length,0,'user');}
+  else t.quill.setSelection(t.index,0,'user');
+}
+function confirmTableEditor(){
+  if(!_tbl)return;syncTableEditor();
+  const t=_tbl,q=t.quill,data=normTable({header:t.header,rows:t.rows});
+  closeTableEditor();
+  if(t.mode==='edit'){q.deleteText(t.index,1,'user');q.insertEmbed(t.index,'table',data,'user');q.setSelection(t.index+1,0,'user');return;}
+  insertTableInto(q,t.index,data,(t.title||'').trim());
+}
+function deleteTableFromEditor(){
+  const t=_tbl;if(!t)return;closeTableEditor();
+  t.quill.deleteText(t.index,1,'user');t.quill.setSelection(t.index,0,'user');
+}
+function openInsertTable(q){
+  const r=q.getSelection(true);
+  openTableEditor({mode:'insert',quill:q,index:r?r.index:q.getLength()-1});
+}
+
+// Wire paste detection and click-to-edit into an editor.
+function attachTableSupport(quill){
+  quill.root.addEventListener('paste',e=>{
+    const cd=e.clipboardData;if(!cd)return;
+    // HTML tables (websites, spreadsheets) are converted by Quill's own paste,
+    // which maps <table> onto TableBlot.
+    if(/<table[\s>]/i.test(cd.getData('text/html')||''))return;
+    const plain=cd.getData('text/plain');
+    const guess=tableFromPlainText(plain);
+    if(!guess)return;
+    e.preventDefault(); // Quill's paste handler skips defaultPrevented events
+    const range=quill.getSelection(true)||{index:quill.getLength()-1,length:0};
+    if(range.length)quill.deleteText(range.index,range.length,'user');
+    openTableEditor(Object.assign({mode:'paste',quill,index:range.index,plain},guess));
+  },true);
+  quill.root.addEventListener('click',e=>{
+    const tbl=e.target.closest&&e.target.closest('table.blurt-table');
+    if(!tbl||!quill.root.contains(tbl))return;
+    const blot=Quill.find(tbl);if(!blot)return;
+    openTableEditor({mode:'edit',quill,index:blot.offset(quill.scroll),data:readTableNode(tbl)});
+  });
+}
+
 function initBlurtEditors(){
   _blurtQuills={};
   document.querySelectorAll('.blurt-field[data-cid]').forEach(el=>{
@@ -1248,6 +1522,7 @@ function initBlurtEditors(){
         keyboard:{bindings:editorBindings(()=>{const loc=locateCard(cid);if(loc)saveNote(loc.tid,cid,loc.stid);})}
       }
     });
+    attachTableSupport(_blurtQuills[cid]);
   });
 }
 
