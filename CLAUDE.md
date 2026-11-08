@@ -119,8 +119,16 @@ Key functions in `index.html`, grouped by area:
   (`openPanel`, `buildSubjectPanel`, `buildTopicPanel`, `buildSubtopicPanel`,
   `buildCardPanel`).
 - **Navigation / rendering** — `renderSidebar`, `renderMain`, `openSubject`,
-  `setTopic`, sorting/filtering helpers (`sortedSubjects`, `getSpecPoints`,
-  `setSpFilter`, `setSubtopicSpFilter`).
+  `setTopic`, filtering helpers (`getSpecPoints`, `setSpFilter`,
+  `setSubtopicSpFilter`).
+- **Ordering** — every list the user sees (sidebar, subject page, study setup,
+  session deck, session breakdown, weak areas) uses the same helpers:
+  `naturalCompare` (numeric, case-insensitive), `compareNames` (ignores a
+  leading "Topic/Unit/Chapter…" label; numbered names first) via
+  `sortedTopics` / `sortedSubtopics`, `compareSpecPoints` / `sortCardsBySpec`
+  for cards, and `sortedSubjects` (A–Z, or newest first via `createdAt`).
+  Within a topic, subtopics come first, then general cards. Don't iterate
+  `sub.topics` / `t.subtopics` directly for anything that is displayed.
 - **Study sessions** — `openStudySetup` → `startSession` builds a card queue
   (optionally shuffled/timed) from selected topics/subtopics;
   `renderSessionCard` / `revealSessionAnswer` / `rateCard` drive the

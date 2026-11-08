@@ -1178,54 +1178,38 @@ function setSortOrder(o){
   save();renderSidebar();
 }
 
+// Every list in the app (subjects, topics, subtopics, spec points, study
+// setup, sessions, breakdowns) is ordered with these helpers so they always agree.
+// Natural order: runs of digits compare as numbers ("Unit 2" < "Unit 10",
+// "4.2" < "4.10"), letters ignore case ("3a" < "3B" < "3c").
+const NATURAL=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});
+function naturalCompare(a,b){a=String(a||'');b=String(b||'');return NATURAL.compare(a,b)||(a<b?-1:a>b?1:0);}
+
+// Topic/subtopic names: a leading label such as "Topic", "Unit" or "Chapter" is
+// ignored, so "Topic 2" sorts with "1 Atoms" and "Unit 10"; numbered names come
+// before unnumbered ones.
+const NAME_LABEL=/^\s*(?:topic|unit|chapter|ch\.?|section|sec\.?|module|part|paper|lesson|lecture|week)\s*(?=\d)/i;
+function nameKey(name){return String(name||'').replace(NAME_LABEL,'').trim();}
+function compareNames(a,b){
+  const ka=nameKey(a),kb=nameKey(b),na=/^\d/.test(ka),nb=/^\d/.test(kb);
+  if(na!==nb)return na?-1:1;
+  return naturalCompare(ka,kb)||naturalCompare(a,b);
+}
+function sortedTopics(topics){return[...(topics||[])].sort((a,b)=>compareNames(a.name,b.name));}
+function sortedSubtopics(subtopics){return sortedTopics(subtopics);}
+
+// When an item was created: the createdAt stamp, or the timestamp uid() puts
+// at the front of every id (for items made before createdAt existed).
+function createdAt(x){if(x.createdAt)return x.createdAt;const t=parseInt(String(x.id||'').slice(0,8),36);return isFinite(t)?t:0;}
 function sortedSubjects(){
   const s=[...state.subjects];
-  if(state.sortOrder==='az')s.sort((a,b)=>a.name.localeCompare(b.name));
+  if(state.sortOrder==='az')s.sort((a,b)=>naturalCompare(a.name,b.name));
+  else s.sort((a,b)=>createdAt(b)-createdAt(a)); // 'new': newest first
   return s;
 }
-  
-function topicNum(name){
-  const m=name.match(/^(?:topic\s*)?(\d+(?:\.\d+)*)(?:\(([a-z])\))?/i);
-  if(!m)return null;
-  // Pad the number parts, then append the letter (or 'a' as default so numbered-only sorts first)
-  const numPart=m[1].split('.').map(n=>n.padStart(4,'0')).join('.');
-  const letterPart=m[2]?m[2].toLowerCase():'';
-  return numPart+letterPart;
-}
 
-function sortedTopics(topics){
-  return[...topics].sort((a,b)=>{
-    const na=topicNum(a.name),nb=topicNum(b.name);
-    if(na!==null&&nb!==null)return na.localeCompare(nb);
-    if(na!==null)return-1;
-    if(nb!==null)return 1;
-    return a.name.localeCompare(b.name);
-  });
-}
-
-function sortedSubtopics(subtopics){
-  return[...subtopics].sort((a,b)=>{
-    const na=topicNum(a.name),nb=topicNum(b.name);
-    if(na!==null&&nb!==null)return na.localeCompare(nb);
-    if(na!==null)return-1;
-    if(nb!==null)return 1;
-    return a.name.localeCompare(b.name);
-  });
-}
-
-// Natural-order comparison for spec points like "4.2.3": compare each run of
-// digits numerically (so 4.10 > 4.2) and each run of text alphabetically.
-function compareSpecPoints(a,b){
-  const ta=String(a).match(/\d+|\D+/g)||[];
-  const tb=String(b).match(/\d+|\D+/g)||[];
-  for(let i=0;i<Math.min(ta.length,tb.length);i++){
-    const x=ta[i],y=tb[i];
-    const xn=/^\d/.test(x),yn=/^\d/.test(y);
-    if(xn&&yn){const d=parseInt(x,10)-parseInt(y,10);if(d)return d;}
-    else{const d=x.localeCompare(y);if(d)return d;}
-  }
-  return ta.length-tb.length;
-}
+// Spec points like "4.2.3": natural order (so 4.10 comes after 4.2).
+function compareSpecPoints(a,b){return naturalCompare(String(a).trim(),String(b).trim());}
 
 function getSpecPoints(topic){
   const points=new Set();
@@ -1424,31 +1408,22 @@ function renderMain(){
 }
 
 function buildWeakAreasHTML(sub){
-  const groups={};
-  (sub.topics||[]).forEach(t=>{
-    (t.cards||[]).forEach(c=>{
-      try{if(!c.confidence?.lastRating)return;}catch(e){return;}
-      const key=t.id,name=t.name;
-      if(!groups[key])groups[key]={name,got:0,almost:0,missed:0};
-      const r=c.confidence.lastRating;
-      if(r==='got')groups[key].got++;else if(r==='almost')groups[key].almost++;else if(r==='missed')groups[key].missed++;
-    });
-    (t.subtopics||[]).forEach(st=>{
-      (st.cards||[]).forEach(c=>{
-        try{if(!c.confidence?.lastRating)return;}catch(e){return;}
-        const key=st.id,name=st.name;
-        if(!groups[key])groups[key]={name,got:0,almost:0,missed:0};
-        const r=c.confidence.lastRating;
-        if(r==='got')groups[key].got++;else if(r==='almost')groups[key].almost++;else if(r==='missed')groups[key].missed++;
-      });
-    });
+  // One row per section, built in display order so ties keep the page's order.
+  const arr=[];
+  const tally=(cards,name)=>{
+    const g={name,got:0,almost:0,missed:0};
+    (cards||[]).forEach(c=>{const r=c.confidence&&c.confidence.lastRating;if(r==='got'||r==='almost'||r==='missed')g[r]++;});
+    if(g.got+g.almost+g.missed)arr.push(g);
+  };
+  sortedTopics(sub.topics).forEach(t=>{
+    const sts=sortedSubtopics(t.subtopics);
+    sts.forEach(st=>tally(st.cards,st.name));
+    tally(t.cards,sts.length?t.name+' · general':t.name);
   });
-  const arr=Object.values(groups);
   if(!arr.length)return'';
-  arr.sort((a,b)=>{
-    const ta=a.got+a.almost+a.missed,tb=b.got+b.almost+b.missed;
-    return(tb?(b.missed/tb):0)-(ta?(a.missed/ta):0);
-  });
+  // Weakest first: a miss counts fully, an "almost" half.
+  const weakness=g=>(g.missed+g.almost/2)/(g.got+g.almost+g.missed);
+  arr.sort((a,b)=>weakness(b)-weakness(a));
   let h=`<div class="weak-areas-section"><div class="weak-areas-title">Weak areas</div>`;
   arr.forEach(g=>{
     const tot=g.got+g.almost+g.missed;
@@ -1692,7 +1667,7 @@ function buildCardPanel(editId,topicId,subtopicId){
 function saveSubject(){
   const name=v('p-name');if(!name.trim())return;
   if(panel.editId){const sub=state.subjects.find(s=>s.id===panel.editId);if(sub){sub.name=name.trim();sub.color=panel.selColor;sub.updatedAt=Date.now();}}
-  else{state.subjects.push({id:uid(),name:name.trim(),color:panel.selColor,topics:[],updatedAt:Date.now()});state.activeSubId=state.subjects[state.subjects.length-1].id;}
+  else{state.subjects.push({id:uid(),name:name.trim(),color:panel.selColor,topics:[],createdAt:Date.now(),updatedAt:Date.now()});state.activeSubId=state.subjects[state.subjects.length-1].id;}
   save();closePanel();renderSidebar();renderMain();
 }
 function saveTopic(){
@@ -2103,9 +2078,9 @@ function deleteCard(tid,cid,stid){
 function openStudySetup(){
   const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
   const eligible=[];
-  (sub.topics||[]).forEach(t=>{
+  sortedTopics(sub.topics).forEach(t=>{
     const directCards=(t.cards||[]).filter(c=>c.answer&&c.answer.trim());
-    const eligibleSts=(t.subtopics||[]).map(st=>{
+    const eligibleSts=sortedSubtopics(t.subtopics).map(st=>{
       const n=(st.cards||[]).filter(c=>c.answer&&c.answer.trim()).length;
       return n>0?{id:st.id,name:st.name,count:n}:null;
     }).filter(Boolean);
@@ -2124,12 +2099,12 @@ function openStudySetup(){
       </label>`;
     if(hasSubs){
       selHtml+=`<div class="study-subtopic-list">`;
-      if(t.directCount){
-        selHtml+=`<label class="study-subtopic-item"><input type="checkbox" class="study-st-cb" data-tid="${t.id}" data-stid="__direct__" checked> General cards <span style="font-size:11px;color:var(--text3);margin-left:4px">(${t.directCount})</span></label>`;
-      }
       t.subtopics.forEach(st=>{
         selHtml+=`<label class="study-subtopic-item"><input type="checkbox" class="study-st-cb" data-tid="${t.id}" data-stid="${st.id}" checked> ${esc(st.name)} <span style="font-size:11px;color:var(--text3);margin-left:4px">(${st.count})</span></label>`;
       });
+      if(t.directCount){
+        selHtml+=`<label class="study-subtopic-item"><input type="checkbox" class="study-st-cb" data-tid="${t.id}" data-stid="__direct__" checked> General cards <span style="font-size:11px;color:var(--text3);margin-left:4px">(${t.directCount})</span></label>`;
+      }
       selHtml+=`</div>`;
     }
     selHtml+=`</div>`;
@@ -2162,21 +2137,22 @@ function startSession(){
 
   const shuffled=document.getElementById('studyOrderShuffled').classList.contains('active');
   const timerEnabled=document.getElementById('studyTimerOn').classList.contains('active');
+  // Same order as the subject page: topics, then each topic's subtopics, then
+  // its general cards, with cards ordered by spec point. _ord remembers that
+  // position so breakdowns stay in order after shuffling.
+  const picked=new Set(selectedKeys.map(k=>k.tid+'|'+(k.stid||'')));
   let cards=[];
-  (sub.topics||[]).forEach(t=>{
-    selectedKeys.filter(k=>k.tid===t.id).forEach(({stid})=>{
-      let pool,subtopicName='';
-      if(stid){
-        const st=(t.subtopics||[]).find(st=>st.id===stid);if(!st)return;
-        pool=(st.cards||[]).filter(c=>c.answer&&c.answer.trim());subtopicName=st.name;
-      }else{
-        pool=(t.cards||[]).filter(c=>c.answer&&c.answer.trim());
-      }
-      pool.forEach(c=>cards.push(Object.assign({},c,{_tid:t.id,_stid:stid||null,_topicName:t.name,_subtopicName:subtopicName,_rating:null})));
-    });
+  sortedTopics(sub.topics).forEach(t=>{
+    const add=(list,stid,subtopicName)=>{
+      if(!picked.has(t.id+'|'+(stid||'')))return;
+      sortCardsBySpec((list||[]).filter(c=>c.answer&&c.answer.trim())).forEach(c=>
+        cards.push(Object.assign({},c,{_tid:t.id,_stid:stid,_topicName:t.name,_subtopicName:subtopicName,_rating:null,_ord:cards.length})));
+    };
+    sortedSubtopics(t.subtopics).forEach(st=>add(st.cards,st.id,st.name));
+    add(t.cards,null,'');
   });
   if(!cards.length){alert('No cards with answers found in selection.');return;}
-  if(shuffled){for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}}
+  if(shuffled)shuffle(cards);
 
   cancelStudySetup();
   _session={cards,idx:0,revealed:false,rated:false,shuffled,timerEnabled,startTime:Date.now(),timerInterval:null,subjectName:sub.name,subjectId:sub.id};
@@ -2191,6 +2167,7 @@ function startSession(){
   renderSessionView();
 }
 
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function formatTime(s){return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
 
 function renderSessionView(){
@@ -2300,13 +2277,14 @@ function showSessionEnd(){
 
   const groups={};
   cards.forEach(c=>{
-    const key=c._stid||c._tid,name=c._subtopicName||c._topicName;
-    if(!groups[key])groups[key]={name,got:0,almost:0,missed:0};
+    const key=c._stid||c._tid,name=c._subtopicName?c._subtopicName:(c._topicName+(cards.some(x=>x._tid===c._tid&&x._stid)?' · general':''));
+    if(!groups[key])groups[key]={name,ord:c._ord,got:0,almost:0,missed:0};
+    groups[key].ord=Math.min(groups[key].ord,c._ord);
     if(c._rating==='got')groups[key].got++;
     else if(c._rating==='almost')groups[key].almost++;
     else if(c._rating==='missed')groups[key].missed++;
   });
-  const breakdownRows=Object.values(groups).map(g=>`<div class="end-topic-row">
+  const breakdownRows=Object.values(groups).sort((a,b)=>a.ord-b.ord).map(g=>`<div class="end-topic-row">
     <span class="end-topic-name">${esc(g.name)}</span>
     <div class="end-topic-pills">
       ${g.got?`<span class="end-pill got">${g.got} got</span>`:''}
@@ -2328,7 +2306,7 @@ function showSessionEnd(){
         <div class="end-stat almost"><div class="end-stat-n">${almost}</div><div class="end-stat-l">Almost</div></div>
         <div class="end-stat missed"><div class="end-stat-n">${missed}</div><div class="end-stat-l">Missed it</div></div>
       </div>
-      ${breakdownRows?`<div class="end-breakdown"><div class="end-breakdown-title">By subtopic</div>${breakdownRows}</div>`:''}
+      ${breakdownRows?`<div class="end-breakdown"><div class="end-breakdown-title">Breakdown</div>${breakdownRows}</div>`:''}
       <div class="end-actions">
         ${missed?`<button class="btn btn-primary" onclick="retryMissed()">Retry missed (${missed})</button>`:''}
         <button class="btn" onclick="exitSession()">Back to subject</button>
@@ -2339,7 +2317,7 @@ function showSessionEnd(){
 
   Sync.queueSession({
     date:new Date().toISOString(),subjectName,total,got,almost,missed,duration,
-    breakdown:Object.values(groups)
+    breakdown:Object.values(groups).sort((a,b)=>a.ord-b.ord).map(({ord,...g})=>g)
   });
 }
 
@@ -2347,7 +2325,7 @@ function retryMissed(){
   const missed=(_session.cards||[]).filter(c=>c._rating==='missed');
   if(!missed.length)return;
   _session={
-    cards:missed.map(c=>Object.assign({},c,{_rating:null})),
+    cards:(_session.shuffled?shuffle:x=>x.sort((a,b)=>a._ord-b._ord))(missed.map(c=>Object.assign({},c,{_rating:null}))),
     idx:0,revealed:false,rated:false,
     shuffled:_session.shuffled,timerEnabled:_session.timerEnabled,
     startTime:Date.now(),timerInterval:null,
