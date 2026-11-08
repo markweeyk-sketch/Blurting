@@ -87,6 +87,20 @@ input,textarea,select,button{font-family:inherit;color:var(--text)}
 .offline-dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;background:#e8892b;box-shadow:0 0 0 3px rgba(232,137,43,.25)}
 body.has-offline-banner .app{padding-top:38px}
 [data-theme=dark] #offlineBanner{color:#ffd9a1;background:#3a2a12;border-bottom-color:#5a4322}
+#offlineBanner.error{color:#7a1d1d;background:#fde2e2;border-bottom-color:#f0a8a8}
+#offlineBanner.error .offline-dot{background:#c94242;box-shadow:0 0 0 3px rgba(201,66,66,.25)}
+[data-theme=dark] #offlineBanner.error{color:#ffc4c4;background:#3a1616;border-bottom-color:#5a2626}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);z-index:600;display:flex;align-items:center;gap:12px;max-width:min(560px,calc(100vw - 32px));padding:10px 14px;border-radius:10px;background:var(--accent);color:var(--accent-text);font-size:12.5px;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.vis{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.toast button{flex-shrink:0;background:none;border:1px solid currentColor;color:inherit;border-radius:6px;padding:4px 9px;font-size:11.5px;font-weight:600;cursor:pointer;opacity:.9}
+.settings-section{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px}
+.settings-text{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.settings-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.meter{height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin:6px 0 4px}
+.meter-fill{height:100%;border-radius:3px;background:var(--green);transition:width .3s}
+.meter-fill.warn{background:#e8892b}
+.meter-fill.over{background:#c94242}
+.meter-label{font-size:11px;color:var(--text3)}
 .blurt-table{border-collapse:collapse;width:100%;margin:8px 0;line-height:1.45}
 .blurt-table th,.blurt-table td{border:1px solid var(--border2);padding:6px 9px;vertical-align:top;text-align:left}
 .blurt-table th{background:var(--bg3);font-weight:600}
@@ -217,9 +231,18 @@ body.has-offline-banner .app{padding-top:38px}
 .account-info{flex:1;min-width:0}
 .account-name{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .account-email{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.account-sync-row{display:flex;align-items:center;gap:5px}
+.account-sync-row{display:flex;align-items:center;gap:5px;border-radius:5px;padding:1px 2px;margin:0 -2px}
+.account-sync-row.clickable{cursor:pointer}
+.account-sync-row.clickable:hover{background:var(--bg2)}
 .account-sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
 .account-sync-label{font-size:10px;color:var(--green-text)}
+.account-sync-row[data-s=saving] .account-sync-dot,.account-sync-row[data-s=connecting] .account-sync-dot{background:#e8a33b;animation:syncPulse 1s ease-in-out infinite}
+.account-sync-row[data-s=saving] .account-sync-label,.account-sync-row[data-s=connecting] .account-sync-label{color:var(--text2)}
+.account-sync-row[data-s=offline] .account-sync-dot{background:#e8892b}
+.account-sync-row[data-s=offline] .account-sync-label{color:#a35a10}
+.account-sync-row[data-s=error] .account-sync-dot,.account-sync-row[data-s=toolarge] .account-sync-dot{background:#c94242}
+.account-sync-row[data-s=error] .account-sync-label,.account-sync-row[data-s=toolarge] .account-sync-label{color:var(--red-text)}
+@keyframes syncPulse{50%{opacity:.35}}
 .account-signout-btn{width:100%;padding:5px 8px;font-size:11px;font-weight:500;border-radius:6px;border:1px solid var(--red-border);background:transparent;cursor:pointer;color:var(--red-text);transition:background .15s}
 .account-signout-btn:hover{background:var(--red-bg)}
 /* ── Quill answer editor (panel) ── */
@@ -340,52 +363,43 @@ body.has-offline-banner .app{padding-top:38px}
 </style>
 
 <script type="module">
+// Thin Firebase adapter. All sync decisions live in the main script (Sync);
+// this module only talks to Auth/Firestore and reports back via window.Sync.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, onSnapshot, runTransaction, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 const firebaseConfig={apiKey:"AIzaSyCSLOk9TuRlGlpbDBoPkdlOtdXE0-rlEHk",authDomain:"blurt-fe2a5.firebaseapp.com",projectId:"blurt-fe2a5",storageBucket:"blurt-fe2a5.firebasestorage.app",messagingSenderId:"138136838097",appId:"1:138136838097:web:99e50d3ca3e301f1604af0"};
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 const auth=getAuth(app);
-async function signIn(){const provider=new GoogleAuthProvider();await signInWithPopup(auth,provider);}
-// Returns {ok:true,state} on a successful read (state may be null if the cloud
-// doc is empty), or {ok:false} if the read failed (offline / transient error).
-// The distinction matters: on a failed read we must NOT push local over the
-// cloud, or we risk overwriting good cloud data (the original data-loss bug).
-async function loadFromFirestore(uid){try{const ref=doc(db,'users',uid);const snap=await getDoc(ref);return{ok:true,state:snap.exists()?snap.data().state:null};}catch(e){return{ok:false,state:null};}}
-async function saveToFirestore(uid,state){try{const ref=doc(db,'users',uid);await setDoc(ref,{state});}catch(e){}}
-onAuthStateChanged(auth,async user=>{
-  if(user){
-    window._blurtUser=user;
-    updateAccountUI(user);
-    const res=await loadFromFirestore(user.uid);
-    if(!res.ok){
-      // Couldn't reach the cloud. Keep working locally; do not push over cloud.
-      window._cloudReady=false;
-      if(window.updateSyncStatus)window.updateSyncStatus();
-      return;
-    }
-    window._cloudReady=true;
-    const cloudState=res.state;
-    const localRaw=localStorage.getItem('blurt3');
-    const localState=localRaw?JSON.parse(localRaw):null;
-    const hasCloud=cloudState&&cloudState.subjects&&cloudState.subjects.length>0;
-    const hasLocal=localState&&localState.subjects&&localState.subjects.length>0;
-    if(hasCloud){
-      // Cloud is the source of truth (online saves keep it current) — adopt it.
-      window._setState(cloudState);
-    }else if(hasLocal){
-      // Cloud confirmed empty — seed it from this device's data.
-      await saveToFirestore(user.uid,localState);
-    }
-    if(window.updateSyncStatus)window.updateSyncStatus();
-  }else{
-    window._blurtUser=null;window._cloudReady=false;
-    updateAccountUI(null);
-    if(window.updateSyncStatus)window.updateSyncStatus();
-  }
-});
+const readDoc=snap=>{const d=snap.exists()?snap.data():null;return{exists:snap.exists(),rev:(d&&d.rev)||null,state:(d&&d.state)||null,savedAt:(d&&d.savedAt)||null,device:(d&&d.device)||null};};
+let unwatch=null;
+window.blurtCloud={
+  signIn:()=>signInWithPopup(auth,new GoogleAuthProvider()),
+  signOut:()=>auth.signOut(),
+  // Live view of users/{uid}. Fires once the doc is reachable, then on every change.
+  watch(uid,onDoc,onErr){
+    if(unwatch)unwatch();
+    unwatch=onSnapshot(doc(db,'users',uid),snap=>onDoc(readDoc(snap)),onErr);
+  },
+  unwatch(){if(unwatch){unwatch();unwatch=null;}},
+  // Write only if the cloud is still at expectedRev (the version this device last
+  // saw). If another device wrote in between, nothing is written and the current
+  // cloud doc comes back so the caller can merge.
+  push(uid,payload,expectedRev){
+    const ref=doc(db,'users',uid);
+    return runTransaction(db,async tx=>{
+      const snap=await tx.get(ref);
+      const cur=readDoc(snap);
+      if(cur.exists&&cur.rev!==expectedRev)return{conflict:true,cloud:cur};
+      tx.set(ref,payload);
+      return{ok:true};
+    });
+  },
+  addSession:(uid,data)=>addDoc(collection(db,'users',uid,'sessions'),data)
+};
+onAuthStateChanged(auth,user=>{updateAccountUI(user);window.Sync.onUser(user);});
 function updateAccountUI(user){
   const out=document.getElementById('accountSignedOut'),inn=document.getElementById('accountSignedIn');
   if(user){
@@ -396,17 +410,6 @@ function updateAccountUI(user){
     document.getElementById('accountInitials').textContent=(user.displayName||'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   }else{out.style.display='flex';inn.style.display='none';}
 }
-async function saveSessionToFirestore(uid,sessionData){
-  try{const ref=collection(db,'users',uid,'sessions');await addDoc(ref,sessionData);}catch(e){}
-}
-window.firebaseSignIn=signIn;
-window.firebaseSignOut=()=>auth.signOut();
-// Write through to the cloud on every save, but only while online — offline
-// saves stay local (the offline banner warns about the loss risk).
-window.firestoreSave=(state)=>{if(window._blurtUser&&navigator.onLine)saveToFirestore(window._blurtUser.uid,state);};
-window.firestoreSaveSession=(sessionData)=>{if(window._blurtUser&&navigator.onLine)saveSessionToFirestore(window._blurtUser.uid,sessionData);};
-// Push the current in-memory state to the cloud (used to flush after reconnecting).
-window.firestoreFlush=()=>{if(window._blurtUser&&navigator.onLine&&window._currentState)saveToFirestore(window._blurtUser.uid,window._currentState());};
 </script>
 </head>
 
@@ -454,9 +457,9 @@ window.firestoreFlush=()=>{if(window._blurtUser&&navigator.onLine&&window._curre
               <div class="account-email" id="accountEmail"></div>
             </div>
           </div>
-          <div class="account-sync-row">
+          <div class="account-sync-row" id="syncRow" data-s="connecting" onclick="onSyncRowClick()">
             <span class="account-sync-dot"></span>
-            <span class="account-sync-label">Synced</span>
+            <span class="account-sync-label" id="syncLabel">Connecting…</span>
           </div>
           <button class="account-signout-btn" onclick="firebaseSignOut()">Sign out</button>
         </div>
@@ -498,22 +501,28 @@ window.firestoreFlush=()=>{if(window._blurtUser&&navigator.onLine&&window._curre
 
 <div id="offlineBanner" style="display:none">
   <span class="offline-dot"></span>
-  <span><strong>You're offline.</strong> Changes are saved on this device only — they are <strong>not</strong> syncing to the cloud and could be lost if you open Blurt on another device or clear this browser. Reconnect to sync.</span>
+  <span id="offlineBannerText"></span>
 </div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toastMsg"></span><button id="toastAction" hidden></button></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden onchange="onImportFile(this)">
+<input type="file" id="imageFile" accept="image/*" multiple hidden>
 
 <div id="settingsModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
   <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;width:460px;max-width:92vw;max-height:88vh;overflow:auto">
     <div style="padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
       <div>
         <div style="font-size:15px;font-weight:600">Settings</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:2px">More options coming soon</div>
       </div>
       <button class="panel-close" onclick="closeSettings()">✕</button>
     </div>
     <div style="padding:16px 20px">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:10px">Keyboard shortcuts</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px">These apply inside the answer and note editors. Click a shortcut, then press the key combination you want (include Ctrl/Cmd, Alt or Shift).</div>
+      <div class="settings-section">Keyboard shortcuts</div>
+      <div class="settings-text">These apply inside the answer and note editors. Click a shortcut, then press the key combination you want (include Ctrl/Cmd, Alt or Shift).</div>
       <div id="settingsHotkeyRows"></div>
+    </div>
+    <div style="padding:16px 20px;border-top:1px solid var(--border)">
+      <div class="settings-section">Data &amp; sync</div>
+      <div id="settingsData"></div>
     </div>
     <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
       <button class="btn btn-sm" onclick="resetAllHotkeys()">Reset to defaults</button>
@@ -556,82 +565,610 @@ window.firestoreFlush=()=>{if(window._blurtUser&&navigator.onLine&&window._curre
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <script>
 const PALETTE=[{c:'#534AB7'},{c:'#0F6E56'},{c:'#993C1D'},{c:'#185FA5'},{c:'#854F0B'},{c:'#993556'},{c:'#3B6D11'},{c:'#555555'}];
-let state={subjects:[],activeSubId:null,activeTopicId:null,activeSpFilter:null,theme:'light',sidebarOpen:true,sortOrder:'az'};
+let state={subjects:[],deleted:{},activeSubId:null,activeTopicId:null,activeSpFilter:null,theme:'light',sidebarOpen:true,sortOrder:'az'};
 let panel={type:null,editId:null,topicId:null,subtopicId:null,selColor:PALETTE[0].c};
 let _closeTimer=null;
 let _answerQuill=null;
 let _blurtQuills={};
 let _session=null;
 
-function load(){
-  try{const raw=localStorage.getItem('blurt3');if(raw)state=JSON.parse(raw);}catch(e){}
-  if(!state.subjects)state.subjects=[];
-  if(!state.theme)state.theme='light';
-  if(state.sidebarOpen===undefined)state.sidebarOpen=true;
-  if(!state.sortOrder)state.sortOrder='az';
-  if(!state.activeSpFilter)state.activeSpFilter=null;
-  state.hotkeys=Object.assign(defaultHotkeys(),state.hotkeys||{});
+// ── Local storage ──
+// The whole state lives in IndexedDB: localStorage caps out around 5 MB, which a
+// few pasted images can fill. Falls back to localStorage if IndexedDB is
+// unavailable (some private windows). Keys: 'state', 'meta' (sync bookkeeping)
+// and 'backup' (the last version Blurt replaced, restorable from Settings).
+const Store=(()=>{
+  let mode=null,dbp=null;
+  const LS='blurt:';
+  function idb(){
+    if(!dbp)dbp=new Promise((res,rej)=>{
+      const r=indexedDB.open('blurt',1);
+      r.onupgradeneeded=()=>r.result.createObjectStore('kv');
+      r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error('IndexedDB blocked'));
+    });
+    return dbp;
+  }
+  async function init(){
+    if(mode)return mode;
+    try{if(!window.indexedDB)throw new Error('no IndexedDB');await idb();mode='idb';}catch(e){mode='ls';}
+    return mode;
+  }
+  async function get(k){
+    await init();
+    if(mode==='ls'){const raw=localStorage.getItem(LS+k);return raw?JSON.parse(raw):undefined;}
+    const db=await idb();
+    return new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});
+  }
+  // Writes several keys in one transaction so state and sync bookkeeping never disagree.
+  async function put(entries){
+    await init();
+    if(mode==='ls'){Object.entries(entries).forEach(([k,v])=>localStorage.setItem(LS+k,JSON.stringify(v)));return;}
+    const db=await idb();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction('kv','readwrite'),os=tx.objectStore('kv');
+      Object.entries(entries).forEach(([k,v])=>os.put(v,k));
+      tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error||new Error('aborted'));
+    });
+  }
+  return{init,get,put,mode:()=>mode};
+})();
+
+// UI state that belongs to this device only: never synced, never overwritten by the cloud.
+const LOCAL_ONLY=['activeSubId','activeTopicId','activeSpFilter','activeSubtopicSpFilters','openSubtopics','sidebarOpen'];
+const HISTORY_CAP=50;            // rating history kept per card (totals are kept separately)
+const TOMBSTONE_TTL=180*864e5;   // how long deletions are remembered for merging
+const SAFE_ID=/^[\w-]{1,64}$/;
+
+// Fill defaults and repair anything malformed (old saves, imported files) so the
+// renderer can trust ids, colours and list shapes.
+function normalizeState(s){
+  s=s&&typeof s==='object'?s:{};
+  if(!Array.isArray(s.subjects))s.subjects=[];
+  if(!s.theme)s.theme='light';
+  if(s.sidebarOpen===undefined)s.sidebarOpen=true;
+  if(!s.sortOrder)s.sortOrder='az';
+  if(!s.activeSpFilter)s.activeSpFilter=null;
+  if(!s.deleted||typeof s.deleted!=='object')s.deleted={};
+  s.hotkeys=Object.assign(defaultHotkeys(),s.hotkeys||{});
+  const fixId=x=>{if(!SAFE_ID.test(String(x.id||'')))x.id=uid();};
+  const list=a=>(Array.isArray(a)?a:[]).filter(x=>x&&typeof x==='object');
+  const cards=a=>list(a).map(c=>{fixId(c);capHistory(c);return c;});
+  s.subjects=list(s.subjects);
+  s.subjects.forEach(sub=>{
+    fixId(sub);sub.name=String(sub.name||'Untitled');
+    if(!/^#[0-9a-f]{3,8}$/i.test(sub.color||''))sub.color=PALETTE[0].c;
+    sub.topics=list(sub.topics);
+    sub.topics.forEach(t=>{
+      fixId(t);t.name=String(t.name||'Untitled');t.cards=cards(t.cards);
+      t.subtopics=list(t.subtopics);
+      t.subtopics.forEach(st=>{fixId(st);st.name=String(st.name||'Untitled');st.cards=cards(st.cards);});
+    });
+  });
+  return s;
+}
+function capHistory(c){const h=c.confidence&&c.confidence.history;if(Array.isArray(h)&&h.length>HISTORY_CAP)c.confidence.history=h.slice(-HISTORY_CAP);}
+function hasContent(s){return!!(s&&Array.isArray(s.subjects)&&s.subjects.length);}
+function eachCard(s,fn){(s.subjects||[]).forEach(sub=>(sub.topics||[]).forEach(t=>{(t.cards||[]).forEach(fn);(t.subtopics||[]).forEach(st=>(st.cards||[]).forEach(fn));}));}
+function eachItem(s,fn){(s.subjects||[]).forEach(sub=>{fn(sub);(sub.topics||[]).forEach(t=>{fn(t);(t.cards||[]).forEach(fn);(t.subtopics||[]).forEach(st=>{fn(st);(st.cards||[]).forEach(fn);});});});}
+function countCards(s){let n=0;eachCard(s,()=>n++);return n;}
+function markDeleted(id){if(!state.deleted)state.deleted={};state.deleted[id]=Date.now();}
+function pruneTombstones(d){const out={},cut=Date.now()-TOMBSTONE_TTL;Object.entries(d||{}).forEach(([k,v])=>{if(v>cut)out[k]=v;});return out;}
+// Stamp every item as just edited and forget deletions of them, so a restored or
+// imported copy wins when it later meets other devices' data in a merge.
+function touchAll(s){const now=Date.now();s.deleted=s.deleted||{};eachItem(s,x=>{x.updatedAt=now;if(x.myNote)x.noteAt=now;delete s.deleted[x.id];});}
+
+let syncMeta={synced:false,baseRev:null,dirty:false,editedAt:0,uid:null,pendingSessions:[]};
+let _editSeq=0,_loadFailed=false;
+let _resolveReady;const _ready=new Promise(r=>_resolveReady=r);
+
+async function load(){
+  let s,meta;
+  try{
+    s=await Store.get('state');meta=await Store.get('meta');
+    if(s===undefined){
+      // One-off move from the old localStorage key.
+      const raw=localStorage.getItem('blurt3');
+      if(raw){s=JSON.parse(raw);await Store.put({state:s,meta:syncMeta});localStorage.removeItem('blurt3');}
+    }
+  }catch(e){
+    // Don't write anything this session: an empty state saved over unreadable data would destroy it.
+    console.error('[Blurt] load failed',e);_loadFailed=true;
+    try{const raw=localStorage.getItem('blurt3');if(raw)s=JSON.parse(raw);}catch(_){}
+    setTimeout(()=>toast("Couldn't open your saved data on this device. Changes this session won't be kept — reload to try again.",{ms:12000}),0);
+  }
+  state=normalizeState(s||state);
+  if(meta)syncMeta=Object.assign(syncMeta,meta);
+  if(!Array.isArray(syncMeta.pendingSessions))syncMeta.pendingSessions=[];
   applyTheme();applySidebar();renderSidebar();
+  document.getElementById('sortAZ').classList.toggle('active',state.sortOrder==='az');
+  document.getElementById('sortNew').classList.toggle('active',state.sortOrder==='new');
   if(state.activeSubId)renderMain();
-  if(window.updateSyncStatus)window.updateSyncStatus();
+  if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+  _resolveReady();
 }
 
-window._setState=function(newState){
-  state=newState;
-  if(!state.subjects)state.subjects=[];
-  if(!state.theme)state.theme='light';
-  if(state.sidebarOpen===undefined)state.sidebarOpen=true;
-  if(!state.sortOrder)state.sortOrder='az';
-  state.hotkeys=Object.assign(defaultHotkeys(),state.hotkeys||{});
-  state.activeSpFilter=null;
-  localStorage.setItem('blurt3',JSON.stringify(state));
-  applyTheme();applySidebar();renderSidebar();
-  if(state.activeSubId)renderMain();
-};
-
+// Content or synced preference changed: keep it locally and queue a cloud sync.
 function save(){
-  try{localStorage.setItem('blurt3',JSON.stringify(state));}catch(e){}
-  if(window.firestoreSave)window.firestoreSave(state);
+  syncMeta.dirty=true;syncMeta.editedAt=Date.now();_editSeq++;
+  persistSoon();Sync.changed();
+}
+// Device-only UI change (navigation, expanded sections): local, never synced.
+function saveUI(){persistSoon();}
+let _persistTimer=null,_persistErr=null;
+function persistSoon(){clearTimeout(_persistTimer);_persistTimer=setTimeout(persistNow,250);}
+async function persistNow(){
+  clearTimeout(_persistTimer);_persistTimer=null;
+  if(_loadFailed)return;
+  try{
+    await Store.put({state,meta:syncMeta});
+    if(_persistErr){_persistErr=null;renderSyncStatus();}
+  }catch(e){
+    console.error('[Blurt] local save failed',e);
+    _persistErr=e;renderSyncStatus();
+  }
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){if(_persistTimer)persistNow();Sync.flush();}});
+window.addEventListener('pagehide',()=>{if(_persistTimer)persistNow();});
+async function saveBackup(s,reason){
+  try{await Store.put({backup:{at:Date.now(),reason,state:JSON.parse(JSON.stringify(s))}});}catch(e){console.error('[Blurt] backup failed',e);}
 }
 
-// Lets the Firebase layer read the latest state (e.g. to flush after reconnect).
-window._currentState=()=>state;
-
-// Show the offline warning whenever the browser is offline and the user is
-// signed in (so cloud sync is expected but not happening).
-window.updateSyncStatus=function(){
-  const banner=document.getElementById('offlineBanner');
-  if(!banner)return;
-  const show=!navigator.onLine&&!!window._blurtUser;
-  banner.style.display=show?'flex':'none';
-  document.body.classList.toggle('has-offline-banner',show);
+// ── Cloud sync ──
+// The cloud doc (users/{uid}) carries a revision id. This device remembers the
+// revision its data is based on (syncMeta.baseRev; only meaningful once
+// syncMeta.synced is set for the signed-in account) and whether it has edits the
+// cloud hasn't seen (syncMeta.dirty). Writes only succeed if the cloud is still
+// at baseRev, so devices never silently overwrite each other: when the cloud has
+// moved on, a device without edits adopts it and a device with edits merges
+// (mergeStates). Whatever gets replaced is kept as a restorable backup.
+const CLOUD_LIMIT=1000000; // Firestore allows 1 MiB per document; leave headroom for the envelope
+const Sync={
+  user:null,status:'local',detail:'',inflight:null,again:false,timer:null,retryMs:0,
+  onUser(user){_ready.then(()=>this._onUser(user));},
+  _onUser(user){
+    clearTimeout(this.timer);clearTimeout(this.watchRetry);
+    if(!user){this.user=null;if(window.blurtCloud)blurtCloud.unwatch();this.setStatus('local');return;}
+    this.user=user;
+    this.accountSwitch=!!(syncMeta.uid&&syncMeta.uid!==user.uid);
+    if(syncMeta.uid!==user.uid)syncMeta.synced=false;
+    syncMeta.uid=user.uid;persistSoon();
+    this.setStatus('connecting');
+    this.watch();
+  },
+  watch(){
+    if(!this.user)return;
+    blurtCloud.watch(this.user.uid,c=>this.onCloud(c),e=>{
+      console.error('[Blurt] cloud listener',e);
+      this.setStatus('error',e&&e.code==='permission-denied'?'The cloud refused access to your data.':'Lost the connection to the cloud.');
+      clearTimeout(this.watchRetry);this.watchRetry=setTimeout(()=>this.watch(),30000);
+    });
+  },
+  onCloud(c){
+    if(this.inflight&&c.rev===this.inflight)return; // echo of our own write
+    if(this.accountSwitch){this.accountSwitch=false;this.switchAccount(c);return;}
+    if(!c.exists||(syncMeta.synced&&c.rev===syncMeta.baseRev)){
+      // Cloud is where this device left it (or empty): push anything outstanding.
+      if(!c.exists){syncMeta.synced=true;syncMeta.baseRev=null;if(hasContent(state))syncMeta.dirty=true;}
+      if(syncMeta.dirty)this.schedule(0);else this.setStatus('synced');
+    }else if(!syncMeta.dirty||!hasContent(state))adoptCloud(c);
+    else mergeWithCloud(c);
+    this.flushSessions();
+  },
+  // This device holds another account's data: keep it as a backup instead of mixing it in.
+  switchAccount(c){
+    if(c.exists&&hasContent(c.state)){
+      const had=hasContent(state);
+      if(had)saveBackup(cloudState(state),'Data from the previously signed-in account');
+      adoptCloud(c);
+      if(had)toast("Loaded this account's data. What was on this device is saved in Settings › Data & sync.",{ms:9000});
+    }else{syncMeta.synced=true;syncMeta.baseRev=c.rev;syncMeta.dirty=true;this.schedule(0);}
+  },
+  changed(){if(this.user)this.schedule(1500);else renderSyncStatus();},
+  schedule(ms){
+    if(!this.user)return;
+    clearTimeout(this.timer);this.timer=setTimeout(()=>this.push(),ms);
+    if(this.status!=='error'&&syncMeta.synced)this.setStatus('saving');
+  },
+  flush(){if(this.timer&&this.user)this.push();},
+  async push(){
+    clearTimeout(this.timer);this.timer=null;
+    // Nothing goes up until the first cloud read has told us where we stand.
+    if(!this.user||!window.blurtCloud||!syncMeta.synced)return;
+    if(this.inflight){this.again=true;return;}
+    if(!syncMeta.dirty){this.setStatus('synced');return;}
+    if(!navigator.onLine){this.setStatus('offline');return;}
+    const json=cloudJSON(state);
+    if(jsonBytes(json)>CLOUD_LIMIT){this.setStatus('toolarge');return;}
+    const rev=uid(),seq=_editSeq;
+    this.inflight=rev;this.setStatus('saving');
+    try{
+      const r=await blurtCloud.push(this.user.uid,{state:JSON.parse(json),rev,savedAt:Date.now(),device:deviceLabel()},syncMeta.baseRev);
+      this.inflight=null;
+      if(r.conflict){this.onCloud(r.cloud);return;}
+      syncMeta.baseRev=rev;
+      if(seq===_editSeq)syncMeta.dirty=false;
+      this.retryMs=0;persistNow();
+      if(syncMeta.dirty||this.again){this.again=false;this.schedule(800);}else this.setStatus('synced');
+      this.flushSessions();
+    }catch(e){
+      this.inflight=null;
+      console.error('[Blurt] sync failed',e);
+      this.retryMs=Math.min(this.retryMs?this.retryMs*2:3000,60000);
+      this.setStatus(navigator.onLine?'error':'offline',e&&e.code==='permission-denied'?'The cloud refused the save.':(e&&e.message)||'');
+      this.timer=setTimeout(()=>this.push(),this.retryMs);
+    }
+  },
+  setStatus(s,detail){this.status=s;this.detail=detail||'';renderSyncStatus();},
+  // Study-session summaries queue locally so offline sessions still reach the cloud.
+  queueSession(d){syncMeta.pendingSessions.push(d);syncMeta.pendingSessions=syncMeta.pendingSessions.slice(-200);persistSoon();this.flushSessions();},
+  async flushSessions(){
+    if(!this.user||this.flushing||!syncMeta.pendingSessions.length||!navigator.onLine)return;
+    this.flushing=true;
+    try{while(syncMeta.pendingSessions.length){await blurtCloud.addSession(this.user.uid,syncMeta.pendingSessions[0]);syncMeta.pendingSessions.shift();persistSoon();}}
+    catch(e){console.warn('[Blurt] session upload failed',e);}
+    this.flushing=false;
+  }
 };
-window.addEventListener('offline',()=>window.updateSyncStatus());
-window.addEventListener('online',()=>{
-  // Back online: push whatever is in memory so offline edits reach the cloud,
-  // then hide the warning.
-  if(window.firestoreFlush)window.firestoreFlush();
-  window.updateSyncStatus();
-});
+window.Sync=Sync;
+window.addEventListener('online',()=>{if(Sync.user){if(syncMeta.dirty)Sync.schedule(0);Sync.flushSessions();}renderSyncStatus();});
+window.addEventListener('offline',renderSyncStatus);
 
+function cloudState(s){const o=Object.assign({},s);LOCAL_ONLY.forEach(k=>delete o[k]);o.deleted=pruneTombstones(o.deleted);return o;}
+function cloudJSON(s){return JSON.stringify(cloudState(s));} // JSON also drops undefined values Firestore would reject
+function jsonBytes(str){return new Blob([str]).size;}
+function deviceLabel(){
+  const ua=navigator.userAgent;
+  const os=/Android/.test(ua)?'Android':/iPhone|iPad|iPod/.test(ua)?'iOS':/CrOS/.test(ua)?'ChromeOS':/Mac/.test(ua)?'Mac':/Windows/.test(ua)?'Windows':/Linux/.test(ua)?'Linux':'another device';
+  const br=/Edg\//.test(ua)?'Edge':/Firefox\//.test(ua)?'Firefox':/Chrome\//.test(ua)?'Chrome':/Safari\//.test(ua)?'Safari':'Browser';
+  return`${br} on ${os}`;
+}
+
+function adoptCloud(c){
+  replaceState(c.state);
+  syncMeta.synced=true;syncMeta.baseRev=c.rev;syncMeta.dirty=false;_editSeq++;
+  persistNow();Sync.setStatus('synced');
+}
+function mergeWithCloud(c){
+  saveBackup(cloudState(state),'This device, before merging changes from '+(c.device||'another device'));
+  replaceState(mergeStates(state,c.state||{}));
+  syncMeta.synced=true;syncMeta.baseRev=c.rev;syncMeta.dirty=true;syncMeta.editedAt=Date.now();_editSeq++;
+  persistNow();Sync.schedule(0);
+  toast(`Merged in changes from ${c.device||'another device'}.`,{action:{label:'Undo',fn:restoreBackup}});
+}
+// Swap in new content, keeping this device's own UI state.
+function replaceState(next){
+  const ui={};LOCAL_ONLY.forEach(k=>{if(state[k]!==undefined)ui[k]=state[k];});
+  state=normalizeState(Object.assign(JSON.parse(JSON.stringify(next||{})),ui));
+  if(state.activeSubId&&!state.subjects.some(s=>s.id===state.activeSubId)){state.activeSubId=null;state.activeTopicId=null;}
+  applyTheme();rerenderKeepingDrafts();
+}
+// Re-render after the data changed underneath the user, without throwing away
+// half-written blurts, open answers or the caret position.
+function rerenderKeepingDrafts(){
+  renderSidebar();
+  if(_session)return;
+  if(!state.activeSubId){showHome();return;}
+  const drafts={},open=[...document.querySelectorAll('.answer-box.vis,.my-note.vis')].map(e=>e.id);
+  let focus=null;
+  Object.entries(_blurtQuills).forEach(([cid,q])=>{
+    if(q.getText().trim()||q.root.querySelector('table,img'))drafts[cid]=q.getContents();
+    if(q.hasFocus())focus={cid,range:q.getSelection()};
+  });
+  renderMain();
+  Object.entries(drafts).forEach(([cid,d])=>{if(_blurtQuills[cid])_blurtQuills[cid].setContents(d,'silent');});
+  open.forEach(id=>{const e=document.getElementById(id);if(e)e.classList.add('vis');if(id.startsWith('ans-')){const b=document.getElementById('ans-btn-'+id.slice(4));if(b)b.textContent='Hide answer';}});
+  if(focus&&_blurtQuills[focus.cid]){const q=_blurtQuills[focus.cid];q.focus();if(focus.range)q.setSelection(focus.range,'silent');}
+}
+
+// ── Merging ──
+// Two copies of the data are merged item by item (matched on id). Each item
+// keeps the side with the newer `updatedAt` (content) / `noteAt` (my note), with
+// this device winning ties; rating histories are combined. `deleted` records
+// when items were removed so a merge doesn't bring them back — unless the other
+// copy edited the item after it was deleted.
+function mergeStates(local,other){
+  const deleted=Object.assign({},other.deleted||{});
+  Object.entries(local.deleted||{}).forEach(([k,v])=>{deleted[k]=Math.max(deleted[k]||0,v);});
+  const out=Object.assign({},other,local);
+  out.deleted=pruneTombstones(deleted);
+  out.subjects=mergeList(local.subjects,other.subjects,deleted,mergeSubject);
+  return out;
+}
+function touched(x){return Math.max(x.updatedAt||0,x.noteAt||0);}
+function mergeList(a,b,deleted,mergeItem){
+  const byId=new Map((b||[]).map(x=>[x.id,x])),seen=new Set(),out=[];
+  const alive=x=>!(deleted[x.id]&&deleted[x.id]>=touched(x));
+  (a||[]).forEach(x=>{seen.add(x.id);const y=byId.get(x.id);const m=y?mergeItem(x,y,deleted):x;if(alive(m))out.push(m);});
+  (b||[]).forEach(y=>{if(!seen.has(y.id)&&alive(y))out.push(y);});
+  return out;
+}
+function newer(x,y){return(y.updatedAt||0)>(x.updatedAt||0)?y:x;}
+function mergeSubject(x,y,d){return Object.assign({},newer(x,y),{topics:mergeList(x.topics,y.topics,d,mergeTopic)});}
+function mergeTopic(x,y,d){return Object.assign({},newer(x,y),{cards:mergeList(x.cards,y.cards,d,mergeCard),subtopics:mergeList(x.subtopics,y.subtopics,d,mergeSubtopic)});}
+function mergeSubtopic(x,y,d){return Object.assign({},newer(x,y),{cards:mergeList(x.cards,y.cards,d,mergeCard)});}
+function mergeCard(x,y){
+  const n=newer(x,y),note=(y.noteAt||0)>(x.noteAt||0)?y:x;
+  return Object.assign({},n,{myNote:note.myNote,noteAt:note.noteAt,confidence:mergeConfidence(x.confidence,y.confidence)});
+}
+function mergeConfidence(p,q){
+  if(!p||!q)return p||q;
+  const seen=new Set(),h=[...(p.history||[]),...(q.history||[])].filter(e=>{const k=e.date+e.rating;if(seen.has(k))return false;seen.add(k);return true;}).sort((a,b)=>a.date<b.date?-1:1);
+  const full=(p.history||[]).length<HISTORY_CAP&&(q.history||[]).length<HISTORY_CAP;
+  const count=r=>full?h.filter(e=>e.rating===r).length:null;
+  return{
+    lastRating:h.length?h[h.length-1].rating:(p.lastRating||q.lastRating),
+    history:h.slice(-HISTORY_CAP),
+    timesGot:count('got')??Math.max(p.timesGot||0,q.timesGot||0),
+    timesAlmost:count('almost')??Math.max(p.timesAlmost||0,q.timesAlmost||0),
+    timesMissed:count('missed')??Math.max(p.timesMissed||0,q.timesMissed||0)
+  };
+}
+
+// ── Backups: export, import, restore ──
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 
 function exportData(){
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify(cloudState(state),null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download=`blurt-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
-  URL.revokeObjectURL(a.href);
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+async function onImportFile(input){
+  const f=input.files&&input.files[0];input.value='';if(!f)return;
+  let data;
+  try{data=JSON.parse(await f.text());}catch(e){toast("That file isn't a Blurt backup (it isn't valid JSON).");return;}
+  if(data&&data.state&&!data.subjects)data=data.state; // a raw cloud document
+  if(!data||!Array.isArray(data.subjects)){toast("That file isn't a Blurt backup (no subjects found).");return;}
+  const inc=normalizeState(data);inc.deleted={};
+  const n=countCards(inc),ns=inc.subjects.length;
+  showChoice({
+    title:'Import backup',
+    text:`<strong>${esc(f.name)}</strong> has ${ns} subject${ns!==1?'s':''} and ${n} card${n!==1?'s':''}.<br><br><strong>Merge</strong> adds what's missing and keeps your newer edits. <strong>Replace</strong> swaps everything here for the file. Either way, your current data is kept as a saved version you can restore.`,
+    buttons:[
+      {label:'Cancel'},
+      {label:'Replace my data',cls:'btn-danger',fn:()=>applyImport(inc,f.name,true)},
+      {label:'Merge',cls:'btn-primary',fn:()=>applyImport(inc,f.name,false)}
+    ]
+  });
+}
+async function applyImport(inc,name,replace){
+  await saveBackup(cloudState(state),`Before importing ${name}`);
+  if(replace){touchAll(inc);replaceState(Object.assign(inc,{theme:state.theme,hotkeys:state.hotkeys,sortOrder:state.sortOrder}));}
+  else{eachItem(inc,x=>{delete state.deleted[x.id];});replaceState(mergeStates(state,inc));}
+  save();
+  toast(replace?'Replaced your data with the backup.':'Merged the backup into your data.',{action:{label:'Undo',fn:restoreBackup}});
+  if(document.getElementById('settingsModal').style.display==='flex')renderSettingsData();
+}
+async function restoreBackup(){
+  let b;try{b=await Store.get('backup');}catch(e){}
+  if(!b||!b.state){toast('There is no saved version to restore.');return;}
+  const cur=cloudState(state);
+  touchAll(b.state);replaceState(b.state);
+  await saveBackup(cur,'The version you replaced by restoring');
+  save();
+  toast('Restored the saved version.');
+  if(document.getElementById('settingsModal').style.display==='flex')renderSettingsData();
+}
+function confirmRestore(){
+  showChoice({title:'Restore saved version?',text:'This replaces your current data (on every synced device) with the saved version. Your current data becomes the new saved version, so you can switch back.',
+    buttons:[{label:'Cancel'},{label:'Restore',cls:'btn-primary',fn:restoreBackup}]});
+}
+
+// ── Sync status, toasts and small dialogs ──
+const SYNC_LABELS={connecting:'Connecting…',synced:'Synced',saving:'Saving…',offline:'Offline · saved on this device',error:'Sync failed · retrying',toolarge:'Too large to sync'};
+function renderSyncStatus(){
+  let s=Sync.status;
+  if(Sync.user&&!navigator.onLine&&s!=='toolarge')s='offline';
+  const row=document.getElementById('syncRow');
+  if(row){
+    row.dataset.s=s;
+    document.getElementById('syncLabel').textContent=s==='offline'&&!syncMeta.dirty?'Offline':(SYNC_LABELS[s]||'');
+    row.title=s==='error'?(Sync.detail||'Sync failed')+' — click to retry now':s==='toolarge'?'Click to see what is using the space':'';
+    row.classList.toggle('clickable',s==='error'||s==='toolarge');
+  }
+  const banner=document.getElementById('offlineBanner');if(!banner)return;
+  let html='';
+  if(_persistErr)html="<strong>Couldn't save on this device.</strong> Storage may be full. Export a backup from Settings now so nothing is lost.";
+  else if(Sync.user&&syncMeta.dirty&&s==='offline')html="<strong>You're offline.</strong> Your changes are saved on this device and will sync when you reconnect. Until then they won't show on your other devices.";
+  else if(Sync.user&&syncMeta.dirty&&s==='error')html=`<strong>Your changes aren't reaching the cloud.</strong> They're saved on this device and Blurt keeps retrying.${Sync.detail?' '+esc(Sync.detail):''} <button class="btn btn-sm" onclick="Sync.push()">Retry now</button>`;
+  else if(Sync.user&&s==='toolarge')html=`<strong>Your data is too big to sync</strong> (${fmtKB(jsonBytes(cloudJSON(state)))} of ${fmtKB(CLOUD_LIMIT)}), usually because of images. It's saved on this device. <button class="btn btn-sm" onclick="openSettings()">Free up space</button>`;
+  banner.style.display=html?'flex':'none';
+  banner.classList.toggle('error',!!html&&s!=='offline');
+  document.getElementById('offlineBannerText').innerHTML=html;
+  document.body.classList.toggle('has-offline-banner',!!html);
+}
+function onSyncRowClick(){if(Sync.status==='error')Sync.push();else if(Sync.status==='toolarge')openSettings();}
+function fmtKB(b){return b>=1e6?(b/1e6).toFixed(2)+' MB':Math.max(1,Math.round(b/1e3))+' KB';}
+
+let _toastTimer=null;
+function toast(msg,o={}){
+  const el=document.getElementById('toast'),btn=document.getElementById('toastAction');
+  document.getElementById('toastMsg').textContent=msg;
+  if(o.action){btn.hidden=false;btn.textContent=o.action.label;btn.onclick=()=>{hideToast();o.action.fn();};}
+  else{btn.hidden=true;btn.onclick=null;}
+  el.classList.add('vis');
+  clearTimeout(_toastTimer);_toastTimer=setTimeout(hideToast,o.ms||(o.action?10000:4500));
+}
+function hideToast(){document.getElementById('toast').classList.remove('vis');}
+
+function showChoice({title,text,buttons}){
+  let m=document.getElementById('choiceModal');
+  if(!m){m=document.createElement('div');m.id='choiceModal';m.className='tm-overlay';document.body.appendChild(m);
+    m.addEventListener('mousedown',e=>{if(e.target===m)m.hidden=true;});
+    m.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();m.hidden=true;}});}
+  m.innerHTML=`<div class="tm-box" role="dialog" aria-label="${escAttr(title)}" style="width:440px">
+    <div class="tm-head"><div class="tm-title">${esc(title)}</div><button class="panel-close" data-i="-1">✕</button></div>
+    <div style="padding:16px 20px;font-size:13px;line-height:1.55;color:var(--text2)">${text}</div>
+    <div class="tm-foot"><span class="spacer"></span>${buttons.map((b,i)=>`<button class="btn ${b.cls||''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div></div>`;
+  m.querySelectorAll('button[data-i]').forEach(el=>el.onclick=()=>{m.hidden=true;const b=buttons[+el.dataset.i];if(b&&b.fn)b.fn();});
+  m.hidden=false;
+  const p=m.querySelector('.btn-primary')||m.querySelector('.tm-foot .btn');if(p)p.focus();
+}
+
+function firebaseSignIn(){
+  if(!window.blurtCloud){toast('Signing in needs an internet connection.');return;}
+  blurtCloud.signIn().catch(e=>{if(!/popup-closed|cancelled-popup/.test((e&&e.code)||''))toast('Sign-in failed: '+((e&&e.message)||e));});
+}
+function firebaseSignOut(){
+  if(Sync.user&&syncMeta.dirty&&!confirm("Some changes haven't reached the cloud yet. They'll stay on this device and sync the next time you sign in. Sign out anyway?"))return;
+  if(window.blurtCloud)blurtCloud.signOut();
+}
+
+// ── Images ──
+// Pasted, dropped and picked images are downscaled and re-encoded (WebP, or
+// JPEG where unsupported) so a screenshot costs tens of KB instead of MBs —
+// everything has to fit in one ~1 MB cloud document.
+const IMG_MAX_SIDE=1400,IMG_QUALITY=0.8,BIG_IMG=120000;
+function loadImage(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('Unreadable image'));i.src=src;});}
+async function compressImage(src){
+  const img=await loadImage(src);
+  const k=Math.min(1,IMG_MAX_SIDE/Math.max(img.naturalWidth,img.naturalHeight));
+  const w=Math.max(1,Math.round(img.naturalWidth*k)),h=Math.max(1,Math.round(img.naturalHeight*k));
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+  const ctx=cv.getContext('2d');ctx.drawImage(img,0,0,w,h);
+  let out=cv.toDataURL('image/webp',IMG_QUALITY);
+  if(!out.startsWith('data:image/webp')){ctx.globalCompositeOperation='destination-over';ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);out=cv.toDataURL('image/jpeg',IMG_QUALITY);}
+  return src.startsWith('data:')&&out.length>=src.length?src:out;
+}
+async function insertImageFiles(quill,files,index){
+  const imgs=[...files].filter(f=>/^image\//.test(f.type));if(!imgs.length)return;
+  let i=index!=null?index:(quill.getSelection(true)||{index:quill.getLength()-1}).index;
+  for(const f of imgs){
+    const url=URL.createObjectURL(f);
+    try{quill.insertEmbed(i,'image',await compressImage(url),'user');i++;}
+    catch(e){toast(`Couldn't read ${f.name||'that image'}.`);}
+    finally{URL.revokeObjectURL(url);}
+  }
+  quill.setSelection(i,0,'user');
+}
+function pickImages(quill){
+  const inp=document.getElementById('imageFile'),r=quill.getSelection(true);
+  inp.onchange=()=>{const fs=[...inp.files];inp.value='';insertImageFiles(quill,fs,r?r.index:null);};
+  inp.click();
+}
+const _shrinking=new WeakSet();
+// Shrink oversized inline images that arrive inside pasted HTML (e.g. from Word).
+async function shrinkEditorImages(quill){
+  for(const img of quill.root.querySelectorAll('img')){
+    const src=img.getAttribute('src')||'';
+    if(!src.startsWith('data:image/')||src.length<=BIG_IMG||_shrinking.has(img))continue;
+    _shrinking.add(img);
+    try{const out=await compressImage(src);if(out!==src)img.setAttribute('src',out);}catch(e){}
+  }
+}
+function attachImageSupport(quill){
+  const imageFiles=dt=>dt?[...(dt.files||[])].filter(f=>/^image\//.test(f.type)):[];
+  quill.root.addEventListener('paste',e=>{
+    const fs=imageFiles(e.clipboardData);if(!fs.length)return;
+    e.preventDefault();e.stopImmediatePropagation();insertImageFiles(quill,fs);
+  },true);
+  quill.root.addEventListener('drop',e=>{
+    const fs=imageFiles(e.dataTransfer);if(!fs.length)return;
+    e.preventDefault();e.stopPropagation();insertImageFiles(quill,fs);
+  },true);
+  quill.on('text-change',(delta,old,source)=>{
+    if(source==='user'&&delta.ops.some(op=>op.insert&&typeof op.insert.image==='string'&&op.insert.image.length>BIG_IMG))shrinkEditorImages(quill);
+  });
+}
+function imageStats(){
+  let count=0,bytes=0,big=0;
+  eachCard(state,c=>[c.answer,c.myNote].forEach(h=>{
+    if(!h||h.indexOf('data:image/')<0)return;
+    (h.match(/src="data:image\/[^"]+"/g)||[]).forEach(m=>{count++;bytes+=m.length;if(m.length>BIG_IMG)big++;});
+  }));
+  return{count,bytes,big};
+}
+async function shrinkImages(btn){
+  if(btn){btn.disabled=true;btn.textContent='Shrinking…';}
+  let saved=0,count=0;const now=Date.now();
+  const cards=[];eachCard(state,c=>cards.push(c));
+  for(const c of cards){
+    for(const field of ['answer','myNote']){
+      const html=c[field];if(!html||html.indexOf('data:image/')<0)continue;
+      const tpl=document.createElement('template');tpl.innerHTML=html;let changed=false;
+      for(const img of tpl.content.querySelectorAll('img')){
+        const src=img.getAttribute('src')||'';
+        if(!src.startsWith('data:image/')||src.length<=BIG_IMG)continue;
+        try{const out=await compressImage(src);if(out.length<src.length){saved+=src.length-out.length;count++;img.setAttribute('src',out);changed=true;}}catch(e){}
+      }
+      if(changed){c[field]=tpl.innerHTML;if(field==='answer')c.updatedAt=now;else c.noteAt=now;}
+    }
+  }
+  if(count){save();rerenderKeepingDrafts();}
+  toast(count?`Shrank ${count} image${count!==1?'s':''}, freeing ${fmtKB(saved)}.`:'None of the images could be made smaller.');
+  renderSettingsData();
+}
+
+async function renderSettingsData(){
+  const el=document.getElementById('settingsData');if(!el)return;
+  const bytes=jsonBytes(cloudJSON(state)),pct=Math.round(bytes/CLOUD_LIMIT*100),img=imageStats();
+  let backup=null;try{backup=await Store.get('backup');}catch(e){}
+  el.innerHTML=`
+    <div class="settings-text" style="margin-bottom:2px">${Sync.user?'Cloud space used':'Size of your data'} (cloud sync fits about 1 MB)</div>
+    <div class="meter"><div class="meter-fill${pct>=100?' over':pct>=80?' warn':''}" style="width:${Math.min(100,pct)}%"></div></div>
+    <div class="meter-label">${fmtKB(bytes)} of ${fmtKB(CLOUD_LIMIT)} · ${pct}%${img.count?` · ${img.count} image${img.count!==1?'s':''} use ${fmtKB(img.bytes)}`:''}</div>
+    ${img.big?`<div class="settings-actions"><button class="btn btn-sm" onclick="shrinkImages(this)">Shrink ${img.big} large image${img.big!==1?'s':''}</button></div>`:''}
+    <div class="settings-text" style="margin:16px 0 0">Save everything to a file, or load one. When you import, you choose whether to merge or replace.</div>
+    <div class="settings-actions">
+      <button class="btn btn-sm" onclick="exportData()">Export backup</button>
+      <button class="btn btn-sm" onclick="document.getElementById('importFile').click()">Import backup…</button>
+    </div>
+    ${backup&&backup.state?`<div class="settings-text" style="margin:16px 0 0">Saved version: <strong>${esc(backup.reason)}</strong> · ${esc(new Date(backup.at).toLocaleString())} · ${countCards(backup.state)} cards</div>
+    <div class="settings-actions"><button class="btn btn-sm" onclick="confirmRestore()">Restore this version</button></div>`:''}`;
 }
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function escAnswer(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
-function renderAnswer(s){if(!s)return'';return s.trim().startsWith('<')?s:escAnswer(s);}
+function renderAnswer(s){if(!s)return'';return s.trim().startsWith('<')?sanitizeRich(s):escAnswer(s);}
+// Escape a value for use inside a single-quoted JS string in an inline handler.
+function jsStr(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+// Answers and notes are stored as HTML, so anything rendered from them goes
+// through an allowlist: Quill's own formatting, tables and images survive;
+// scripts, event handlers, styles and javascript: links don't. Results are
+// cached because renderMain re-renders every card.
+const RICH_TAGS=new Set(['P','BR','STRONG','B','EM','I','U','S','STRIKE','SUB','SUP','OL','UL','LI','A','IMG','TABLE','THEAD','TBODY','TR','TH','TD','SPAN','H1','H2','H3','BLOCKQUOTE','PRE','CODE','DIV']);
+const DROP_TAGS=new Set(['SCRIPT','STYLE','IFRAME','FRAME','FRAMESET','OBJECT','EMBED','TEMPLATE','SVG','MATH','LINK','META','BASE','FORM','INPUT','BUTTON','TEXTAREA','SELECT','NOSCRIPT','AUDIO','VIDEO','SOURCE','CANVAS']);
+const _richCache=new Map();
+function safeUrl(u,img){
+  u=String(u||'').trim();
+  if(img)return/^data:image\/(png|jpe?g|gif|webp|bmp);base64,/i.test(u)||/^https:\/\//i.test(u);
+  return/^(https?:|mailto:)/i.test(u);
+}
+function sanitizeRich(html){
+  if(_richCache.has(html))return _richCache.get(html);
+  const tpl=document.createElement('template');tpl.innerHTML=html;
+  const clean=node=>[...node.childNodes].forEach(ch=>{
+    if(ch.nodeType===3)return;
+    if(ch.nodeType!==1){ch.remove();return;}
+    const tag=ch.tagName.toUpperCase();
+    if(DROP_TAGS.has(tag)){ch.remove();return;}
+    clean(ch);
+    if(!RICH_TAGS.has(tag)){ch.replaceWith(...ch.childNodes);return;}
+    [...ch.attributes].forEach(a=>{
+      const n=a.name.toLowerCase();let keep=false;
+      if(n==='class')keep=a.value.split(/\s+/).every(c=>!c||/^(ql-[\w-]+|blurt-table)$/.test(c));
+      else if(n==='href')keep=tag==='A'&&safeUrl(a.value,false);
+      else if(n==='src')keep=tag==='IMG'&&safeUrl(a.value,true);
+      else if(n==='alt'||n==='width'||n==='height')keep=tag==='IMG';
+      else if(n==='colspan'||n==='rowspan')keep=(tag==='TD'||tag==='TH')&&/^\d{1,2}$/.test(a.value);
+      if(!keep)ch.removeAttribute(a.name);
+    });
+    if(tag==='A'){ch.setAttribute('target','_blank');ch.setAttribute('rel','noopener noreferrer');}
+  });
+  clean(tpl.content);
+  const box=document.createElement('div');box.appendChild(tpl.content);
+  const out=box.innerHTML;
+  if(_richCache.size>3000)_richCache.clear();
+  _richCache.set(html,out);
+  return out;
+}
 
 function toggleTheme(){state.theme=state.theme==='dark'?'light':'dark';applyTheme();save();}
 function applyTheme(){document.documentElement.setAttribute('data-theme',state.theme);document.getElementById('themeBtn').textContent=state.theme==='dark'?'☀':'☾';}
-function toggleSidebar(){state.sidebarOpen=!state.sidebarOpen;applySidebar();save();}
+function toggleSidebar(){state.sidebarOpen=!state.sidebarOpen;applySidebar();saveUI();}
 function applySidebar(){document.getElementById('sidebar').classList.toggle('collapsed',!state.sidebarOpen);}
 
 function setSortOrder(o){
@@ -756,7 +1293,7 @@ function openSubject(id){
   state.activeTopicId = null;
   state.activeSpFilter = null;
   state.activeSubtopicSpFilters = {};
-  save();
+  saveUI();
   renderSidebar();
   renderMain();
 }
@@ -801,7 +1338,7 @@ function renderMain(){
         class="spec-search-input"
         type="text"
         placeholder="Search spec point e.g. 1.1"
-        value="${state.activeSpFilter||''}"
+        value="${escAttr(state.activeSpFilter||'')}"
         oninput="setSpFilter(this.value)"
       >
       ${state.activeSpFilter?`<button class="spec-search-clear" onclick="setSpFilter(null)">✕</button>`:''}
@@ -851,7 +1388,7 @@ function renderMain(){
             ${scAll.length?`<div class="progress-wrap" style="padding:8px 2px 4px"><div class="progress-bar"><div class="progress-fill" style="width:${sp}%"></div></div><div class="progress-label">${sn} of ${scAll.length} noted</div></div>`:''}
             ${stSps.length>0?`<div class="subtopic-filter-bar">
               <button class="subtopic-chip${!stSpFilter?' active':''}" onclick="setSubtopicSpFilter('${st.id}',null)">All</button>
-              ${stSps.map(s=>`<button class="subtopic-chip${stSpFilter===s?' active':''}" onclick="setSubtopicSpFilter('${st.id}','${s.replace(/'/g,"\\'")}')">${esc(s)}</button>`).join('')}
+              ${stSps.map(s=>`<button class="subtopic-chip${stSpFilter===s?' active':''}" onclick="setSubtopicSpFilter('${st.id}','${escAttr(jsStr(s))}')">${esc(s)}</button>`).join('')}
             </div>`:''}
             ${sc.length?`<div class="cards-grid">${sc.map(c=>cardHTML(t.id,c,st.id)).join('')}</div>`
               :(stSpFilter||state.activeSpFilter)?`<div style="font-size:12px;color:var(--text3);padding:8px 2px">No cards match this spec point.</div>`
@@ -934,7 +1471,7 @@ function toggleSubtopic(id){
   if(!state.openSubtopics)state.openSubtopics=[];
   if(el.classList.contains('open'))state.openSubtopics.push(id);
   else state.openSubtopics=state.openSubtopics.filter(x=>x!==id);
-  save();
+  saveUI();
 }
 
 function confDot(c){
@@ -975,7 +1512,7 @@ function saveNote(tid,cid,stid){
   const html=quill.root.innerHTML;
   if(!quill.getText().trim()&&!quill.root.querySelector('table'))return;
   const c=findCard(tid,cid,stid);if(!c)return;
-  c.myNote=html;save();
+  c.myNote=html;c.noteAt=Date.now();save();
   const noteEl=document.getElementById('note-'+cid);
   if(noteEl){noteEl.querySelector('.my-note-text').innerHTML=renderAnswer(c.myNote);noteEl.classList.add('vis');}
   else{
@@ -1138,12 +1675,12 @@ function buildCardPanel(editId,topicId,subtopicId){
     modules:{
       toolbar:{
         container:[['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}],[{indent:'-1'},{indent:'+1'}],['image','table']],
-        handlers:{table:function(){openInsertTable(this.quill);}}
+        handlers:{table:function(){openInsertTable(this.quill);},image:function(){pickImages(this.quill);}}
       },
       keyboard:{bindings:editorBindings(()=>saveCard(),()=>{const h=document.getElementById('p-hint');if(h)h.focus();})}
     }
   });
-  attachTableSupport(_answerQuill);
+  attachTableSupport(_answerQuill);attachImageSupport(_answerQuill);
   const tblBtn=_answerQuill.getModule('toolbar').container.querySelector('.ql-table');
   if(tblBtn)tblBtn.title=`Insert table (${hotkeyLabel(state.hotkeys.insertTable)})`;
   if(c&&c.answer){
@@ -1154,16 +1691,16 @@ function buildCardPanel(editId,topicId,subtopicId){
 
 function saveSubject(){
   const name=v('p-name');if(!name.trim())return;
-  if(panel.editId){const sub=state.subjects.find(s=>s.id===panel.editId);if(sub){sub.name=name.trim();sub.color=panel.selColor;}}
-  else{state.subjects.push({id:uid(),name:name.trim(),color:panel.selColor,topics:[]});state.activeSubId=state.subjects[state.subjects.length-1].id;}
+  if(panel.editId){const sub=state.subjects.find(s=>s.id===panel.editId);if(sub){sub.name=name.trim();sub.color=panel.selColor;sub.updatedAt=Date.now();}}
+  else{state.subjects.push({id:uid(),name:name.trim(),color:panel.selColor,topics:[],updatedAt:Date.now()});state.activeSubId=state.subjects[state.subjects.length-1].id;}
   save();closePanel();renderSidebar();renderMain();
 }
 function saveTopic(){
   const name=v('p-topic');if(!name.trim())return;
   const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
   if(!sub.topics)sub.topics=[];
-  if(panel.editId){const t=sub.topics.find(t=>t.id===panel.editId);if(t)t.name=name.trim();}
-  else{const t={id:uid(),name:name.trim(),cards:[],subtopics:[]};sub.topics.push(t);state.activeTopicId=t.id;}
+  if(panel.editId){const t=sub.topics.find(t=>t.id===panel.editId);if(t){t.name=name.trim();t.updatedAt=Date.now();}}
+  else{const t={id:uid(),name:name.trim(),cards:[],subtopics:[],updatedAt:Date.now()};sub.topics.push(t);state.activeTopicId=t.id;}
   save();closePanel();renderMain();
 }
 function saveSubtopic(){
@@ -1171,8 +1708,8 @@ function saveSubtopic(){
   const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
   const t=sub.topics.find(t=>t.id===panel.topicId);if(!t)return;
   if(!t.subtopics)t.subtopics=[];
-  if(panel.editId){const st=t.subtopics.find(st=>st.id===panel.editId);if(st)st.name=name.trim();}
-  else t.subtopics.push({id:uid(),name:name.trim(),cards:[]});
+  if(panel.editId){const st=t.subtopics.find(st=>st.id===panel.editId);if(st){st.name=name.trim();st.updatedAt=Date.now();}}
+  else t.subtopics.push({id:uid(),name:name.trim(),cards:[],updatedAt:Date.now()});
   save();closePanel();renderMain();
 }
 function saveCard(){
@@ -1182,8 +1719,8 @@ function saveCard(){
   const cardList=panel.subtopicId?((t.subtopics||[]).find(st=>st.id===panel.subtopicId)||{cards:[]}).cards:(t.cards=t.cards||[]);
   const rawAns=_answerQuill?_answerQuill.root.innerHTML:'';
   const answer=(rawAns==='<p><br></p>'||!rawAns)?'':rawAns;
-  if(panel.editId){const c=cardList.find(c=>c.id===panel.editId);if(c){c.sp=v('p-sp');c.q=q.trim();c.hint=v('p-hint');c.answer=answer;}}
-  else cardList.push({id:uid(),sp:v('p-sp'),q:q.trim(),hint:v('p-hint'),answer:answer,myNote:''});
+  if(panel.editId){const c=cardList.find(c=>c.id===panel.editId);if(c){c.sp=v('p-sp');c.q=q.trim();c.hint=v('p-hint');c.answer=answer;c.updatedAt=Date.now();}}
+  else cardList.push({id:uid(),sp:v('p-sp'),q:q.trim(),hint:v('p-hint'),answer:answer,myNote:'',updatedAt:Date.now()});
   save();closePanel();renderMain();
 }
 function v(id){return(document.getElementById(id)||{}).value||'';}
@@ -1226,7 +1763,7 @@ function editorBindings(onEnter,onArrowUpTop){
 
 // ---- Settings ----
 let _hkRecordHandler=null;
-function openSettings(){renderHotkeyRows();document.getElementById('settingsModal').style.display='flex';}
+function openSettings(){renderHotkeyRows();renderSettingsData();document.getElementById('settingsModal').style.display='flex';}
 function closeSettings(){cancelRecordHotkey();document.getElementById('settingsModal').style.display='none';}
 function renderHotkeyRows(){
   if(!state.hotkeys)state.hotkeys=defaultHotkeys();
@@ -1522,24 +2059,28 @@ function initBlurtEditors(){
         keyboard:{bindings:editorBindings(()=>{const loc=locateCard(cid);if(loc)saveNote(loc.tid,cid,loc.stid);})}
       }
     });
-    attachTableSupport(_blurtQuills[cid]);
+    attachTableSupport(_blurtQuills[cid]);attachImageSupport(_blurtQuills[cid]);
   });
 }
 
 function deleteSubject(id){
   if(!confirm('Delete this subject and everything in it?'))return;
-  state.subjects=state.subjects.filter(s=>s.id!==id);
-  if(state.activeSubId===id){state.activeSubId=null;state.activeTopicId=null;}
+  state.subjects=state.subjects.filter(s=>s.id!==id);markDeleted(id);
+  const wasActive=state.activeSubId===id;
+  if(wasActive){state.activeSubId=null;state.activeTopicId=null;}
   save();renderSidebar();
+  if(wasActive)showHome('Subject deleted');
+}
+function showHome(title){
   document.getElementById('topbarTitle').textContent='Welcome to Blurt';
   document.getElementById('topbarSub').textContent='Select a subject to get started';
   document.getElementById('topbarActions').innerHTML='';
-  document.getElementById('mainContent').innerHTML=`<div class="empty"><div class="empty-title">Subject deleted</div><div class="empty-sub">Add or select a subject.</div><button class="btn btn-primary" onclick="openPanel('subject')">Add subject</button></div>`;
+  document.getElementById('mainContent').innerHTML=`<div class="empty"><div class="empty-title">${esc(title||'No subject selected')}</div><div class="empty-sub">Add or select a subject.</div><button class="btn btn-primary" onclick="openPanel('subject')">Add subject</button></div>`;
 }
 function deleteTopic(tid){
   if(!confirm('Delete this topic and all its cards?'))return;
   const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
-  sub.topics=sub.topics.filter(t=>t.id!==tid);
+  sub.topics=sub.topics.filter(t=>t.id!==tid);markDeleted(tid);
   if(state.activeTopicId===tid)state.activeTopicId=null;
   save();renderMain();
 }
@@ -1547,7 +2088,7 @@ function deleteSubtopic(tid,stid){
   if(!confirm('Delete this subtopic and all its cards?'))return;
   const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
   const t=sub.topics.find(t=>t.id===tid);if(!t)return;
-  t.subtopics=(t.subtopics||[]).filter(st=>st.id!==stid);
+  t.subtopics=(t.subtopics||[]).filter(st=>st.id!==stid);markDeleted(stid);
   save();renderMain();
 }
 function deleteCard(tid,cid,stid){
@@ -1555,7 +2096,7 @@ function deleteCard(tid,cid,stid){
   const t=sub.topics.find(t=>t.id===tid);if(!t)return;
   if(stid){const st=(t.subtopics||[]).find(st=>st.id===stid);if(st)st.cards=(st.cards||[]).filter(c=>c.id!==cid);}
   else t.cards=(t.cards||[]).filter(c=>c.id!==cid);
-  save();const el=document.getElementById('card-'+cid);if(el)el.remove();
+  markDeleted(cid);save();const el=document.getElementById('card-'+cid);if(el)el.remove();
 }
 
 // ── Study session ──
@@ -1729,7 +2270,7 @@ function rateCard(rating){
           if(!c.confidence)c.confidence={lastRating:null,history:[],timesGot:0,timesAlmost:0,timesMissed:0};
           c.confidence.lastRating=rating;
           if(!c.confidence.history)c.confidence.history=[];
-          c.confidence.history.push({date:new Date().toISOString(),rating});
+          c.confidence.history.push({date:new Date().toISOString(),rating});capHistory(c);
           if(rating==='got')c.confidence.timesGot=(c.confidence.timesGot||0)+1;
           else if(rating==='almost')c.confidence.timesAlmost=(c.confidence.timesAlmost||0)+1;
           else c.confidence.timesMissed=(c.confidence.timesMissed||0)+1;
@@ -1796,12 +2337,10 @@ function showSessionEnd(){
   </div>`;
   document.getElementById('topbarActions').innerHTML=`<button class="btn btn-sm" onclick="exitSession()">Back to subject</button>`;
 
-  try{
-    if(window.firestoreSaveSession)window.firestoreSaveSession({
-      date:new Date().toISOString(),subjectName,total,got,almost,missed,duration,
-      breakdown:Object.values(groups)
-    });
-  }catch(e){}
+  Sync.queueSession({
+    date:new Date().toISOString(),subjectName,total,got,almost,missed,duration,
+    breakdown:Object.values(groups)
+  });
 }
 
 function retryMissed(){
