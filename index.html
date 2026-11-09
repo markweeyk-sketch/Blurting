@@ -186,8 +186,6 @@ body.has-offline-banner .app{padding-top:38px}
 .card-btn.red:hover{background:var(--red-bg)}
 .answer-box{display:none;margin-top:10px;padding:10px 12px;background:var(--bg2);border-left:3px solid var(--green);font-size:12px;line-height:1.65;border-radius:0 6px 6px 0}
 .answer-box.vis{display:block}
-.answer-box ul{padding-left:1.1rem;margin-top:4px}
-.answer-box li{margin-bottom:3px}
 .my-note{display:none;margin-top:9px;padding:10px 12px;background:var(--green-bg);border-radius:8px;border:1px solid var(--green-border);font-size:12px;line-height:1.6}
 .my-note.vis{display:block}
 .my-note-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--green-text);margin-bottom:3px}
@@ -263,10 +261,7 @@ body.has-offline-banner .app{padding-top:38px}
 [data-theme="dark"] .ql-snow .ql-tooltip a{color:var(--text2)}
 [data-theme="dark"] .ql-picker-options{background:var(--bg3) !important;border-color:var(--border2) !important}
 /* ── Rich content in answer-box and my-note ── */
-.answer-box ol{padding-left:1.1rem;margin-top:4px}
 .answer-box img{max-width:100%;border-radius:4px;margin-top:4px}
-.my-note-text ul,.my-note-text ol{padding-left:1.1rem;margin-top:4px}
-.my-note-text li{margin-bottom:3px}
 .my-note-text img{max-width:100%;border-radius:4px;margin-top:4px}
 /* ── Sleek scrollbar ── */
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -313,8 +308,6 @@ body.has-offline-banner .app{padding-top:38px}
 .session-answer-wrap.vis{display:block}
 .session-answer-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--green-text);margin-bottom:6px}
 .session-answer-body{padding:11px 14px;background:var(--bg2);border-left:3px solid var(--green);font-size:13px;line-height:1.65;border-radius:0 6px 6px 0}
-.session-answer-body ul,.session-answer-body ol{padding-left:1.1rem;margin-top:4px}
-.session-answer-body li{margin-bottom:3px}
 .session-answer-body img{max-width:100%;border-radius:4px;margin-top:4px}
 .conf-row{display:flex;gap:8px;margin-top:4px}
 .conf-btn{flex:1;padding:12px 10px;font-size:13px;font-weight:600;border-radius:10px;border:none;cursor:pointer;transition:opacity .15s,transform .1s}
@@ -360,6 +353,226 @@ body.has-offline-banner .app{padding-top:38px}
 .weak-bar-wrap{width:60px;flex-shrink:0}
 .weak-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
 .weak-bar-fill{height:100%;border-radius:2px}
+/* ── Rich text (answers, notes, session) — drawn to match the editor ── */
+.rich ul,.rich ol{padding-left:1.5em;margin:4px 0}
+.rich li{margin-bottom:3px}
+.rich li>ul,.rich li>ol{margin:3px 0 0}
+.rich ul{list-style:disc}.rich ul ul{list-style:circle}.rich ul ul ul{list-style:square}.rich ul ul ul ul{list-style:disc}
+.rich ol{list-style:decimal}.rich ol ol{list-style:lower-alpha}.rich ol ol ol{list-style:lower-roman}.rich ol ol ol ol{list-style:decimal}
+.rich li.nest-only{list-style:none}
+.rich p{margin:0}
+.rich img{max-width:100%;border-radius:4px;margin-top:4px}
+/* Editor lists: same indent per level as the display, and bullets • ◦ ▪ like disc/circle/square */
+.ql-snow .ql-editor ol,.ql-snow .ql-editor ul{padding-left:0}
+.ql-snow .ql-editor li:not(.ql-direction-rtl){padding-left:1.5em}
+.ql-snow .ql-editor ul>li.ql-indent-1::before,.ql-snow .ql-editor ul>li.ql-indent-4::before,.ql-snow .ql-editor ul>li.ql-indent-7::before{content:'\25E6'}
+.ql-snow .ql-editor ul>li.ql-indent-2::before,.ql-snow .ql-editor ul>li.ql-indent-5::before,.ql-snow .ql-editor ul>li.ql-indent-8::before{content:'\25AA'}
+.ql-snow .ql-editor li.ql-indent-1:not(.ql-direction-rtl){padding-left:3em}
+.ql-snow .ql-editor .ql-indent-1:not(.ql-direction-rtl):not(li){padding-left:1.5em}
+.ql-snow .ql-editor li.ql-indent-2:not(.ql-direction-rtl){padding-left:4.5em}
+.ql-snow .ql-editor .ql-indent-2:not(.ql-direction-rtl):not(li){padding-left:3em}
+.ql-snow .ql-editor li.ql-indent-3:not(.ql-direction-rtl){padding-left:6em}
+.ql-snow .ql-editor .ql-indent-3:not(.ql-direction-rtl):not(li){padding-left:4.5em}
+.ql-snow .ql-editor li.ql-indent-4:not(.ql-direction-rtl){padding-left:7.5em}
+.ql-snow .ql-editor .ql-indent-4:not(.ql-direction-rtl):not(li){padding-left:6em}
+.ql-snow .ql-editor li.ql-indent-5:not(.ql-direction-rtl){padding-left:9em}
+.ql-snow .ql-editor .ql-indent-5:not(.ql-direction-rtl):not(li){padding-left:7.5em}
+.ql-snow .ql-editor li.ql-indent-6:not(.ql-direction-rtl){padding-left:10.5em}
+.ql-snow .ql-editor .ql-indent-6:not(.ql-direction-rtl):not(li){padding-left:9em}
+.ql-snow .ql-editor li.ql-indent-7:not(.ql-direction-rtl){padding-left:12em}
+.ql-snow .ql-editor .ql-indent-7:not(.ql-direction-rtl):not(li){padding-left:10.5em}
+.ql-snow .ql-editor li.ql-indent-8:not(.ql-direction-rtl){padding-left:13.5em}
+.ql-snow .ql-editor .ql-indent-8:not(.ql-direction-rtl):not(li){padding-left:12em}
+
+/* ── Sidebar extras ── */
+.sidebar-icons{display:flex;gap:5px}
+.icon-btn svg{display:block}
+.archived-toggle{display:flex;align-items:center;gap:6px;width:100%;margin-top:10px;padding:6px 10px;border:none;background:none;cursor:pointer;font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--text3);text-align:left;border-radius:6px}
+.archived-toggle:hover{color:var(--text2);background:var(--bg)}
+.subject-item.archived{opacity:.7}
+.archived-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;margin-bottom:16px;border:1px dashed var(--border2);border-radius:10px;font-size:12.5px;color:var(--text2);background:var(--bg)}
+.archived-banner .spacer{flex:1}
+.sidebar-scrim{display:none}
+
+/* ── Keyboard selection & search flash ── */
+.card.kb-focus{border-color:#534AB7;box-shadow:0 0 0 2px rgba(83,74,183,.18)}
+@keyframes cardFlash{0%,40%{box-shadow:0 0 0 4px rgba(83,74,183,.35)}100%{box-shadow:0 0 0 2px rgba(83,74,183,.18)}}
+.card.flash{animation:cardFlash 1.4s ease-out}
+kbd,.kbd-hint{display:inline-block;min-width:1.6em;padding:1px 5px;border:1px solid var(--border2);border-bottom-width:2px;border-radius:5px;font:600 10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;color:var(--text2);background:var(--bg)}
+.kbd-hint{margin-left:6px;opacity:.75;color:inherit;background:transparent;border-color:currentColor}
+
+/* ── Study session: side by side ── */
+.session-card-wrap{transition:max-width .25s}
+.session-card-wrap.revealed{max-width:1040px}
+.session-q-card{margin-bottom:12px}
+.session-q-card .session-card-hint{margin-bottom:0}
+.session-cols{display:block}
+.session-col .session-blurt-label{margin-top:0}
+.session-model,.session-rate{display:none}
+.revealed .session-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.revealed .session-cols>.session-card{margin-bottom:0;height:100%}
+.revealed .session-model,.revealed .session-rate{display:block}
+.revealed #sessionShowBtn{display:none}
+.session-rate{margin-top:14px}
+.session-answer-label{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.kw-score{font-weight:500;text-transform:none;letter-spacing:0;color:var(--text3);font-size:11px}
+.kw{border-radius:3px;padding:0 1px}
+.kw.hit{background:rgba(29,158,117,.18);box-shadow:inset 0 -1.5px 0 rgba(29,158,117,.7)}
+.kw.miss{background:rgba(230,138,0,.16);box-shadow:inset 0 -1.5px 0 rgba(230,138,0,.75)}
+.rate-suggest{font-size:12px;color:var(--text2);margin-bottom:8px;min-height:1px}
+.conf-btn.got.suggested{box-shadow:0 0 0 3px var(--bg2),0 0 0 5px #1D9E75}
+.conf-btn.almost.suggested{box-shadow:0 0 0 3px var(--bg2),0 0 0 5px #E68A00}
+.conf-btn.missed.suggested{box-shadow:0 0 0 3px var(--bg2),0 0 0 5px #C0392B}
+.conf-btn .kbd-hint{border-color:rgba(255,255,255,.6);color:#fff}
+
+/* ── Bulk add ── */
+.bulk-box{width:1040px;height:min(760px,92vh)}
+.bulk-tabs{display:flex;gap:4px;padding:10px 20px 0;border-bottom:1px solid var(--border)}
+.bulk-tab{padding:8px 12px;border:none;background:none;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px}
+.bulk-tab.active{color:var(--text);border-bottom-color:var(--text)}
+.bulk-grid{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.bulk-left{padding:14px 20px;overflow:auto;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--border)}
+.bulk-right{padding:14px 20px;overflow:auto;min-height:0}
+.bulk-left .field-label{margin-bottom:0}
+.bulk-text{min-height:200px;flex:1;resize:vertical;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre;tab-size:12}
+.bulk-check{font-size:12.5px;display:flex;gap:7px;align-items:center;color:var(--text2)}
+.bulk-help{font-size:12.5px;color:var(--text2);line-height:1.55}
+.bulk-help summary{cursor:pointer;font-weight:600;color:var(--text);padding:4px 0}
+.bulk-help p{margin:6px 0}
+.bulk-fmt{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border)}
+.bulk-fmt .btn{flex-shrink:0}
+.bulk-note{color:var(--text3)}
+code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg3);padding:1px 4px;border-radius:4px}
+.bulk-preview{display:flex;flex-direction:column;gap:6px}
+.bulk-format{font-size:11px;color:var(--text3);margin-bottom:2px}
+.bulk-warn{font-size:12px;color:#996000;background:rgba(230,138,0,.1);padding:6px 9px;border-radius:6px}
+.bulk-sub{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-top:8px}
+.bulk-row{border:1px solid var(--border);border-radius:9px;padding:8px 11px;background:var(--bg);font-size:12.5px}
+.bulk-sp{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.05em}
+.bulk-q{font-weight:600}
+.bulk-a{margin-top:3px;color:var(--text2);font-size:12px}
+.bulk-missing{color:#996000;font-style:italic}
+.bulk-empty{font-size:12.5px;color:var(--text3);padding:20px 0;text-align:center}
+.bulk-summary{font-size:12px;color:var(--text2)}
+.btn:disabled{opacity:.45;cursor:default}
+
+/* ── Search ── */
+.search-overlay{align-items:flex-start;padding-top:12vh}
+.search-box{width:640px;max-height:70vh}
+.search-bar{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);color:var(--text3)}
+.search-input{flex:1;border:none;outline:none;background:none;font-size:15px;color:var(--text)}
+.search-results{overflow:auto;padding:6px}
+.search-row{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:8px;cursor:pointer}
+.search-row .subject-dot{margin-top:6px}
+.search-row.sel{background:var(--bg2)}
+.search-main{min-width:0;flex:1}
+.search-q{font-size:13px;font-weight:600;color:var(--text)}
+.search-sp{font-size:10px;font-weight:600;color:var(--text3);margin-right:7px;letter-spacing:.04em}
+.search-snip{font-size:12px;color:var(--text2);margin-top:2px;line-height:1.45}
+.search-path{font-size:11px;color:var(--text3);margin-top:2px}
+.search-tag{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);border:1px solid var(--border2);border-radius:4px;padding:0 4px;margin-left:6px;vertical-align:1px}
+.search-empty{padding:22px 14px;font-size:13px;color:var(--text3);text-align:center}
+.search-empty span{display:block;margin-top:6px;font-size:11px}
+mark{background:rgba(232,163,59,.35);color:inherit;border-radius:2px;padding:0 1px}
+
+/* ── Settings ── */
+#settingsModal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);align-items:center;justify-content:center;padding:16px}
+.settings-box{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:14px;width:760px;max-width:100%;height:min(640px,90vh);display:flex;flex-direction:column;overflow:hidden}
+.settings-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
+.settings-layout{flex:1;min-height:0;display:flex}
+.settings-nav{width:180px;flex-shrink:0;padding:12px 8px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:2px;background:var(--bg2)}
+.settings-nav button{text-align:left;padding:8px 10px;border:none;background:none;border-radius:7px;cursor:pointer;font-size:12.5px;color:var(--text2)}
+.settings-nav button:hover{color:var(--text);background:var(--bg3)}
+.settings-nav button.active{background:var(--bg);color:var(--text);font-weight:600;box-shadow:0 0 0 1px var(--border)}
+.settings-body{flex:1;overflow:auto;padding:18px 22px}
+.settings-body>section{display:none}
+.settings-body>section.active{display:block}
+.hotkey-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.hotkey-name{font-size:13px;color:var(--text)}
+.hotkey-desc{font-size:11px;color:var(--text3);margin-top:1px}
+.setting-switch{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px}
+.setting-switch input{position:absolute;opacity:0;pointer-events:none}
+.setting-switch .settings-text{display:block;margin:3px 0 0}
+.switch{flex-shrink:0;width:32px;height:18px;border-radius:9px;background:var(--border2);position:relative;transition:background .15s;margin-top:1px}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.setting-switch input:checked+.switch{background:var(--green)}
+.setting-switch input:checked+.switch::after{transform:translateX(14px)}
+.setting-switch input:focus-visible+.switch{outline:2px solid #534AB7;outline-offset:2px}
+.help-tour{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);margin-bottom:12px;font-size:13px}
+.help-guide{border-bottom:1px solid var(--border)}
+.help-guide summary{cursor:pointer;padding:11px 0;font-size:13px;font-weight:600;color:var(--text)}
+.help-body{font-size:12.5px;line-height:1.6;color:var(--text2);padding:0 0 12px}
+.help-body p{margin:0 0 8px}
+
+/* ── Tour ── */
+.tour-box{width:560px}
+.tour-art{background:var(--bg3);padding:26px 20px;display:flex;align-items:center;justify-content:center;min-height:170px;border-bottom:1px solid var(--border)}
+.tour-text{padding:18px 24px 6px}
+.tour-step{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase}
+.tour-title{font-size:18px;font-weight:650;margin:4px 0 8px}
+.tour-body{font-size:13.5px;line-height:1.6;color:var(--text2)}
+.tour-dots{display:flex;gap:6px}
+.tour-dots span{width:7px;height:7px;border-radius:50%;background:var(--border2);cursor:pointer}
+.tour-dots span.on{background:var(--text)}
+.ta-tree{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center}
+.ta-pill{display:flex;flex-direction:column;align-items:center;padding:8px 12px;border-radius:9px;background:var(--bg);border:1px solid var(--border2);font-size:12px;font-weight:600}
+.ta-pill small{font-weight:400;color:var(--text3);font-size:10.5px}
+.ta-pill.s{border-color:#534AB7}.ta-pill.c{border-color:var(--green)}
+.ta-arrow{color:var(--text3)}
+.ta-bulk{display:flex;align-items:center;gap:10px}
+.ta-paste{font:10.5px/1.7 ui-monospace,Menlo,monospace;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text2)}
+.ta-cards{display:flex;flex-direction:column;gap:5px}
+.ta-card{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:600;display:flex;flex-direction:column}
+.ta-card small{font-size:9.5px;color:var(--text3)}
+.ta-card.big{width:280px;gap:6px;font-weight:400;font-size:12px}
+.ta-input{border:1px solid var(--input-border);background:var(--input-bg);border-radius:6px;padding:7px 9px;color:var(--text2);min-height:40px}
+.ta-btns{display:flex;gap:5px}.ta-btns span{border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:10.5px}.ta-btns .g{color:var(--green-text);border-color:var(--green-border)}
+.ta-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;font-size:11.5px;line-height:1.5}
+.ta-col{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text2)}
+.ta-col.m{border-left:3px solid var(--green)}
+.ta-col small{display:block;font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:2px}
+.tour-art:has(.ta-cols){flex-direction:column;gap:10px}
+.ta-rate{display:flex;gap:6px}.ta-rate span{padding:4px 12px;border-radius:6px;font-size:11px;font-weight:600;color:#fff}
+.ta-rate .g{background:#1D9E75}.ta-rate .a{background:#E68A00}.ta-rate .m{background:#C0392B}.ta-rate .sug{box-shadow:0 0 0 2px var(--bg3),0 0 0 4px #E68A00}
+.ta-search{width:320px;background:var(--bg);border:1px solid var(--border2);border-radius:10px;font-size:12px;overflow:hidden}
+.ta-search>span{display:block;padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.ta-search>div{padding:8px 12px;font-weight:600}.ta-search small{display:block;font-weight:400;color:var(--text3);font-size:10.5px}
+.ta-keys{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.ta-keys kbd{font-size:15px;padding:6px 10px}
+
+/* ── Small screens ── */
+@media (max-width:760px){
+  .sidebar{position:fixed;top:0;bottom:0;left:0;z-index:150;width:min(84vw,300px);min-width:0;box-shadow:4px 0 24px rgba(0,0,0,.12);transition:transform .25s cubic-bezier(.4,0,.2,1),background .25s}
+  .sidebar.collapsed{width:min(84vw,300px);min-width:0;transform:translateX(-105%);border-right:1px solid var(--border)}
+  .sidebar:not(.collapsed)~.sidebar-scrim{display:block;position:fixed;inset:0;z-index:140;background:rgba(0,0,0,.3)}
+  .topbar{padding:10px 12px;flex-wrap:wrap;row-gap:8px}
+  .topbar-actions{order:3;width:100%;overflow-x:auto;padding-bottom:2px}
+  .content{padding:14px 12px}
+  .stats-row{gap:6px;margin-bottom:14px}
+  .topic-header{flex-wrap:wrap}
+  .topic-actions,.subtopic-actions{flex-wrap:wrap}
+  .cards-grid{grid-template-columns:1fr}
+  .panel{width:100vw}
+  .field-input,.search-input,.session-blurt{font-size:16px}
+  .session-content{padding:12px 10px 0}
+  .session-card{padding:16px}
+  .session-card-q{font-size:18px}
+  .session-blurt{min-height:150px}
+  .revealed .session-cols{grid-template-columns:1fr}
+  .session-rate{position:sticky;bottom:0;z-index:2;margin:12px -10px 0;padding:10px 10px calc(12px + env(safe-area-inset-bottom));background:var(--bg2);border-top:1px solid var(--border)}
+  .conf-btn{padding:16px 4px;font-size:14px}
+  .kbd-hint{display:none}
+  .session-show-btn{position:sticky;bottom:12px}
+  .bulk-grid{grid-template-columns:1fr;overflow:auto}
+  .bulk-left{border-right:none;border-bottom:1px solid var(--border);overflow:visible}
+  .bulk-right{overflow:visible}
+  .bulk-box,.settings-box{height:94vh}
+  .settings-layout{flex-direction:column}
+  .settings-nav{width:auto;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);padding:8px}
+  .settings-nav button{white-space:nowrap}
+  .search-overlay{padding-top:4vh}
+  .tour-art{min-height:140px;padding:18px 12px}
+  .ta-cols{grid-template-columns:1fr}
+}
 </style>
 
 <script type="module">
@@ -418,7 +631,11 @@ function updateAccountUI(user){
   <div class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <div class="app-title">Blurt</div>
-      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">☾</button>
+      <div class="sidebar-icons">
+        <button class="icon-btn" onclick="openSearch()" title="Search everything (/ or Ctrl+K)" aria-label="Search"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        <button class="icon-btn" onclick="openSettings('help')" title="Help, guides and the tour" aria-label="Help">?</button>
+        <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Toggle dark mode">☾</button>
+      </div>
     </div>
     <div class="sidebar-sort">
       <div class="sort-row">
@@ -467,6 +684,7 @@ function updateAccountUI(user){
     </div>
   </div>
 
+  <div class="sidebar-scrim" onclick="toggleSidebar()"></div>
   <div class="main">
     <div class="topbar">
       <button class="sidebar-toggle" onclick="toggleSidebar()">
@@ -507,26 +725,22 @@ function updateAccountUI(user){
 <input type="file" id="importFile" accept="application/json,.json" hidden onchange="onImportFile(this)">
 <input type="file" id="imageFile" accept="image/*" multiple hidden>
 
-<div id="settingsModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);align-items:center;justify-content:center">
-  <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;width:460px;max-width:92vw;max-height:88vh;overflow:auto">
-    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-size:15px;font-weight:600">Settings</div>
+<div id="settingsModal" style="display:none" onmousedown="if(event.target===this)closeSettings()">
+  <div class="settings-box" role="dialog" aria-label="Settings">
+    <div class="settings-head"><div class="tm-title">Settings</div><button class="panel-close" onclick="closeSettings()">✕</button></div>
+    <div class="settings-layout">
+      <nav class="settings-nav">
+        <button data-tab="shortcuts" onclick="settingsTab('shortcuts')">Keyboard shortcuts</button>
+        <button data-tab="study" onclick="settingsTab('study')">Study</button>
+        <button data-tab="data" onclick="settingsTab('data')">Data &amp; sync</button>
+        <button data-tab="help" onclick="settingsTab('help')">Help &amp; guides</button>
+      </nav>
+      <div class="settings-body">
+        <section data-tab="shortcuts"><div id="settingsHotkeyRows"></div></section>
+        <section data-tab="study" id="settingsStudy"></section>
+        <section data-tab="data"><div class="settings-section">Data &amp; sync</div><div id="settingsData"></div></section>
+        <section data-tab="help" id="settingsHelp"></section>
       </div>
-      <button class="panel-close" onclick="closeSettings()">✕</button>
-    </div>
-    <div style="padding:16px 20px">
-      <div class="settings-section">Keyboard shortcuts</div>
-      <div class="settings-text">These apply inside the answer and note editors. Click a shortcut, then press the key combination you want (include Ctrl/Cmd, Alt or Shift).</div>
-      <div id="settingsHotkeyRows"></div>
-    </div>
-    <div style="padding:16px 20px;border-top:1px solid var(--border)">
-      <div class="settings-section">Data &amp; sync</div>
-      <div id="settingsData"></div>
-    </div>
-    <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <button class="btn btn-sm" onclick="resetAllHotkeys()">Reset to defaults</button>
-      <button class="btn btn-primary" onclick="closeSettings()">Done</button>
     </div>
   </div>
 </div>
@@ -600,21 +814,29 @@ const Store=(()=>{
     return new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});
   }
   // Writes several keys in one transaction so state and sync bookkeeping never disagree.
-  async function put(entries){
+  function put(entries){return tx((get,set)=>Object.entries(entries).forEach(([k,v])=>set(k,v)));}
+  // Runs fn(get,set) as one transaction, so reads and writes can't interleave with
+  // another tab's. get(key,callback) reads; set(key,value) writes.
+  async function tx(fn,readonly){
     await init();
-    if(mode==='ls'){Object.entries(entries).forEach(([k,v])=>localStorage.setItem(LS+k,JSON.stringify(v)));return;}
+    if(mode==='ls'){
+      fn((k,cb)=>{const raw=localStorage.getItem(LS+k);cb(raw?JSON.parse(raw):undefined);},(k,v)=>localStorage.setItem(LS+k,JSON.stringify(v)));
+      return;
+    }
     const db=await idb();
     return new Promise((res,rej)=>{
-      const tx=db.transaction('kv','readwrite'),os=tx.objectStore('kv');
-      Object.entries(entries).forEach(([k,v])=>os.put(v,k));
-      tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error||new Error('aborted'));
+      const t=db.transaction('kv',readonly?'readonly':'readwrite'),os=t.objectStore('kv');
+      fn((k,cb)=>{const g=os.get(k);g.onsuccess=()=>cb(g.result);},(k,v)=>os.put(v,k));
+      t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||new Error('aborted'));
     });
   }
-  return{init,get,put,mode:()=>mode};
+  // Several keys read together (a consistent snapshot).
+  async function getMany(keys){const o={};await tx(get=>keys.forEach(k=>get(k,v=>{o[k]=v;})),true);return o;}
+  return{init,get,put,tx,getMany,mode:()=>mode};
 })();
 
 // UI state that belongs to this device only: never synced, never overwritten by the cloud.
-const LOCAL_ONLY=['activeSubId','activeTopicId','activeSpFilter','activeSubtopicSpFilters','openSubtopics','sidebarOpen'];
+const LOCAL_ONLY=['activeSubId','activeTopicId','activeSpFilter','activeSubtopicSpFilters','openSubtopics','sidebarOpen','showArchived'];
 const HISTORY_CAP=50;            // rating history kept per card (totals are kept separately)
 const TOMBSTONE_TTL=180*864e5;   // how long deletions are remembered for merging
 const SAFE_ID=/^[\w-]{1,64}$/;
@@ -630,6 +852,7 @@ function normalizeState(s){
   if(!s.activeSpFilter)s.activeSpFilter=null;
   if(!s.deleted||typeof s.deleted!=='object')s.deleted={};
   s.hotkeys=Object.assign(defaultHotkeys(),s.hotkeys||{});
+  s.studyPrefs=Object.assign({highlightTerms:true,suggestRating:true},s.studyPrefs);
   const fixId=x=>{if(!SAFE_ID.test(String(x.id||'')))x.id=uid();};
   const list=a=>(Array.isArray(a)?a:[]).filter(x=>x&&typeof x==='object');
   const cards=a=>list(a).map(c=>{fixId(c);capHistory(c);return c;});
@@ -664,7 +887,7 @@ let _resolveReady;const _ready=new Promise(r=>_resolveReady=r);
 async function load(){
   let s,meta;
   try{
-    s=await Store.get('state');meta=await Store.get('meta');
+    ({state:s,meta,ver:_storeVer=0}=await Store.getMany(['state','meta','ver']));_storeVer=_storeVer||0;
     if(s===undefined){
       // One-off move from the old localStorage key.
       const raw=localStorage.getItem('blurt3');
@@ -677,38 +900,147 @@ async function load(){
     setTimeout(()=>toast("Couldn't open your saved data on this device. Changes this session won't be kept — reload to try again.",{ms:12000}),0);
   }
   state=normalizeState(s||state);
+  if(isNarrow())state.sidebarOpen=!state.activeSubId;
   if(meta)syncMeta=Object.assign(syncMeta,meta);
   if(!Array.isArray(syncMeta.pendingSessions))syncMeta.pendingSessions=[];
+  syncMeta.pendingSessions.forEach(d=>{if(d&&!d.id)d.id=uid();});
+  await Tabs.start();
+  if(Tabs.ch)Tabs.refresh(false); // catch a write another tab made while this one was loading
   applyTheme();applySidebar();renderSidebar();
   document.getElementById('sortAZ').classList.toggle('active',state.sortOrder==='az');
   document.getElementById('sortNew').classList.toggle('active',state.sortOrder==='new');
   if(state.activeSubId)renderMain();
   if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+  if(!_loadFailed)maybeShowTour();
   _resolveReady();
 }
 
 // Content or synced preference changed: keep it locally and queue a cloud sync.
 function save(){
-  syncMeta.dirty=true;syncMeta.editedAt=Date.now();_editSeq++;
+  syncMeta.dirty=true;syncMeta.editedAt=Date.now();_editSeq++;_tabEdit=true;
   persistSoon();Sync.changed();
 }
 // Device-only UI change (navigation, expanded sections): local, never synced.
 function saveUI(){persistSoon();}
 let _persistTimer=null,_persistErr=null;
-function persistSoon(){clearTimeout(_persistTimer);_persistTimer=setTimeout(persistNow,250);}
+// _changeSeq counts local changes, _sharedSeq the last one written to storage
+// (and so announced to other tabs); _tabEdit: a content edit is among them.
+// _storeVer: the stored version (key `ver`, bumped by every write) this tab's
+// copy includes. If storage has moved past it, another tab wrote in between and
+// the write merges with what's there instead of replacing it.
+let _changeSeq=0,_sharedSeq=0,_persisting=0,_tabEdit=false,_storeVer=0;
+function persistSoon(){_changeSeq++;clearTimeout(_persistTimer);_persistTimer=setTimeout(persistNow,250);}
 async function persistNow(){
   clearTimeout(_persistTimer);_persistTimer=null;
   if(_loadFailed)return;
+  const seq=_changeSeq,edit=_tabEdit;_tabEdit=false;_persisting++;
+  let merged=null,ver=0;
   try{
-    await Store.put({state,meta:syncMeta});
+    await Store.tx((get,set)=>get('ver',v=>{
+      v=v||0;ver=v+1;
+      const write=s=>{set('state',s);set('ver',ver);get('meta',m=>set('meta',Tabs.mergeMeta(m,syncMeta,edit)));};
+      if(v===_storeVer)write(state);
+      else get('state',s=>write(merged=s?mergeStates(state,s):state));
+    }));
+    _storeVer=Math.max(_storeVer,ver);
+    if(merged&&merged!==state)replaceState(mergeStates(state,merged));
+    _sharedSeq=Math.max(_sharedSeq,seq);
+    Tabs.post({type:'saved',edit});
     if(_persistErr){_persistErr=null;renderSyncStatus();}
   }catch(e){
+    if(edit)_tabEdit=true;
     console.error('[Blurt] local save failed',e);
     _persistErr=e;renderSyncStatus();
-  }
+  }finally{_persisting--;}
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){if(_persistTimer)persistNow();Sync.flush();}});
 window.addEventListener('pagehide',()=>{if(_persistTimer)persistNow();});
+
+// ── Other tabs ──
+// Every open tab holds its own copy of the data, so tabs tell each other (over a
+// BroadcastChannel) whenever they write to storage. A tab with no unsaved
+// changes of its own takes the stored copy; one with changes merges it in
+// (mergeStates) and writes the result back. Only one tab, the leader (holder of
+// a Web Lock), talks to the cloud: it pushes edits made in any tab and its
+// cloud updates reach the other tabs through storage. When it closes, the next
+// tab takes over. The leader owns the sync bookkeeping in `meta`; other tabs
+// only add their queued study sessions and a "has edits" flag to it.
+const Tabs={
+  id:uid(),leader:true,ch:null,busy:false,again:false,
+  start(){
+    if(!('BroadcastChannel' in window)||!(navigator.locks&&navigator.locks.request))return Promise.resolve(); // one tab at a time, as before
+    this.ch=new BroadcastChannel('blurt');
+    this.ch.onmessage=e=>this.onMessage(e.data||{});
+    const hold=()=>new Promise(()=>{}); // never released: the lock goes when the tab closes
+    return new Promise(decided=>{
+      navigator.locks.request('blurt-sync',{ifAvailable:true},lock=>{
+        if(lock){this.leader=true;decided();return hold();}
+        this.leader=false;decided();this.post({type:'hello'});
+        navigator.locks.request('blurt-sync',()=>{this.takeOver();return hold();});
+      });
+    });
+  },
+  post(m){if(this.ch)try{this.ch.postMessage(Object.assign({from:this.id},m));}catch(e){}},
+  onMessage(m){
+    if(m.from===this.id)return;
+    if(m.type==='saved')this.refresh(m.edit&&this.leader);
+    else if(m.type==='hello'&&this.leader)this.postStatus();
+    else if(m.type==='status'&&!this.leader){Sync.status=m.status;Sync.detail=m.detail;syncMeta.dirty=m.dirty;renderSyncStatus();}
+    else if(m.type==='retry'&&this.leader)Sync.push();
+  },
+  postStatus(){if(this.leader)this.post({type:'status',status:Sync.status,detail:Sync.detail,dirty:!!syncMeta.dirty});},
+  // Another tab wrote to storage: bring this tab up to date.
+  refresh(edited){
+    if(this.busy){this.again=true;this.edited=this.edited||edited;return;}
+    this.busy=true;this.edited=edited;
+    _ready.then(async()=>{
+      try{do{this.again=false;const e=this.edited;this.edited=false;await this.pull(e);}while(this.again);}
+      catch(e){console.error('[Blurt] reading another tab\'s changes failed',e);}
+      this.busy=false;
+    });
+  },
+  async pull(edited){
+    if(_loadFailed)return;
+    const{state:s,meta,ver=0}=await Store.getMany(['state','meta','ver']);
+    if(s&&ver>_storeVer){
+      // Every write includes what was stored before it, so a tab with nothing
+      // unsaved can simply take the stored copy.
+      if(_persistTimer||_persisting||_changeSeq!==_sharedSeq){
+        replaceState(mergeStates(state,s));
+        if(!_persistTimer&&!_persisting)persistSoon();
+      }else if(cloudJSON(s)!==cloudJSON(state))replaceState(s);
+      _storeVer=ver;
+    }
+    if(meta){
+      if(this.leader){const m=this.mergeMeta(meta,syncMeta,false);syncMeta.pendingSessions=m.pendingSessions;syncMeta.uploadedSessions=m.uploadedSessions;}
+      else Object.assign(syncMeta,meta);
+    }
+    if(this.leader){
+      if(edited){syncMeta.dirty=true;syncMeta.editedAt=Date.now();_editSeq++;Sync.changed();}
+      Sync.flushSessions();
+    }
+    renderSyncStatus();
+  },
+  // The previous leader closed: pick up its bookkeeping, then connect.
+  async takeOver(){
+    await _ready;
+    await this.pull(false).catch(()=>{});
+    this.leader=true;
+    if(Sync.user)Sync._onUser(Sync.user);
+  },
+  // What a tab writes to `meta`, given what is stored: study-session queues are
+  // combined (minus ones already uploaded); a non-leader keeps the leader's
+  // sync bookkeeping and only marks unsynced edits.
+  mergeMeta(old,cur,edit){
+    if(!old||!this.ch)return cur;
+    const out=this.leader?Object.assign({},cur):Object.assign({},old,{dirty:!!(old.dirty||edit),editedAt:Math.max(old.editedAt||0,edit?Date.now():0)});
+    const up=[...new Set([...(old.uploadedSessions||[]),...(cur.uploadedSessions||[])])].slice(-200);
+    const seen=new Set(up),pending=[];
+    [...(old.pendingSessions||[]),...(cur.pendingSessions||[])].forEach(d=>{if(d&&d.id&&!seen.has(d.id)){seen.add(d.id);pending.push(d);}});
+    out.uploadedSessions=up;out.pendingSessions=pending.slice(-200);
+    return out;
+  }
+};
 async function saveBackup(s,reason){
   try{await Store.put({backup:{at:Date.now(),reason,state:JSON.parse(JSON.stringify(s))}});}catch(e){console.error('[Blurt] backup failed',e);}
 }
@@ -729,6 +1061,7 @@ const Sync={
     clearTimeout(this.timer);clearTimeout(this.watchRetry);
     if(!user){this.user=null;if(window.blurtCloud)blurtCloud.unwatch();this.setStatus('local');return;}
     this.user=user;
+    if(!Tabs.leader){renderSyncStatus();return;} // the leader tab syncs for everyone (Tabs.takeOver)
     this.accountSwitch=!!(syncMeta.uid&&syncMeta.uid!==user.uid);
     if(syncMeta.uid!==user.uid)syncMeta.synced=false;
     syncMeta.uid=user.uid;persistSoon();
@@ -736,7 +1069,7 @@ const Sync={
     this.watch();
   },
   watch(){
-    if(!this.user)return;
+    if(!this.user||!Tabs.leader)return;
     blurtCloud.watch(this.user.uid,c=>this.onCloud(c),e=>{
       console.error('[Blurt] cloud listener',e);
       this.setStatus('error',e&&e.code==='permission-denied'?'The cloud refused access to your data.':'Lost the connection to the cloud.');
@@ -765,13 +1098,14 @@ const Sync={
   },
   changed(){if(this.user)this.schedule(1500);else renderSyncStatus();},
   schedule(ms){
-    if(!this.user)return;
+    if(!this.user||!Tabs.leader)return;
     clearTimeout(this.timer);this.timer=setTimeout(()=>this.push(),ms);
     if(this.status!=='error'&&syncMeta.synced)this.setStatus('saving');
   },
   flush(){if(this.timer&&this.user)this.push();},
   async push(){
     clearTimeout(this.timer);this.timer=null;
+    if(!Tabs.leader){Tabs.post({type:'retry'});return;}
     // Nothing goes up until the first cloud read has told us where we stand.
     if(!this.user||!window.blurtCloud||!syncMeta.synced)return;
     if(this.inflight){this.again=true;return;}
@@ -798,13 +1132,18 @@ const Sync={
       this.timer=setTimeout(()=>this.push(),this.retryMs);
     }
   },
-  setStatus(s,detail){this.status=s;this.detail=detail||'';renderSyncStatus();},
+  setStatus(s,detail){this.status=s;this.detail=detail||'';renderSyncStatus();Tabs.postStatus();},
   // Study-session summaries queue locally so offline sessions still reach the cloud.
-  queueSession(d){syncMeta.pendingSessions.push(d);syncMeta.pendingSessions=syncMeta.pendingSessions.slice(-200);persistSoon();this.flushSessions();},
+  // Ids let tabs combine their queues without uploading anything twice.
+  queueSession(d){d.id=uid();syncMeta.pendingSessions.push(d);syncMeta.pendingSessions=syncMeta.pendingSessions.slice(-200);persistSoon();this.flushSessions();},
   async flushSessions(){
-    if(!this.user||this.flushing||!syncMeta.pendingSessions.length||!navigator.onLine)return;
+    if(!this.user||!Tabs.leader||this.flushing||!syncMeta.pendingSessions.length||!navigator.onLine)return;
     this.flushing=true;
-    try{while(syncMeta.pendingSessions.length){await blurtCloud.addSession(this.user.uid,syncMeta.pendingSessions[0]);syncMeta.pendingSessions.shift();persistSoon();}}
+    try{while(syncMeta.pendingSessions.length){
+      const d=syncMeta.pendingSessions[0];await blurtCloud.addSession(this.user.uid,d);
+      syncMeta.pendingSessions.shift();
+      syncMeta.uploadedSessions=[...(syncMeta.uploadedSessions||[]),d.id].slice(-200);persistSoon();
+    }}
     catch(e){console.warn('[Blurt] session upload failed',e);}
     this.flushing=false;
   }
@@ -1159,6 +1498,7 @@ function sanitizeRich(html){
     if(tag==='A'){ch.setAttribute('target','_blank');ch.setAttribute('rel','noopener noreferrer');}
   });
   clean(tpl.content);
+  nestQuillLists(tpl.content);
   const box=document.createElement('div');box.appendChild(tpl.content);
   const out=box.innerHTML;
   if(_richCache.size>3000)_richCache.clear();
@@ -1259,16 +1599,20 @@ function setSpFilter(sp){
 }
 function renderSidebar(){
   const el=document.getElementById('subjectList');
-  const subs=sortedSubjects();
+  const subs=sortedSubjects(),live=subs.filter(s=>!s.archived),arch=subs.filter(s=>s.archived);
   if(!subs.length){el.innerHTML='<div style="padding:10px;font-size:12px;color:var(--text3)">No subjects yet</div>';return;}
-  el.innerHTML=subs.map(s=>{
-    const count=s.topics?s.topics.reduce((a,t)=>a+allCards(t).length,0):0;
-    return`<div class="subject-item${state.activeSubId===s.id?' active':''}" onclick="openSubject('${s.id}')">
+  const item=s=>{
+    const count=(s.topics||[]).reduce((a,t)=>a+allCards(t).length,0);
+    return`<div class="subject-item${state.activeSubId===s.id?' active':''}${s.archived?' archived':''}" onclick="openSubject('${s.id}')">
       <span class="subject-dot" style="background:${s.color}"></span>
       <span class="subject-name">${esc(s.name)}</span>
       <span class="subject-count">${count}</span>
     </div>`;
-  }).join('');
+  };
+  let h=live.map(item).join('');
+  if(!live.length)h+='<div style="padding:10px;font-size:12px;color:var(--text3)">All subjects are archived</div>';
+  if(arch.length)h+=`<button class="archived-toggle" onclick="toggleArchivedList()"><span>${state.showArchived?'▾':'▸'}</span> Archived (${arch.length})</button>`+(state.showArchived?arch.map(item).join(''):'');
+  el.innerHTML=h;
 }
 
 function allCards(t){let c=[...(t.cards||[])];(t.subtopics||[]).forEach(st=>c=c.concat(st.cards||[]));return c;}
@@ -1277,6 +1621,7 @@ function openSubject(id){
   state.activeTopicId = null;
   state.activeSpFilter = null;
   state.activeSubtopicSpFilters = {};
+  if(isNarrow()){state.sidebarOpen=false;applySidebar();}
   saveUI();
   renderSidebar();
   renderMain();
@@ -1304,7 +1649,7 @@ function renderMain(){
   shown.forEach(t=>getSpecPoints(t).forEach(sp=>allSpSet.add(sp)));
   const allSps=[...allSpSet].sort(compareSpecPoints);
 
-  let html=`<div class="stats-row">
+  let html=(sub.archived?`<div class="archived-banner"><span>📦 This subject is archived, so it's hidden from your main subject list.</span><span class="spacer"></span><button class="btn btn-sm" onclick="toggleArchive('${sub.id}')">Unarchive</button></div>`:'')+`<div class="stats-row">
     <div class="stat-card"><div class="stat-n">${topics.length}</div><div class="stat-l">Topics</div></div>
     <div class="stat-card"><div class="stat-n">${totalCards}</div><div class="stat-l">Cards</div></div>
     <div class="stat-card"><div class="stat-n">${notedCards}</div><div class="stat-l">My notes</div></div>
@@ -1339,6 +1684,7 @@ function renderMain(){
     html+=`<div class="topic-block"><div class="topic-header"><span class="topic-label">${esc(t.name)}</span><div class="topic-actions">
       <button class="btn btn-sm" onclick="openPanel('subtopic',null,'${t.id}')">+ Subtopic</button>
       <button class="btn btn-sm" onclick="openPanel('card',null,'${t.id}',null)">+ Card</button>
+      <button class="btn btn-sm" onclick="openBulk('${t.id}',null)">Bulk add</button>
       <button class="btn btn-sm" onclick="openPanel('topic','${t.id}')">Edit</button>
       <button class="btn btn-sm btn-danger" onclick="deleteTopic('${t.id}')">Delete</button>
     </div></div>`;
@@ -1380,6 +1726,7 @@ function renderMain(){
           </div>
           <div class="subtopic-actions">
             <button class="btn btn-sm" onclick="openPanel('card',null,'${t.id}','${st.id}')">+ Card</button>
+            <button class="btn btn-sm" onclick="openBulk('${t.id}','${st.id}')">Bulk add</button>
             <button class="btn btn-sm" onclick="openPanel('subtopic','${st.id}','${t.id}')">Edit</button>
             <button class="btn btn-sm btn-danger" onclick="deleteSubtopic('${t.id}','${st.id}')">Delete subtopic</button>
           </div>
@@ -1405,6 +1752,7 @@ function renderMain(){
   document.getElementById('mainContent').innerHTML=html;
   (state.openSubtopics||[]).forEach(id=>{const el=document.getElementById('st-'+id);if(el)el.classList.add('open');});
   initBlurtEditors();
+  if(_kbCard)setCardFocus(_kbCard,false);
 }
 
 function buildWeakAreasHTML(sub){
@@ -1462,7 +1810,7 @@ function cardHTML(tid,c,stid){
   const hasNote=c.myNote&&c.myNote.trim();
   const dot=confDot(c);
   const showSpRow=!!(c.sp||dot);
-  return`<div class="card" id="card-${c.id}">
+  return`<div class="card${_kbCard===c.id?' kb-focus':''}" id="card-${c.id}" onmousedown="setCardFocus('${c.id}')">
     ${showSpRow?`<div class="card-sp">${c.sp?esc(c.sp):''}${dot}</div>`:''}
     <div class="card-q">${esc(c.q)}</div>
     ${c.hint?`<div class="card-hint">${esc(c.hint)}</div>`:''}
@@ -1474,8 +1822,8 @@ function cardHTML(tid,c,stid){
       <button class="card-btn" onclick="openPanel('card','${c.id}','${tid}','${stid||''}')">Edit</button>
       <button class="card-btn red" onclick="deleteCard('${tid}','${c.id}','${stid||''}')">Delete</button>
     </div>
-    <div class="answer-box" id="ans-${c.id}">${c.answer?renderAnswer(c.answer):''}</div>
-    ${hasNote?`<div class="my-note" id="note-${c.id}"><div class="my-note-label">My note</div><div class="my-note-text">${renderAnswer(c.myNote)}</div></div>`:''}
+    <div class="answer-box rich" id="ans-${c.id}">${c.answer?renderAnswer(c.answer):''}</div>
+    ${hasNote?`<div class="my-note" id="note-${c.id}"><div class="my-note-label">My note</div><div class="my-note-text rich">${renderAnswer(c.myNote)}</div></div>`:''}
   </div>`;
 }
 
@@ -1493,7 +1841,7 @@ function saveNote(tid,cid,stid){
   else{
     const card=document.getElementById('card-'+cid);
     const nd=document.createElement('div');nd.className='my-note vis';nd.id='note-'+cid;
-    nd.innerHTML=`<div class="my-note-label">My note</div><div class="my-note-text">${renderAnswer(c.myNote)}</div>`;
+    nd.innerHTML=`<div class="my-note-label">My note</div><div class="my-note-text rich">${renderAnswer(c.myNote)}</div>`;
     card.appendChild(nd);
     const acts=card.querySelector('.card-actions');
     if(!acts.querySelector('.card-btn.green[onclick*="toggleNote"]')){
@@ -1591,32 +1939,40 @@ function buildSubjectPanel(editId){
     <div class="field"><label class="field-label">Colour</label>
       <div class="color-grid">${PALETTE.map(p=>`<div class="color-swatch${panel.selColor===p.c?' sel':''}" data-color="${p.c}" style="background:${p.c}" onclick="setPanelColor('${p.c}')"></div>`).join('')}</div></div>`;
   document.getElementById('panelFooter').innerHTML=`
-    ${sub?`<button class="btn btn-danger" onclick="deleteSubject('${sub.id}');closePanel()">Delete</button><span class="spacer"></span>`:''}
+    ${sub?`<button class="btn btn-danger" onclick="deleteSubject('${sub.id}');closePanel()">Delete</button><button class="btn" onclick="toggleArchive('${sub.id}')" title="Hide it from the subject list without deleting anything">${sub.archived?'Unarchive':'Archive'}</button><span class="spacer"></span>`:''}
     <button class="btn" onclick="closePanel()">Cancel</button>
     <button class="btn btn-primary" onclick="saveSubject()">Save</button>`;
 }
 function buildTopicPanel(editId){
-  const sub=state.subjects.find(s=>s.id===state.activeSubId);
+  const sub=activeSubject();
   const t=editId&&sub?sub.topics.find(t=>t.id===editId):null;
+  const subs=sortedSubjects().filter(s=>!s.archived||s.id===sub.id);
   document.getElementById('panelTitle').textContent=t?'Edit topic':'New topic';
   document.getElementById('panelBody').innerHTML=`
     <div class="field"><label class="field-label">Topic name</label>
       <input class="field-input" id="p-topic" placeholder="e.g. Topic 3: Computers" value="${t?esc(t.name):''}">
-      <div class="field-hint">Topics starting with a number are sorted numerically</div></div>`;
+      <div class="field-hint">Numbered names (“3 Bonding”, “Unit 3”, “Topic 3.1”) sort in number order</div></div>
+    ${t&&subs.length>1?`<div class="field"><label class="field-label">Subject</label>
+      <select class="field-input" id="p-topic-sub">${subs.map(s=>`<option value="${s.id}"${s.id===sub.id?' selected':''}>${esc(s.name)}</option>`).join('')}</select>
+      <div class="field-hint">Choose another subject to move this topic and all its cards there</div></div>`:''}`;
   document.getElementById('panelFooter').innerHTML=`
+    ${t?`<button class="btn btn-danger" onclick="closePanel();deleteTopic('${t.id}')">Delete</button><span class="spacer"></span>`:''}
     <button class="btn" onclick="closePanel()">Cancel</button>
     <button class="btn btn-primary" onclick="saveTopic()">Save topic</button>`;
 }
 
 function buildSubtopicPanel(editId,topicId){
-  const sub=state.subjects.find(s=>s.id===state.activeSubId);
+  const sub=activeSubject();
   const t=sub&&sub.topics.find(t=>t.id===topicId);
   const st=editId&&t?(t.subtopics||[]).find(st=>st.id===editId):null;
   document.getElementById('panelTitle').textContent=st?'Edit subtopic':'New subtopic';
   document.getElementById('panelBody').innerHTML=`
     <div class="field"><label class="field-label">Subtopic name</label>
       <input class="field-input" id="p-stname" placeholder="e.g. 3.1 CPU & Memory" value="${st?esc(st.name):''}">
-      <div class="field-hint">Adding to: ${t?esc(t.name):'–'}</div></div>`;
+      ${st?'':`<div class="field-hint">Adding to: ${t?esc(t.name):'–'}</div>`}</div>
+    ${st?`<div class="field"><label class="field-label">Topic</label>
+      <select class="field-input" id="p-st-loc">${locationOptions(`${sub.id}|${topicId}|`,true)}</select>
+      <div class="field-hint">Choose another topic to move this subtopic and its cards there</div></div>`:''}`;
   document.getElementById('panelFooter').innerHTML=`
     ${st?`<button class="btn btn-danger" onclick="deleteSubtopic('${topicId}','${st.id}');closePanel()">Delete</button><span class="spacer"></span>`:''}
     <button class="btn" onclick="closePanel()">Cancel</button>
@@ -1639,9 +1995,11 @@ function buildCardPanel(editId,topicId,subtopicId){
       <input class="field-input" id="p-hint" placeholder="e.g. Think: arithmetic and logic..." value="${c?esc(c.hint||''):''}"></div>
     <div class="field"><label class="field-label">Model answer</label>
       <div class="quill-answer-wrap"><div id="p-ans-editor"></div></div></div>
-    <div class="section-note">Adding to: <strong>${st?esc(st.name)+' › ':''} ${t?esc(t.name):'–'}</strong></div>`;
+    <div class="field"><label class="field-label">Location</label>
+      <select class="field-input" id="p-loc">${locationOptions(`${state.activeSubId}|${topicId}|${subtopicId||''}`,false)}</select>
+      ${c?'<div class="field-hint">Choose somewhere else to move this card</div>':''}</div>`;
   document.getElementById('panelFooter').innerHTML=`
-    ${c?`<button class="btn btn-danger" onclick="deleteCard('${topicId}','${c.id}','${subtopicId||''}');closePanel()">Delete</button><span class="spacer"></span>`:''}
+    ${c?`<button class="btn btn-danger" onclick="deleteCard('${topicId}','${c.id}','${subtopicId||''}');closePanel()">Delete</button><button class="btn" onclick="saveCard(true)" title="Adds a new card from this form and leaves the original unchanged">Save as copy</button><span class="spacer"></span>`:''}
     <button class="btn" onclick="closePanel()">Cancel</button>
     <button class="btn btn-primary" onclick="saveCard()">Save card</button>`;
   _answerQuill=new Quill('#p-ans-editor',{
@@ -1672,52 +2030,89 @@ function saveSubject(){
 }
 function saveTopic(){
   const name=v('p-topic');if(!name.trim())return;
-  const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
+  const sub=activeSubject();if(!sub)return;
   if(!sub.topics)sub.topics=[];
-  if(panel.editId){const t=sub.topics.find(t=>t.id===panel.editId);if(t){t.name=name.trim();t.updatedAt=Date.now();}}
-  else{const t={id:uid(),name:name.trim(),cards:[],subtopics:[],updatedAt:Date.now()};sub.topics.push(t);state.activeTopicId=t.id;}
+  if(panel.editId){
+    const t=sub.topics.find(t=>t.id===panel.editId);if(!t)return;
+    t.name=name.trim();t.updatedAt=Date.now();
+    const dest=v('p-topic-sub'),ds=dest&&dest!==sub.id&&state.subjects.find(s=>s.id===dest);
+    if(ds){
+      moveItem(sub.topics,t,ds.topics||(ds.topics=[]));
+      if(state.activeTopicId===t.id)state.activeTopicId=null;
+      save();closePanel();renderSidebar();renderMain();afterMove(ds.id,'the topic');return;
+    }
+  }else{const t={id:uid(),name:name.trim(),cards:[],subtopics:[],createdAt:Date.now(),updatedAt:Date.now()};sub.topics.push(t);state.activeTopicId=t.id;}
   save();closePanel();renderMain();
 }
 function saveSubtopic(){
   const name=v('p-stname');if(!name.trim())return;
-  const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
+  const sub=activeSubject();if(!sub)return;
   const t=sub.topics.find(t=>t.id===panel.topicId);if(!t)return;
   if(!t.subtopics)t.subtopics=[];
-  if(panel.editId){const st=t.subtopics.find(st=>st.id===panel.editId);if(st){st.name=name.trim();st.updatedAt=Date.now();}}
-  else t.subtopics.push({id:uid(),name:name.trim(),cards:[],updatedAt:Date.now()});
+  if(panel.editId){
+    const st=t.subtopics.find(st=>st.id===panel.editId);if(!st)return;
+    st.name=name.trim();st.updatedAt=Date.now();
+    const loc=v('p-st-loc');
+    if(loc&&loc!==`${sub.id}|${t.id}|`){
+      const l=parseLoc(loc),dest=resolveList({kind:'subtopics',sub:l.sub,tid:l.tid});
+      if(dest){
+        const m=moveItem(t.subtopics,st,dest);
+        state.openSubtopics=[...(state.openSubtopics||[]),m.id];
+        save();closePanel();renderSidebar();renderMain();afterMove(l.sub,'the subtopic');return;
+      }
+    }
+  }else t.subtopics.push({id:uid(),name:name.trim(),cards:[],createdAt:Date.now(),updatedAt:Date.now()});
   save();closePanel();renderMain();
 }
-function saveCard(){
+// asCopy: add a new card from the form and leave the original untouched.
+function saveCard(asCopy){
   const q=v('p-q');if(!q.trim())return;
-  const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
-  const t=sub.topics.find(t=>t.id===panel.topicId);if(!t)return;
-  const cardList=panel.subtopicId?((t.subtopics||[]).find(st=>st.id===panel.subtopicId)||{cards:[]}).cards:(t.cards=t.cards||[]);
+  const here=`${state.activeSubId}|${panel.topicId}|${panel.subtopicId||''}`,loc=v('p-loc')||here;
+  const src=resolveList(parseLoc(here)),dest=resolveList(parseLoc(loc));if(!dest)return;
   const rawAns=_answerQuill?_answerQuill.root.innerHTML:'';
   const answer=(rawAns==='<p><br></p>'||!rawAns)?'':rawAns;
-  if(panel.editId){const c=cardList.find(c=>c.id===panel.editId);if(c){c.sp=v('p-sp');c.q=q.trim();c.hint=v('p-hint');c.answer=answer;c.updatedAt=Date.now();}}
-  else cardList.push({id:uid(),sp:v('p-sp'),q:q.trim(),hint:v('p-hint'),answer:answer,myNote:'',updatedAt:Date.now()});
-  save();closePanel();renderMain();
+  const now=Date.now(),fields={sp:v('p-sp'),q:q.trim(),hint:v('p-hint'),answer,updatedAt:now};
+  let focus;
+  if(panel.editId&&asCopy!==true){
+    const c=src&&src.find(c=>c.id===panel.editId);if(!c)return;
+    Object.assign(c,fields);focus=c.id;
+    if(dest!==src)focus=moveItem(src,c,dest).id;
+  }else{
+    const c=Object.assign({id:uid(),myNote:'',createdAt:now},fields);
+    const i=asCopy===true&&dest===src?src.findIndex(x=>x.id===panel.editId):-1;
+    if(i>=0)dest.splice(i+1,0,c);else dest.push(c);
+    focus=c.id;
+  }
+  save();closePanel();renderSidebar();renderMain();
+  const ds=parseLoc(loc).sub;
+  if(ds!==state.activeSubId)toast(`${asCopy===true?'Copied':panel.editId?'Moved':'Added'} to ${clip(subjectName(ds),40)}.`,{action:{label:'Go there',fn:()=>openSubject(ds)}});
+  else{setCardFocus(focus,true);if(asCopy===true)toast('Saved a copy. The original card is unchanged.');}
 }
 function v(id){return(document.getElementById(id)||{}).value||'';}
 
 // Default keyboard shortcuts for the editors. Each hotkey stores the key code
 // (for Quill matching), a display char, and which modifiers must be held.
 function defaultHotkeys(){
-  return {
+  const k=key=>({key,code:null,shortKey:false,shiftKey:false,altKey:false});
+  return{
     bulletList:{code:56,key:'8',shortKey:true,shiftKey:true,altKey:false},
     orderedList:{code:55,key:'7',shortKey:true,shiftKey:true,altKey:false},
-    insertTable:{code:84,key:'T',shortKey:true,shiftKey:false,altKey:true}
+    insertTable:{code:84,key:'T',shortKey:true,shiftKey:false,altKey:true},
+    search:k('/'),newCard:k('n'),bulkAdd:k('b'),study:k('s'),nextCard:k('j'),prevCard:k('k'),
+    toggleAnswer:k('a'),writeBlurt:k('w'),editCard:k('e'),toggleSidebar:k('['),showHelp:k('?'),
+    reveal:k(' '),rateGot:k('1'),rateAlmost:k('2'),rateMissed:k('3')
   };
 }
 function hkToBinding(hk){const h=hk||{};return{key:h.code,shortKey:!!h.shortKey,shiftKey:!!h.shiftKey,altKey:!!h.altKey};}
+const KEY_NAMES={' ':'Space',ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',Escape:'Esc',Delete:'Del'};
 function hotkeyLabel(hk){
-  if(!hk||hk.code==null)return'—';
+  if(!hk||!hk.key)return'—';
   const isMac=/Mac|iPhone|iPad/i.test(navigator.platform||navigator.userAgent);
   const parts=[];
   if(hk.shortKey)parts.push(isMac?'Cmd':'Ctrl');
   if(hk.altKey)parts.push(isMac?'Option':'Alt');
   if(hk.shiftKey)parts.push('Shift');
-  parts.push(hk.key||'');
+  parts.push(KEY_NAMES[hk.key]||(hk.key.length===1?hk.key.toUpperCase():hk.key));
   return parts.join('+');
 }
 
@@ -1738,39 +2133,42 @@ function editorBindings(onEnter,onArrowUpTop){
 
 // ---- Settings ----
 let _hkRecordHandler=null;
-function openSettings(){renderHotkeyRows();renderSettingsData();document.getElementById('settingsModal').style.display='flex';}
-function closeSettings(){cancelRecordHotkey();document.getElementById('settingsModal').style.display='none';}
 function renderHotkeyRows(){
   if(!state.hotkeys)state.hotkeys=defaultHotkeys();
-  const rows=[{k:'bulletList',label:'Bullet list'},{k:'orderedList',label:'Numbered list'},{k:'insertTable',label:'Insert table'}];
-  document.getElementById('settingsHotkeyRows').innerHTML=rows.map(r=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:13px;color:var(--text)">${r.label}</span>
-      <button class="hotkey-btn" id="hk-${r.k}" onclick="startRecordHotkey('${r.k}',this)">${esc(hotkeyLabel(state.hotkeys[r.k]))}</button>
-    </div>`).join('');
+  document.getElementById('settingsHotkeyRows').innerHTML=`<div class="settings-text">Click a shortcut, then press the keys you want. Esc cancels.</div>`+HOTKEY_GROUPS.map(g=>`
+    <div class="settings-section" style="margin-top:18px">${g.title}</div><div class="settings-text">${g.text}</div>
+    ${Object.entries(HOTKEYS).filter(([,d])=>d.scope===g.scope).map(([k,d])=>`
+      <div class="hotkey-row"><div><div class="hotkey-name">${d.label}</div>${d.desc?`<div class="hotkey-desc">${d.desc}</div>`:''}</div>
+      <button class="hotkey-btn" id="hk-${k}" onclick="startRecordHotkey('${k}',this)">${esc(hotkeyLabel(state.hotkeys[k]))}</button></div>`).join('')}`).join('')
+    +'<div class="settings-actions" style="margin-top:16px"><button class="btn btn-sm" onclick="resetAllHotkeys()">Reset all to defaults</button></div>';
 }
+function sameHotkey(a,b){return!!a&&!!b&&normKey(a.key)===normKey(b.key)&&!!a.shortKey===!!b.shortKey&&!!a.altKey===!!b.altKey&&!!a.shiftKey===!!b.shiftKey;}
+function resetAllHotkeys(){state.hotkeys=defaultHotkeys();save();renderHotkeyRows();if(state.activeSubId&&!_session)rerenderKeepingDrafts();}
 function startRecordHotkey(which,btn){
   cancelRecordHotkey();
   document.querySelectorAll('.hotkey-btn').forEach(b=>b.classList.remove('recording'));
+  const scope=HOTKEYS[which].scope;
   btn.textContent='Press keys…';btn.classList.add('recording');
   _hkRecordHandler=function(e){
-    if(['Shift','Control','Alt','Meta','CapsLock','Escape'].includes(e.key)){
-      if(e.key==='Escape'){cancelRecordHotkey();renderHotkeyRows();}
-      return;
-    }
+    if(['Shift','Control','Alt','Meta','CapsLock','Tab'].includes(e.key))return;
     e.preventDefault();e.stopPropagation();
-    if(!(e.ctrlKey||e.metaKey||e.altKey)){btn.textContent='Add Ctrl / Cmd / Alt…';return;}
-    if(!state.hotkeys)state.hotkeys=defaultHotkeys();
-    state.hotkeys[which]={code:e.keyCode,key:e.key.length===1?e.key.toUpperCase():e.key,shortKey:e.ctrlKey||e.metaKey,shiftKey:e.shiftKey,altKey:e.altKey};
+    if(e.key==='Escape'){cancelRecordHotkey();renderHotkeyRows();return;}
+    if(scope==='editor'&&!(e.ctrlKey||e.metaKey||e.altKey)){btn.textContent='Add Ctrl / Cmd / Alt…';return;}
+    if(scope!=='editor'&&(e.ctrlKey||e.metaKey)&&!e.altKey&&normKey(e.key)==='k'){btn.textContent='Ctrl/Cmd+K is search';return;}
+    const hk=scope==='editor'
+      ?{code:e.keyCode,key:e.key.length===1?e.key.toUpperCase():e.key,shortKey:e.ctrlKey||e.metaKey,shiftKey:e.shiftKey,altKey:e.altKey}
+      :{code:null,key:normKey(e.key),shortKey:e.ctrlKey||e.metaKey,shiftKey:e.shiftKey&&/^[a-z]$/i.test(e.key),altKey:e.altKey};
+    const clash=Object.entries(HOTKEYS).find(([k,d])=>k!==which&&d.scope===scope&&sameHotkey(state.hotkeys[k],hk));
+    if(clash){btn.textContent=`Already “${clash[1].label}”`;return;}
+    state.hotkeys[which]=hk;
     save();cancelRecordHotkey();renderHotkeyRows();
-    if(state.activeSubId)renderMain();
+    if(state.activeSubId&&!_session)rerenderKeepingDrafts();
   };
   document.addEventListener('keydown',_hkRecordHandler,true);
 }
 function cancelRecordHotkey(){
   if(_hkRecordHandler){document.removeEventListener('keydown',_hkRecordHandler,true);_hkRecordHandler=null;}
 }
-function resetAllHotkeys(){state.hotkeys=defaultHotkeys();save();renderHotkeyRows();if(state.activeSubId)renderMain();}
 
 // Find which topic/subtopic a card belongs to within the active subject.
 function locateCard(cid){
@@ -2039,8 +2437,9 @@ function initBlurtEditors(){
 }
 
 function deleteSubject(id){
-  if(!confirm('Delete this subject and everything in it?'))return;
-  state.subjects=state.subjects.filter(s=>s.id!==id);markDeleted(id);
+  const sub=state.subjects.find(s=>s.id===id);if(!sub)return;
+  if(!confirm(`Delete “${sub.name}” and everything in it?`))return;
+  removeWithUndo({kind:'subjects'},id,`“${clip(sub.name,40)}”`);
   const wasActive=state.activeSubId===id;
   if(wasActive){state.activeSubId=null;state.activeTopicId=null;}
   save();renderSidebar();
@@ -2053,25 +2452,23 @@ function showHome(title){
   document.getElementById('mainContent').innerHTML=`<div class="empty"><div class="empty-title">${esc(title||'No subject selected')}</div><div class="empty-sub">Add or select a subject.</div><button class="btn btn-primary" onclick="openPanel('subject')">Add subject</button></div>`;
 }
 function deleteTopic(tid){
-  if(!confirm('Delete this topic and all its cards?'))return;
-  const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
-  sub.topics=sub.topics.filter(t=>t.id!==tid);markDeleted(tid);
+  const sub=activeSubject();if(!sub)return;
+  const t=(sub.topics||[]).find(t=>t.id===tid);if(!t)return;
+  removeWithUndo({kind:'topics',sub:sub.id},tid,`topic “${clip(t.name,40)}”`);
   if(state.activeTopicId===tid)state.activeTopicId=null;
   save();renderMain();
 }
 function deleteSubtopic(tid,stid){
-  if(!confirm('Delete this subtopic and all its cards?'))return;
-  const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
-  const t=sub.topics.find(t=>t.id===tid);if(!t)return;
-  t.subtopics=(t.subtopics||[]).filter(st=>st.id!==stid);markDeleted(stid);
+  const sub=activeSubject();if(!sub)return;
+  const t=(sub.topics||[]).find(t=>t.id===tid),st=t&&(t.subtopics||[]).find(s=>s.id===stid);if(!st)return;
+  removeWithUndo({kind:'subtopics',sub:sub.id,tid},stid,`subtopic “${clip(st.name,40)}”`);
   save();renderMain();
 }
 function deleteCard(tid,cid,stid){
-  const sub=state.subjects.find(s=>s.id===state.activeSubId);if(!sub)return;
-  const t=sub.topics.find(t=>t.id===tid);if(!t)return;
-  if(stid){const st=(t.subtopics||[]).find(st=>st.id===stid);if(st)st.cards=(st.cards||[]).filter(c=>c.id!==cid);}
-  else t.cards=(t.cards||[]).filter(c=>c.id!==cid);
-  markDeleted(cid);save();const el=document.getElementById('card-'+cid);if(el)el.remove();
+  const sub=activeSubject();if(!sub)return;
+  const path={kind:'cards',sub:sub.id,tid,stid:stid||null},list=resolveList(path),c=list&&list.find(c=>c.id===cid);if(!c)return;
+  removeWithUndo(path,cid,`card “${clip(c.q,40)}”`);
+  save();const el=document.getElementById('card-'+cid);if(el)el.remove();
 }
 
 // ── Study session ──
@@ -2186,48 +2583,51 @@ function renderSessionView(){
 function renderSessionCard(){
   const{cards,idx}=_session;
   _session.revealed=false;_session.rated=false;
-  // Update progress text
   const pt=document.querySelector('.session-progress-text');
   if(pt)pt.textContent=`Card ${idx+1} of ${cards.length}`;
-  const c=cards[idx];
+  const c=cards[idx],hk=state.hotkeys;
   const wrap=document.getElementById('sessionCardWrap');if(!wrap)return;
-  wrap.innerHTML=`<div class="session-card">
+  wrap.classList.remove('revealed');
+  wrap.innerHTML=`<div class="session-card session-q-card">
     ${c.sp?`<div class="session-card-sp">${esc(c.sp)}</div>`:''}
     <div class="session-card-q">${esc(c.q)}</div>
     ${c.hint?`<div class="session-card-hint">${esc(c.hint)}</div>`:''}
-    <div class="session-blurt-label">Your answer</div>
-    <textarea class="session-blurt" id="sessionBlurt" placeholder="Write everything you know..."></textarea>
   </div>
-  <button class="session-show-btn" id="sessionShowBtn" onclick="revealSessionAnswer()">Show answer</button>
-  <div class="session-answer-wrap" id="sessionAnswerWrap">
-    <div class="session-card">
-      <div class="session-answer-label">Model answer</div>
-      <div class="session-answer-body">${c.answer?renderAnswer(c.answer):''}</div>
+  <div class="session-cols">
+    <div class="session-card session-col">
+      <div class="session-blurt-label">Your answer</div>
+      <textarea class="session-blurt" id="sessionBlurt" placeholder="Write everything you know..."></textarea>
     </div>
+    <div class="session-card session-col session-model">
+      <div class="session-answer-label">Model answer <span class="kw-score" id="kwScore"></span></div>
+      <div class="session-answer-body rich" id="sessionAnswerBody"></div>
+    </div>
+  </div>
+  <button class="session-show-btn" id="sessionShowBtn" onclick="revealSessionAnswer()">Show answer <span class="kbd-hint">${esc(hotkeyLabel(hk.reveal))}</span></button>
+  <div class="session-rate">
+    <div class="rate-suggest" id="rateSuggest"></div>
     <div class="conf-row">
-      <button class="conf-btn got" onclick="rateCard('got')">Got it ✓</button>
-      <button class="conf-btn almost" onclick="rateCard('almost')">Almost</button>
-      <button class="conf-btn missed" onclick="rateCard('missed')">Missed it ✗</button>
+      <button class="conf-btn got" data-r="got" onclick="rateCard('got')">Got it ✓<span class="kbd-hint">${esc(hotkeyLabel(hk.rateGot))}</span></button>
+      <button class="conf-btn almost" data-r="almost" onclick="rateCard('almost')">Almost<span class="kbd-hint">${esc(hotkeyLabel(hk.rateAlmost))}</span></button>
+      <button class="conf-btn missed" data-r="missed" onclick="rateCard('missed')">Missed it ✗<span class="kbd-hint">${esc(hotkeyLabel(hk.rateMissed))}</span></button>
     </div>
   </div>`;
+  const content=document.querySelector('.session-content');if(content)content.scrollTop=0;
   setTimeout(()=>{
-    const el=document.getElementById('sessionBlurt');
-    if(!el)return;
+    const el=document.getElementById('sessionBlurt');if(!el)return;
     el.focus();
-    el.addEventListener('input',function(){
-      this.style.height='auto';
-      this.style.height=this.scrollHeight+'px';
-    });
+    let t=null;
+    el.addEventListener('input',()=>{autosizeBlurt(el);if(_session&&_session.revealed){clearTimeout(t);t=setTimeout(updateKeyTerms,200);}});
   },50);
 }
 
 function revealSessionAnswer(){
   if(!_session||_session.revealed)return;
   _session.revealed=true;
-  const wrap=document.getElementById('sessionAnswerWrap');
-  const btn=document.getElementById('sessionShowBtn');
-  if(wrap)wrap.classList.add('vis');
-  if(btn)btn.style.display='none';
+  const wrap=document.getElementById('sessionCardWrap');if(wrap)wrap.classList.add('revealed');
+  updateKeyTerms();
+  const el=document.getElementById('sessionBlurt');
+  if(el){autosizeBlurt(el);if(document.activeElement===el)el.blur();} // so the rating keys work straight away
 }
 
 function rateCard(rating){
@@ -2347,18 +2747,683 @@ function exitSession(){
   renderMain();
 }
 
+// ── Nested lists ──
+// Quill stores a nested list as one flat list whose items carry ql-indent-N
+// classes, which only the editor knows how to draw. For display, rebuild real
+// nested <ul>/<ol> elements so indentation and numbering (1, a, i) match.
+function nestQuillLists(root){
+  const parents=new Set([...root.querySelectorAll('ul,ol')].map(l=>l.parentNode));
+  parents.forEach(parent=>{
+    let run=[];
+    const flush=()=>{if(run.length)nestRun(run);run=[];};
+    [...parent.childNodes].forEach(n=>{
+      if(n.nodeType===1&&(n.tagName==='UL'||n.tagName==='OL'))run.push(n);
+      else if(!(n.nodeType===3&&!n.nodeValue.trim()))flush();
+    });
+    flush();
+  });
+}
+function nestRun(run){
+  if(!run.some(l=>l.querySelector(':scope>li[class*="ql-indent-"]')))return;
+  const tops=[],stack=[];
+  const hostLi=k=>{if(!stack[k].li){const li=document.createElement('li');li.className='nest-only';stack[k].list.appendChild(li);stack[k].li=li;}return stack[k].li;};
+  run.forEach(list=>[...list.children].forEach(li=>{
+    if(li.tagName!=='LI')return;
+    const m=/(?:^|\s)ql-indent-(\d+)/.exec(li.className||''),lvl=m?Math.min(+m[1],8):0;
+    if(m)li.classList.remove('ql-indent-'+m[1]);
+    if(!li.className)li.removeAttribute('class');
+    stack.length=Math.min(stack.length,lvl+1);
+    for(let k=0;k<=lvl;k++){
+      const type=k===lvl||!stack[k]?list.tagName:stack[k].list.tagName;
+      if(!stack[k]||(k===lvl&&stack[k].list.tagName!==type)){
+        const L=document.createElement(type);
+        if(k===0)tops.push(L);else hostLi(k-1).appendChild(L);
+        stack[k]={list:L,li:null};stack.length=k+1;
+      }
+    }
+    stack[lvl].list.appendChild(li);stack[lvl].li=li;
+  }));
+  const anchor=run[0];
+  tops.forEach(t=>anchor.parentNode.insertBefore(t,anchor));
+  run.forEach(l=>l.remove());
+}
+
+// ── Keyboard shortcuts ──
+// Three scopes: 'editor' shortcuts are Quill bindings (need a modifier), 'app'
+// shortcuts work on the subject page when you're not typing, 'session' ones
+// during a study session. All are editable in Settings › Keyboard shortcuts.
+const HOTKEYS={
+  search:{scope:'app',label:'Search everything',desc:'Ctrl/Cmd+K also works, even while typing'},
+  newCard:{scope:'app',label:'New card',desc:"In the selected card's section, or the open topic"},
+  bulkAdd:{scope:'app',label:'Bulk add cards',desc:'Paste many questions & answers, or a spec'},
+  study:{scope:'app',label:'Start a study session'},
+  nextCard:{scope:'app',label:'Select next card'},
+  prevCard:{scope:'app',label:'Select previous card'},
+  toggleAnswer:{scope:'app',label:'Show / hide answer',desc:'Of the selected card'},
+  writeBlurt:{scope:'app',label:'Write a blurt',desc:"Jumps into the selected card's blurt box"},
+  editCard:{scope:'app',label:'Edit selected card'},
+  toggleSidebar:{scope:'app',label:'Show / hide the sidebar'},
+  showHelp:{scope:'app',label:'Show these shortcuts'},
+  reveal:{scope:'session',label:'Reveal the answer',desc:'Ctrl/Cmd+Enter also works while typing'},
+  rateGot:{scope:'session',label:'Rate: Got it'},
+  rateAlmost:{scope:'session',label:'Rate: Almost'},
+  rateMissed:{scope:'session',label:'Rate: Missed it'},
+  bulletList:{scope:'editor',label:'Bullet list'},
+  orderedList:{scope:'editor',label:'Numbered list'},
+  insertTable:{scope:'editor',label:'Insert table'}
+};
+const HOTKEY_GROUPS=[
+  {scope:'app',title:'Subject page',text:"Work when you're not typing in a box. Click a card (or use the next/previous keys) to select it."},
+  {scope:'session',title:'Study session',text:'Rating keys work once the answer is showing and you have clicked out of your answer box.'},
+  {scope:'editor',title:'Answer & note editors',text:'Work while typing in an editor, so they need Ctrl/Cmd or Alt.'}
+];
+function normKey(k){return k&&k.length===1?k.toLowerCase():k;}
+function matchHotkey(e,hk){
+  if(!hk||!hk.key||normKey(e.key)!==normKey(hk.key))return false;
+  if(!!(e.ctrlKey||e.metaKey)!==!!hk.shortKey||!!e.altKey!==!!hk.altKey)return false;
+  // Shift only matters for letters; for "?" or "/" it's part of the character.
+  return!(/^[a-z]$/i.test(hk.key)&&!!e.shiftKey!==!!hk.shiftKey);
+}
+function isTyping(el){el=el||document.activeElement;return!!el&&(/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)||el.isContentEditable);}
+const visible=id=>{const el=document.getElementById(id);return!!el&&!el.hidden&&el.style.display!=='none'&&getComputedStyle(el).display!=='none';};
+function overlayOpen(){
+  return document.getElementById('panelBackdrop').classList.contains('open')||
+    ['settingsModal','studySetupModal','tableModal','choiceModal','searchModal','bulkModal','tourModal'].some(visible);
+}
+
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closePanel();return;}
-  if(!_session)return;
-  const tag=(document.activeElement||{}).tagName;
-  const inText=tag==='INPUT'||tag==='TEXTAREA';
-  if(e.key===' '&&!inText&&!_session.revealed){e.preventDefault();revealSessionAnswer();return;}
-  if(_session.revealed&&!_session.rated){
-    if(e.key==='1')rateCard('got');
-    else if(e.key==='2')rateCard('almost');
-    else if(e.key==='3')rateCard('missed');
+  if(_hkRecordHandler)return;
+  if(e.key==='Escape'){
+    for(const[id,close]of[['searchModal',closeSearch],['bulkModal',closeBulk],['tourModal',closeTour],['settingsModal',closeSettings],['studySetupModal',cancelStudySetup]])
+      if(visible(id)){close();return;}
+    closePanel();return;
   }
+  if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch();return;}
+  const hk=state.hotkeys;
+  if(_session){
+    if(!_session.revealed&&(e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();revealSessionAnswer();return;}
+    if(isTyping()||overlayOpen())return;
+    if(!_session.revealed&&matchHotkey(e,hk.reveal)){e.preventDefault();revealSessionAnswer();return;}
+    if(_session.revealed&&!_session.rated){
+      const r=matchHotkey(e,hk.rateGot)?'got':matchHotkey(e,hk.rateAlmost)?'almost':matchHotkey(e,hk.rateMissed)?'missed':null;
+      if(r){e.preventDefault();rateCard(r);}
+    }
+    return;
+  }
+  if(isTyping()||overlayOpen())return;
+  const is=k=>matchHotkey(e,hk[k]);
+  const card=kbCardId();
+  let handled=true;
+  if(is('search'))openSearch();
+  else if(is('showHelp'))openSettings('shortcuts');
+  else if(is('toggleSidebar'))toggleSidebar();
+  else if(!state.activeSubId)handled=false;
+  else if(is('newCard'))kbNewCard();
+  else if(is('bulkAdd'))kbBulkAdd();
+  else if(is('study'))openStudySetup();
+  else if(is('nextCard'))moveCardFocus(1);
+  else if(is('prevCard'))moveCardFocus(-1);
+  else if(is('toggleAnswer')&&card)toggleAnswer(card);
+  else if(is('writeBlurt')&&card&&_blurtQuills[card])_blurtQuills[card].focus();
+  else if(is('editCard')&&card){const l=locateCard(card);if(l)openPanel('card',card,l.tid,l.stid);}
+  else handled=false;
+  if(handled)e.preventDefault();
 });
+
+// The "selected" card for keyboard use (outlined). Survives re-renders.
+let _kbCard=null;
+function kbCardId(){return _kbCard&&document.getElementById('card-'+_kbCard)?_kbCard:null;}
+function setCardFocus(id,scroll){
+  document.querySelectorAll('.card.kb-focus').forEach(c=>c.classList.remove('kb-focus'));
+  _kbCard=id||null;
+  const el=id&&document.getElementById('card-'+id);
+  if(el){el.classList.add('kb-focus');if(scroll)el.scrollIntoView({block:'center',behavior:'smooth'});}
+}
+function moveCardFocus(d){
+  const cards=[...document.querySelectorAll('#mainContent .card')].filter(c=>c.offsetParent!==null);
+  if(!cards.length)return;
+  let i=cards.findIndex(c=>c.id==='card-'+_kbCard);
+  i=i<0?(d>0?0:cards.length-1):Math.max(0,Math.min(cards.length-1,i+d));
+  setCardFocus(cards[i].id.slice(5),true);
+}
+// Where a new card should go: the selected card's section, else the open topic, else the first topic.
+function kbTarget(){
+  const l=kbCardId()&&locateCard(_kbCard);if(l)return l;
+  const sub=activeSubject();if(!sub)return null;
+  const t=(state.activeTopicId&&sub.topics.find(t=>t.id===state.activeTopicId))||sortedTopics(sub.topics)[0];
+  return t?{tid:t.id,stid:null}:null;
+}
+function kbNewCard(){const l=kbTarget();if(l)openPanel('card',null,l.tid,l.stid);else openPanel('topic');}
+function kbBulkAdd(){const l=kbTarget();if(l)openBulk(l.tid,l.stid);else openPanel('topic');}
+function activeSubject(){return state.subjects.find(s=>s.id===state.activeSubId)||null;}
+
+// ── Side-by-side marking ──
+// On reveal, the model answer's key terms are highlighted: green if your blurt
+// mentions them, amber if not. Matching is forgiving about word endings
+// ("molecules" ≈ "molecule", "photosynthetic" ≈ "photosynthesis") but it is
+// only a hint — you still choose the rating.
+const STOPWORDS=new Set(('a about above after again against all also am an and any are as at be because been before being below between both but by can could did do does doing down during each either etc few for from further had has have having he her here hers him his how however i if in into is it its itself just less like may me might more most much must my no nor not of off often on once one only or other our out over own per same shall she should so some such than that the their them then there these they this those through thus to too under until up upon us use used uses using very via was we were what when where whether which while who whom whose why will with within without would yet you your').split(' '));
+const TERM_RE=/\d+(?:[.,]\d+)*|\p{L}[\p{L}\p{N}'’]*(?:-[\p{L}\p{N}]+)*/gu;
+function stemWord(w){
+  w=w.toLowerCase().replace(/['’]s?$/,'');
+  if(/\d/.test(w))return w;
+  if(w.length>4&&w.endsWith('ies'))return w.slice(0,-3)+'y';
+  for(const s of['ational','ation','ness','ment','ing','edly','ed','ly'])if(w.length-s.length>=4&&w.endsWith(s)){w=w.slice(0,-s.length);break;}
+  if(w.length>3&&w.endsWith('s')&&!/(ss|us|is)$/.test(w))w=w.slice(0,-1);
+  if(w.length>4&&w.endsWith('e'))w=w.slice(0,-1);
+  return w;
+}
+function isKeyTerm(tok){return/\d/.test(tok)||/^[A-Z]{2,}$/.test(tok)||(tok.length>=3&&!STOPWORDS.has(tok.toLowerCase()));}
+function stemsMatch(a,b){
+  if(a===b)return true;
+  const m=Math.min(a.length,b.length);if(m<6)return false;
+  let i=0;while(i<m&&a[i]===b[i])i++;
+  return i>=Math.max(6,Math.ceil(m*.8));
+}
+function highlightKeyTerms(root,blurt){
+  const have=[...new Set((blurt.match(TERM_RE)||[]).map(stemWord))],haveSet=new Set(have);
+  const found=s=>haveSet.has(s)||have.some(h=>stemsMatch(h,s));
+  const terms=new Map(),nodes=[];
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);while(w.nextNode())nodes.push(w.currentNode);
+  nodes.forEach(n=>{
+    const text=n.nodeValue,frag=document.createDocumentFragment();let last=0,any=false,m;
+    TERM_RE.lastIndex=0;
+    while((m=TERM_RE.exec(text))){
+      if(!isKeyTerm(m[0]))continue;
+      const s=stemWord(m[0]);if(!terms.has(s))terms.set(s,found(s));
+      frag.append(text.slice(last,m.index));
+      const span=document.createElement('span');span.className='kw '+(terms.get(s)?'hit':'miss');span.textContent=m[0];
+      frag.append(span);last=m.index+m[0].length;any=true;
+    }
+    if(any){frag.append(text.slice(last));n.replaceWith(frag);}
+  });
+  let hits=0;terms.forEach(v=>{if(v)hits++;});
+  return{hits,total:terms.size};
+}
+const RATING_NAMES={got:'Got it',almost:'Almost',missed:'Missed it'};
+function updateKeyTerms(){
+  const body=document.getElementById('sessionAnswerBody');if(!body||!_session)return;
+  const c=_session.cards[_session.idx],p=state.studyPrefs||{};
+  const score=document.getElementById('kwScore'),sug=document.getElementById('rateSuggest');
+  body.innerHTML=c.answer?renderAnswer(c.answer):'';
+  score.textContent='';sug.innerHTML='';markSuggestion(null);
+  if(p.highlightTerms===false)return;
+  const r=highlightKeyTerms(body,(document.getElementById('sessionBlurt')||{}).value||'');
+  if(!r.total)return;
+  score.innerHTML=`<span class="kw hit">${r.hits}</span> of ${r.total} key terms in your answer`;
+  if(p.suggestRating!==false&&r.total>=3){
+    const f=r.hits/r.total,s=f>=.8?'got':f>=.5?'almost':'missed';
+    sug.innerHTML=`Suggested from key terms: <strong>${RATING_NAMES[s]}</strong>. You decide.`;
+    markSuggestion(s);
+  }
+}
+function markSuggestion(r){document.querySelectorAll('.conf-btn').forEach(b=>b.classList.toggle('suggested',b.dataset.r===r));}
+function autosizeBlurt(el){if(!el)return;el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+
+// ── Undo for deletes ──
+// Where an item lived, by ids, so undo still works after a re-render or sync.
+function resolveList(path){
+  if(path.kind==='subjects')return state.subjects;
+  const sub=state.subjects.find(s=>s.id===path.sub);if(!sub)return null;
+  if(path.kind==='topics')return sub.topics||(sub.topics=[]);
+  const t=(sub.topics||[]).find(t=>t.id===path.tid);if(!t)return null;
+  if(path.kind==='subtopics')return t.subtopics||(t.subtopics=[]);
+  if(!path.stid)return t.cards||(t.cards=[]);
+  const st=(t.subtopics||[]).find(s=>s.id===path.stid);
+  return st?(st.cards||(st.cards=[])):null;
+}
+function removeWithUndo(path,id,label){
+  const list=resolveList(path);if(!list)return null;
+  const i=list.findIndex(x=>x.id===id);if(i<0)return null;
+  const[item]=list.splice(i,1);markDeleted(id);
+  toast(`Deleted ${label}.`,{action:{label:'Undo',fn:()=>undoDelete(path,i,item)}});
+  return item;
+}
+function undoDelete(path,i,item){
+  const list=resolveList(path);
+  if(!list){toast("Couldn't undo: the place it was in has been deleted too.");return;}
+  if(list.some(x=>x.id===item.id))return;
+  delete state.deleted[item.id];item.updatedAt=Date.now();
+  list.splice(Math.min(i,list.length),0,item);
+  save();
+  if(path.kind==='subjects')openSubject(item.id);else rerenderKeepingDrafts();
+}
+function clip(s,n){s=String(s||'');return s.length>n?s.slice(0,n-1)+'…':s;}
+
+// ── Archive ──
+function toggleArchive(id){
+  const sub=state.subjects.find(s=>s.id===id);if(!sub)return;
+  sub.archived=!sub.archived;sub.updatedAt=Date.now();
+  save();closePanel();renderSidebar();if(state.activeSubId===id)renderMain();
+  toast(sub.archived?`Archived “${clip(sub.name,40)}”. It's under Archived in the sidebar.`:`“${clip(sub.name,40)}” is back in your subjects.`,
+    {action:{label:'Undo',fn:()=>toggleArchive(id)}});
+}
+function toggleArchivedList(){state.showArchived=!state.showArchived;saveUI();renderSidebar();}
+
+// ── Moving & copying ──
+// <option>s for every topic and subtopic, grouped by subject. value = "subId|tid|stid".
+function locationOptions(cur,topicsOnly){
+  let h='';
+  sortedSubjects().filter(s=>!s.archived||s.id===state.activeSubId).forEach(s=>{
+    const ts=sortedTopics(s.topics);if(!ts.length)return;
+    h+=`<optgroup label="${escAttr(s.name)}">`;
+    ts.forEach(t=>{
+      const v=`${s.id}|${t.id}|`;
+      h+=`<option value="${v}"${v===cur?' selected':''}>${esc(t.name)}${topicsOnly?'':' (general cards)'}</option>`;
+      if(!topicsOnly)sortedSubtopics(t.subtopics).forEach(st=>{
+        const v2=`${s.id}|${t.id}|${st.id}`;
+        h+=`<option value="${v2}"${v2===cur?' selected':''}>\u00a0\u00a0\u00a0${esc(t.name)} › ${esc(st.name)}</option>`;
+      });
+    });
+    h+='</optgroup>';
+  });
+  return h;
+}
+function parseLoc(v){const[sub,tid,stid]=String(v||'').split('|');return{kind:'cards',sub,tid,stid:stid||null};}
+// Moving gives the item a new id (and records the old one as deleted) so a
+// merge with another device's older copy can't leave it in both places.
+function moveItem(srcList,item,destList){
+  srcList.splice(srcList.indexOf(item),1);markDeleted(item.id);
+  const m=Object.assign({},item,{id:uid(),updatedAt:Date.now()});
+  destList.push(m);return m;
+}
+function subjectName(id){const s=state.subjects.find(s=>s.id===id);return s?s.name:'';}
+function afterMove(subId,what){
+  if(subId!==state.activeSubId)toast(`Moved ${what} to ${clip(subjectName(subId),40)}.`,{action:{label:'Go there',fn:()=>openSubject(subId)}});
+}
+
+// ── Bulk add ──
+const SPEC_NUM='(?:sp\\s*)?[A-Z]{0,2}\\d+(?:\\.\\d+)*[a-z]?';
+const SPEC_ONLY=new RegExp('^'+SPEC_NUM+'$','i');
+const SPEC_LINE=new RegExp('^\\s*('+SPEC_NUM+')[.):]?\\s+(.+)$','i');
+const SPEC_LEAD=new RegExp('^('+'(?:sp\\s*)?[A-Z]{0,2}\\d+(?:\\.\\d+)+[a-z]?'+')[.):]?\\s+(.+)$','i');
+// Answer text → the same HTML Quill produces: "-", "*", "•" or "1." lines become
+// list items, and every 2 spaces (or a tab) of indent nests one level deeper.
+function answerToHtml(text){
+  const lines=String(text||'').replace(/\r\n?/g,'\n').replace(/\t/g,'  ').split('\n');
+  let html='',open=null;
+  const close=()=>{if(open){html+=`</${open}>`;open=null;}};
+  lines.forEach(l=>{
+    if(!l.trim())return;
+    const m=l.match(/^(\s*)([-*•–]|\d+[.)])\s+(.*)$/);
+    if(m){
+      const type=/\d/.test(m[2])?'ol':'ul',lvl=Math.min(8,Math.floor(m[1].length/2));
+      if(open!==type){close();html+=`<${type}>`;open=type;}
+      html+=`<li${lvl?` class="ql-indent-${lvl}"`:''}>${esc(m[3].trim())}</li>`;
+    }else{close();html+=`<p>${esc(l.trim())}</p>`;}
+  });
+  close();return html;
+}
+function bulkCard(q,a,sp,hint){return{q:String(q||'').trim(),answerText:String(a||'').trim(),sp:String(sp||'').trim(),hint:String(hint||'').trim()};}
+function bulkColumns(parts){
+  parts=parts.map(p=>p.trim());
+  if(parts.length>=3&&SPEC_ONLY.test(parts[0]))return bulkCard(parts[1],parts[2],parts[0],parts[3]);
+  return bulkCard(parts[0],parts[1],'',parts[2]);
+}
+function parseBulkCards(text){
+  text=String(text||'').replace(/\r\n?/g,'\n');
+  const lines=text.split('\n'),rows=lines.filter(l=>l.trim());
+  if(!rows.length)return{format:null,cards:[]};
+  if(rows.some(l=>l.includes('\t')))return{format:'Columns separated by tabs (pasted from a spreadsheet or table)',cards:rows.map(l=>bulkColumns(l.split('\t')))};
+  if(rows.some(l=>/^\s*Q\s*[:.)]/i.test(l))){
+    const cards=[];let cur=null,field=null;
+    lines.forEach(l=>{
+      const m=l.match(/^\s*(Q|A|SP|Spec|Hint|H)\s*[:.)]\s?(.*)$/i);
+      if(m){
+        const k=m[1].toLowerCase();
+        if(k==='q'){cur={q:'',a:'',sp:'',hint:''};cards.push(cur);field='q';}
+        else if(!cur){cur={q:'',a:'',sp:'',hint:''};cards.push(cur);}
+        if(k!=='q')field=k==='a'?'a':k==='h'||k==='hint'?'hint':'sp';
+        cur[field]+=(cur[field]?'\n':'')+m[2];
+      }else if(cur&&field&&l.trim())cur[field]+=(field==='a'?'\n':' ')+(field==='a'?l:l.trim());
+    });
+    return{format:'Q: / A: blocks',cards:cards.map(c=>bulkCard(c.q,c.a,c.sp,c.hint))};
+  }
+  if(rows.filter(l=>l.includes('|')).length>=rows.length/2)return{format:'Columns separated by |',cards:rows.map(l=>bulkColumns(l.split('|')))};
+  return{format:'Question on the first line, answer below, blank line between cards',cards:text.split(/\n\s*\n/).filter(b=>b.trim()).map(b=>{
+    const ls=b.split('\n').filter(l=>l.trim());const m=ls[0].trim().match(SPEC_LEAD);
+    return m?bulkCard(m[2],ls.slice(1).join('\n'),m[1]):bulkCard(ls[0],ls.slice(1).join('\n'));
+  })};
+}
+// Spec lists: "4.1 Heading" lines followed by "4.1.1 Statement" lines. A number
+// that prefixes later numbers is a heading; lines without a number continue the
+// line above (text copied from PDFs wraps).
+function parseSpec(text){
+  const items=[];
+  String(text||'').replace(/\r\n?/g,'\n').split('\n').forEach(l=>{
+    if(!l.trim())return;
+    const m=l.match(SPEC_LINE);
+    if(m)items.push({num:m[1].trim(),text:m[2].trim()});
+    else if(items.length)items[items.length-1].text+=' '+l.trim();
+  });
+  const low=items.map(it=>it.num.toLowerCase());
+  items.forEach((it,i)=>{it.heading=low.some((o,j)=>j!==i&&o.startsWith(low[i]+'.'));});
+  items.forEach(it=>{
+    if(it.heading)return;
+    let best=null;items.forEach(h=>{if(h.heading&&it.num.toLowerCase().startsWith(h.num.toLowerCase()+'.')&&(!best||h.num.length>best.num.length))best=h;});
+    it.parent=best;
+  });
+  return items;
+}
+const BULK_EXAMPLES={
+  tabs:'4.1.1\tWhat is an atom?\tThe smallest part of an element that can exist\n4.1.2\tWhat is an isotope?\tAtoms of the same element with different numbers of neutrons\n4.1.3\tWhat charge does an electron have?\t-1',
+  qa:'Q: What are the parts of an animal cell?\nA: - Nucleus\n  - contains genetic material\n- Cytoplasm\n- Cell membrane\n\nQ: What is diffusion?\nA: The net movement of particles from a higher to a lower concentration',
+  blocks:'What is an atom?\nThe smallest part of an element that can exist\n\n4.1.2 What is an isotope?\nAtoms of the same element with different numbers of neutrons\n\nWhat are the three subatomic particles?\n1. Proton\n2. Neutron\n3. Electron',
+  spec:'4.1 Atomic structure\n4.1.1 Describe the structure of an atom in terms of protons, neutrons and electrons\n4.1.2 Explain what an isotope is\n4.2 Bonding\n4.2.1 Describe how ionic bonds form\n4.2.2 Explain why metals conduct electricity, including the\nidea of delocalised electrons'
+};
+let _bulk=null,_bulkTimer=null;
+function openBulk(tid,stid,mode){
+  const sub=activeSubject();if(!sub)return;
+  if(!tid){const t=sortedTopics(sub.topics)[0];if(!t){openPanel('topic');return;}tid=t.id;}
+  _bulk={loc:`${sub.id}|${tid}|${stid||''}`,mode:mode||'qa',text:{qa:'',spec:''},headings:true};
+  let m=document.getElementById('bulkModal');
+  if(!m){m=document.createElement('div');m.id='bulkModal';m.className='tm-overlay';document.body.appendChild(m);
+    m.addEventListener('mousedown',e=>{if(e.target===m)closeBulk();});}
+  renderBulk();m.hidden=false;
+  setTimeout(()=>{const ta=document.getElementById('bulkText');if(ta)ta.focus();},30);
+}
+function closeBulk(){const m=document.getElementById('bulkModal');if(m){m.hidden=true;m.innerHTML='';}_bulk=null;}
+function bulkMode(mode){_bulk.text[_bulk.mode]=document.getElementById('bulkText').value;_bulk.mode=mode;renderBulk();document.getElementById('bulkText').focus();}
+function bulkExample(key){const ta=document.getElementById('bulkText');ta.value=BULK_EXAMPLES[key];_bulk.text[_bulk.mode]=ta.value;renderBulkPreview();ta.focus();}
+function renderBulk(){
+  const b=_bulk,m=document.getElementById('bulkModal'),qa=b.mode==='qa';
+  const help=qa?`
+      <p>Paste or type your cards using <strong>any one</strong> of these layouts. Blurt detects which one you used.</p>
+      <div class="bulk-fmt"><div><strong>Columns</strong>: copy two or three columns from Excel, Google Sheets, Word or a website table. Columns are <em>question, answer</em> or <em>spec point, question, answer</em>. You can also type them with <code>|</code> between columns.</div><button class="btn btn-sm" onclick="bulkExample('tabs')">Show example</button></div>
+      <div class="bulk-fmt"><div><strong>Q: / A:</strong>: start each question with <code>Q:</code> and its answer with <code>A:</code>. Answers can run over several lines. Optional <code>SP:</code> and <code>Hint:</code> lines.</div><button class="btn btn-sm" onclick="bulkExample('qa')">Show example</button></div>
+      <div class="bulk-fmt"><div><strong>Blocks</strong>: question on the first line, answer on the lines below, and a blank line between cards. Start the question with a spec point like <code>4.1.2</code> to tag it.</div><button class="btn btn-sm" onclick="bulkExample('blocks')">Show example</button></div>
+      <p class="bulk-note">In answers, lines starting with <code>-</code>, <code>*</code> or <code>1.</code> become bullet or numbered lists. Indent with two spaces to nest.</p>`
+    :`
+      <p>Paste the specification points from your exam board's spec (PDF or website). Each line that starts with a number like <code>4.1.2</code> becomes a card, with that number as its spec point and the text as its question.</p>
+      <p>Lines that don't start with a number are joined to the line above, which fixes text that wrapped when you copied it from a PDF.</p>
+      <div class="bulk-fmt"><div>Numbers that other numbers sit under (like <code>4.1</code> above <code>4.1.1</code>) are <strong>headings</strong>.</div><button class="btn btn-sm" onclick="bulkExample('spec')">Show example</button></div>
+      <p class="bulk-note">Spec cards start without answers. Add answers by editing them, or use “Questions &amp; answers” if you already have them. Only cards with answers appear in study sessions.</p>`;
+  m.innerHTML=`<div class="tm-box bulk-box" role="dialog" aria-label="Bulk add cards">
+    <div class="tm-head">
+      <div><div class="tm-title">Add cards in bulk</div><div class="tm-sub">Turn a list into cards in one go. Nothing is added until you press Add.</div></div>
+      <button class="panel-close" onclick="closeBulk()">✕</button>
+    </div>
+    <div class="bulk-tabs">
+      <button class="bulk-tab${qa?' active':''}" onclick="bulkMode('qa')">Questions &amp; answers</button>
+      <button class="bulk-tab${qa?'':' active'}" onclick="bulkMode('spec')">Import a specification</button>
+    </div>
+    <div class="bulk-grid">
+      <div class="bulk-left">
+        <label class="field-label" for="bulkLoc">Add to</label>
+        <select class="field-input" id="bulkLoc" onchange="_bulk.loc=this.value;renderBulkPreview()">${locationOptions(b.loc,false)}</select>
+        ${qa?'':`<label class="tm-check bulk-check"><input type="checkbox" id="bulkHeadings" ${b.headings?'checked':''} onchange="_bulk.headings=this.checked;renderBulkPreview()"> Turn headings into subtopics</label>`}
+        <textarea class="field-input bulk-text" id="bulkText" spellcheck="false" placeholder="${qa?'Paste your questions and answers here…':'Paste your specification points here…'}" oninput="clearTimeout(_bulkTimer);_bulkTimer=setTimeout(renderBulkPreview,150)">${esc(b.text[b.mode])}</textarea>
+        <details class="bulk-help" ${b.text[b.mode]?'':'open'}><summary>How to format it</summary>${help}</details>
+      </div>
+      <div class="bulk-right"><div class="field-label">Preview</div><div id="bulkPreview" class="bulk-preview"></div></div>
+    </div>
+    <div class="tm-foot"><span id="bulkSummary" class="bulk-summary"></span><span class="spacer"></span>
+      <button class="btn" onclick="closeBulk()">Cancel</button>
+      <button class="btn btn-primary" id="bulkAddBtn" onclick="commitBulk()">Add</button></div>
+  </div>`;
+  renderBulkPreview();
+}
+// Works out exactly what Add would create, for both the preview and the commit.
+function planBulk(){
+  const b=_bulk,text=(document.getElementById('bulkText')||{}).value||'';
+  b.text[b.mode]=text;
+  const loc=parseLoc(b.loc),dest=resolveList(loc);
+  const plan={cards:[],subtopics:[],skipped:0,dupes:0,format:null,notes:[]};
+  if(!dest)return plan;
+  if(b.mode==='qa'){
+    const r=parseBulkCards(text);plan.format=r.format;
+    r.cards.forEach(c=>{if(!c.q){plan.skipped++;return;}plan.cards.push({list:dest,where:null,c:{q:c.q,sp:c.sp,hint:c.hint,answer:answerToHtml(c.answerText)}});});
+    return plan;
+  }
+  const items=parseSpec(text);if(items.length)plan.format='Specification points';
+  const useHeadings=b.headings&&!loc.stid;
+  if(b.headings&&loc.stid&&items.some(i=>i.heading))plan.notes.push('Headings are skipped when adding into a subtopic. Choose a topic to turn them into subtopics.');
+  const t=state.subjects.find(s=>s.id===loc.sub).topics.find(t=>t.id===loc.tid);
+  const subFor=new Map();
+  const existingSp=list=>new Set((list||[]).map(c=>(c.sp||'').trim().toLowerCase()).filter(Boolean));
+  const spSeen=new Map();
+  items.forEach(it=>{
+    if(it.heading)return;
+    let list=dest,where=null;
+    if(useHeadings&&it.parent){
+      const name=`${it.parent.num} ${it.parent.text}`;
+      if(!subFor.has(name)){
+        const ex=(t.subtopics||[]).find(st=>st.name.trim().toLowerCase()===name.toLowerCase());
+        subFor.set(name,ex?{list:ex.cards||(ex.cards=[]),name,existing:true}:{list:null,name,existing:false,cards:[]});
+        if(!ex)plan.subtopics.push(subFor.get(name));
+      }
+      const s=subFor.get(name);list=s.list;where=s;
+    }
+    const key=where?where.name:'_';
+    if(!spSeen.has(key))spSeen.set(key,existingSp(list));
+    if(spSeen.get(key).has(it.num.toLowerCase())){plan.dupes++;return;}
+    spSeen.get(key).add(it.num.toLowerCase());
+    plan.cards.push({list,where,c:{q:it.text,sp:it.num,hint:'',answer:''}});
+  });
+  if(!useHeadings)plan.skipped=items.filter(i=>i.heading).length;
+  return plan;
+}
+function renderBulkPreview(){
+  if(!_bulk)return;
+  const plan=planBulk(),el=document.getElementById('bulkPreview'),btn=document.getElementById('bulkAddBtn'),sum=document.getElementById('bulkSummary');
+  const n=plan.cards.length,ns=plan.subtopics.length;
+  btn.disabled=!n;btn.textContent=n?`Add ${n} card${n!==1?'s':''}`:'Add';
+  sum.textContent=(n?`${n} card${n!==1?'s':''}${ns?` in ${ns} new subtopic${ns!==1?'s':''}`:''}`:'Nothing new to add')+(plan.dupes?` · ${plan.dupes} already there`:'')+(plan.skipped?` · ${plan.skipped} skipped`:'');
+  if(!n&&plan.dupes){el.innerHTML=`<div class="bulk-empty">All ${plan.dupes} of these are already in this place (matched by spec point), so there is nothing new to add.</div>`;return;}
+  if(!n){sum.textContent='';el.innerHTML=`<div class="bulk-empty">${(document.getElementById('bulkText').value.trim())?"Couldn't find any cards yet. Check “How to format it”.":'Your cards will appear here as you paste.'}</div>`;return;}
+  let h=`<div class="bulk-format">Detected: ${esc(plan.format||'')}</div>`+plan.notes.map(x=>`<div class="bulk-warn">${esc(x)}</div>`).join('');
+  let lastWhere;
+  plan.cards.slice(0,200).forEach(({c,where})=>{
+    if(where!==lastWhere){lastWhere=where;if(where)h+=`<div class="bulk-sub">${where.existing?'Into subtopic':'New subtopic'}: ${esc(where.name)}</div>`;}
+    h+=`<div class="bulk-row">${c.sp?`<span class="bulk-sp">${esc(c.sp)}</span>`:''}<div class="bulk-q">${esc(c.q)}</div>${c.answer?`<div class="bulk-a rich">${sanitizeRich(c.answer)}</div>`:_bulk.mode==='qa'?'<div class="bulk-a bulk-missing">No answer, so it won’t appear in study sessions until you add one</div>':''}</div>`;
+  });
+  if(n>200)h+=`<div class="bulk-empty">…and ${n-200} more</div>`;
+  el.innerHTML=h;
+}
+function commitBulk(){
+  const plan=planBulk();if(!plan.cards.length)return;
+  const loc=parseLoc(_bulk.loc),now=Date.now(),created=[];
+  const t=state.subjects.find(s=>s.id===loc.sub).topics.find(t=>t.id===loc.tid);
+  plan.subtopics.forEach(s=>{const st={id:uid(),name:s.name,cards:[],createdAt:now,updatedAt:now};(t.subtopics=t.subtopics||[]).push(st);s.list=st.cards;s.id=st.id;created.push(st.id);});
+  plan.cards.forEach(({list,where,c})=>{
+    const card={id:uid(),sp:c.sp,q:c.q,hint:c.hint,answer:c.answer,myNote:'',createdAt:now,updatedAt:now};
+    (where?where.list:list).push(card);if(!where||where.existing)created.push(card.id);
+  });
+  if(plan.subtopics.length)state.openSubtopics=[...new Set([...(state.openSubtopics||[]),...plan.subtopics.map(s=>s.id)])];
+  const n=plan.cards.length,ns=plan.subtopics.length;
+  closeBulk();
+  if(loc.sub!==state.activeSubId)state.activeSubId=loc.sub;
+  save();renderSidebar();renderMain();
+  toast(`Added ${n} card${n!==1?'s':''}${ns?` in ${ns} new subtopic${ns!==1?'s':''}`:''}.`,{action:{label:'Undo',fn:()=>removeIds(new Set(created))}});
+}
+// Remove items (anywhere) by id, e.g. to undo a bulk add.
+function removeIds(ids){
+  const strip=list=>(list||[]).filter(x=>{if(ids.has(x.id)){markDeleted(x.id);return false;}return true;});
+  state.subjects.forEach(s=>(s.topics||[]).forEach(t=>{t.cards=strip(t.cards);t.subtopics=strip(t.subtopics);(t.subtopics||[]).forEach(st=>{st.cards=strip(st.cards);});}));
+  save();rerenderKeepingDrafts();
+}
+
+// ── Search ──
+const _plainCache=new Map();
+function plainText(html){
+  if(!html)return'';
+  if(!/[<&]/.test(html))return html;
+  if(_plainCache.has(html))return _plainCache.get(html);
+  const t=document.createElement('template');t.innerHTML=html.replace(/<(br|\/p|\/li|\/div|\/td|\/th)>/gi,' $&');
+  const out=t.content.textContent.replace(/\s+/g,' ').trim();
+  if(_plainCache.size>5000)_plainCache.clear();
+  _plainCache.set(html,out);return out;
+}
+let _searchSel=0,_searchResults=[];
+function openSearch(){
+  let m=document.getElementById('searchModal');
+  if(!m){
+    m=document.createElement('div');m.id='searchModal';m.className='tm-overlay search-overlay';
+    m.innerHTML=`<div class="tm-box search-box" role="dialog" aria-label="Search">
+      <div class="search-bar"><svg width="15" height="15" viewBox="0 0 13 13" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <input id="searchInput" class="search-input" type="text" autocomplete="off" spellcheck="false" placeholder="Search questions, answers, notes, spec points and topics…"><kbd>Esc</kbd></div>
+      <div id="searchResults" class="search-results"></div></div>`;
+    document.body.appendChild(m);
+    m.addEventListener('mousedown',e=>{if(e.target===m)closeSearch();});
+    const inp=m.querySelector('#searchInput');
+    inp.addEventListener('input',()=>{_searchSel=0;renderSearch();});
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();_searchSel=Math.max(0,Math.min(_searchResults.length-1,_searchSel+(e.key==='ArrowDown'?1:-1)));renderSearch(true);}
+      else if(e.key==='Enter'&&_searchResults[_searchSel]){e.preventDefault();goToResult(_searchResults[_searchSel]);}
+    });
+  }
+  m.hidden=false;
+  const inp=m.querySelector('#searchInput');inp.select();inp.focus();renderSearch();
+}
+function closeSearch(){const m=document.getElementById('searchModal');if(m)m.hidden=true;}
+function searchAll(query){
+  const terms=query.toLowerCase().split(/\s+/).filter(Boolean);if(!terms.length)return[];
+  const res=[],has=(s,x)=>String(s||'').toLowerCase().includes(x);
+  sortedSubjects().forEach(sub=>sortedTopics(sub.topics).forEach(t=>{
+    const section=(st,name)=>{if(terms.every(x=>has(name,x)||has(sub.name,x)))res.push({type:st?'subtopic':'topic',sub,t,st,score:5});};
+    section(null,t.name);
+    const scan=(c,st)=>{
+      const a=plainText(c.answer),n=plainText(c.myNote);
+      const hay=[c.sp,c.q,c.hint,a,n,t.name,st&&st.name,sub.name].join(' ').toLowerCase();
+      if(!terms.every(x=>hay.includes(x)))return;
+      let score=0;terms.forEach(x=>{score+=has(c.q,x)||has(c.sp,x)?4:has(a,x)?2:1;});
+      res.push({type:'card',sub,t,st,c,a,n,score:score-(sub.archived?1:0)});
+    };
+    sortedSubtopics(t.subtopics).forEach(st=>{section(st,st.name);sortCardsBySpec(st.cards||[]).forEach(c=>scan(c,st));});
+    sortCardsBySpec(t.cards||[]).forEach(c=>scan(c,null));
+  }));
+  return res.map((r,i)=>[r,i]).sort((x,y)=>y[0].score-x[0].score||x[1]-y[1]).map(x=>x[0]).slice(0,60);
+}
+// Escape text and wrap every occurrence of the search terms in <mark>.
+function markTerms(text,terms){
+  text=String(text||'');
+  const low=text.toLowerCase(),on=new Array(text.length).fill(false);
+  terms.forEach(x=>{let i=0;while((i=low.indexOf(x,i))>=0){for(let k=i;k<i+x.length;k++)on[k]=true;i+=x.length;}});
+  let h='',open=false;
+  for(let i=0;i<text.length;i++){if(on[i]!==open){h+=open?'</mark>':'<mark>';open=on[i];}h+=esc(text[i]);}
+  return h+(open?'</mark>':'');
+}
+function snippet(text,terms){
+  const low=text.toLowerCase();let i=-1;
+  terms.some(x=>{i=low.indexOf(x);return i>=0;});
+  if(i<0)return'';
+  const s=Math.max(0,i-50),e=Math.min(text.length,i+90);
+  return(s?'…':'')+text.slice(s,e)+(e<text.length?'…':'');
+}
+function renderSearch(keepScroll){
+  const q=document.getElementById('searchInput').value.trim(),el=document.getElementById('searchResults');
+  const terms=q.toLowerCase().split(/\s+/).filter(Boolean);
+  _searchResults=searchAll(q);
+  if(!q){el.innerHTML=`<div class="search-empty">Type to search every subject. <span>↑ ↓ to move · Enter to open</span></div>`;return;}
+  if(!_searchResults.length){el.innerHTML=`<div class="search-empty">Nothing matches “${esc(q)}”.</div>`;return;}
+  el.innerHTML=_searchResults.map((r,i)=>{
+    const path=[r.sub.name,r.t.name,r.st&&r.st.name].filter(Boolean).map(esc).join(' › ');
+    const dot=`<span class="subject-dot" style="background:${r.sub.color}"></span>`;
+    const arch=r.sub.archived?'<span class="search-tag">Archived</span>':'';
+    if(r.type!=='card')return`<div class="search-row${i===_searchSel?' sel':''}" data-i="${i}">${dot}<div class="search-main"><div class="search-q">${markTerms(r.st?r.st.name:r.t.name,terms)} <span class="search-tag">${r.type}</span>${arch}</div><div class="search-path">${esc(r.sub.name)}${r.st?' › '+esc(r.t.name):''}</div></div></div>`;
+    const sn=snippet(r.a,terms)||snippet(r.n,terms);
+    return`<div class="search-row${i===_searchSel?' sel':''}" data-i="${i}">${dot}<div class="search-main">
+      <div class="search-q">${r.c.sp?`<span class="search-sp">${markTerms(r.c.sp,terms)}</span>`:''}${markTerms(r.c.q,terms)}${arch}</div>
+      ${sn?`<div class="search-snip">${markTerms(sn,terms)}</div>`:''}<div class="search-path">${path}</div></div></div>`;
+  }).join('');
+  el.querySelectorAll('.search-row').forEach(row=>{
+    row.onclick=()=>goToResult(_searchResults[+row.dataset.i]);
+    row.onmousemove=()=>{if(_searchSel!==+row.dataset.i){_searchSel=+row.dataset.i;el.querySelectorAll('.search-row').forEach(r=>r.classList.toggle('sel',+r.dataset.i===_searchSel));}};
+  });
+  const sel=el.querySelector('.search-row.sel');if(sel&&keepScroll)sel.scrollIntoView({block:'nearest'});
+}
+function goToResult(r){
+  closeSearch();
+  if(_session)exitSession();
+  if(state.activeSubId!==r.sub.id){state.activeSubId=r.sub.id;renderSidebar();}
+  state.activeTopicId=r.t.id;state.activeSpFilter=null;state.activeSubtopicSpFilters={};
+  if(r.st)state.openSubtopics=[...new Set([...(state.openSubtopics||[]),r.st.id])];
+  if(isNarrow()){state.sidebarOpen=false;applySidebar();}
+  saveUI();renderSidebar();renderMain();
+  if(r.type==='card'){setCardFocus(r.c.id,true);const el=document.getElementById('card-'+r.c.id);if(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');}}
+  else{const el=r.st?document.getElementById('st-'+r.st.id):document.querySelector('.topic-block');if(el)el.scrollIntoView({block:'start',behavior:'smooth'});}
+}
+
+// ── Settings (tabbed) ──
+function openSettings(tab){
+  renderHotkeyRows();renderSettingsData();renderSettingsStudy();renderSettingsHelp();
+  settingsTab(tab||'shortcuts');
+  document.getElementById('settingsModal').style.display='flex';
+}
+function closeSettings(){cancelRecordHotkey();document.getElementById('settingsModal').style.display='none';}
+function settingsTab(tab){
+  document.querySelectorAll('#settingsModal [data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));
+  const body=document.querySelector('#settingsModal .settings-body');if(body)body.scrollTop=0;
+}
+function setStudyPref(k,v){state.studyPrefs=Object.assign({},state.studyPrefs,{[k]:v});save();renderSettingsStudy();}
+function renderSettingsStudy(){
+  const p=state.studyPrefs||{},el=document.getElementById('settingsStudy');if(!el)return;
+  const sw=(k,label,text)=>`<label class="setting-switch"><input type="checkbox" ${p[k]!==false?'checked':''} onchange="setStudyPref('${k}',this.checked)"><span class="switch"></span><span><strong>${label}</strong><span class="settings-text">${text}</span></span></label>`;
+  el.innerHTML=`<div class="settings-section">When you reveal an answer</div>
+    ${sw('highlightTerms','Highlight key terms','Words from the model answer that appear in what you wrote turn <span class="kw hit">green</span>; the ones you left out turn <span class="kw miss">amber</span>. Small words like “the” and “because” are ignored, and different endings still count (“molecules” matches “molecule”).')}
+    ${sw('suggestRating','Suggest a rating','Based on how many key terms you covered: 80% or more suggests Got it, 50% or more Almost, otherwise Missed it. It only outlines a button; you still choose.')}
+    <div class="settings-text" style="margin-top:14px">Your answer and the model answer sit side by side on wide screens, and stacked on phones.</div>`;
+}
+const HELP_GUIDES=[
+  ['Adding lots of cards at once','<p>Press <b>Bulk add</b> on a topic or subtopic (or the <kbd>B</kbd> key). Paste your questions and answers as columns from a spreadsheet, as <code>Q:</code>/<code>A:</code> pairs, or as blocks separated by blank lines. The preview on the right shows exactly what will be added before anything changes, and the confirmation has an Undo button.</p>'],
+  ['Importing a specification','<p>In Bulk add, choose <b>Import a specification</b> and paste the spec points from your exam board. Lines starting with numbers like <code>4.1.2</code> become cards with that spec point. Headings such as <code>4.1 Atomic structure</code> become subtopics, unless you untick “Turn headings into subtopics”. Spec points already in that place are skipped, so you can paste the same spec again after adding to it.</p><p>The cards start without answers. Fill them in to study them.</p>'],
+  ['Finding anything','<p>Press <kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> (or the magnifier at the top of the sidebar) to search every subject at once: questions, answers, your notes, hints, spec points and topic names. Use ↑ ↓ and Enter to jump straight to a card.</p>'],
+  ['Moving, copying and archiving','<p><b>Move a card</b>: edit it and change “Location”. <b>Copy a card</b>: edit it and press “Save as copy”, which keeps the original as it was. Topics and subtopics can be moved the same way from their edit panels.</p><p><b>Archive a subject</b> you have finished with from its Edit panel. It moves to “Archived” at the bottom of the sidebar, still searchable, and can be brought back any time.</p><p>Deleted something by mistake? Every delete shows an <b>Undo</b> button for a few seconds.</p>'],
+  ['Study sessions','<p>Press <b>Study</b>, pick topics, then for each card write everything you remember and press <b>Show answer</b> (Space, or Ctrl/Cmd+Enter while typing). Your answer and the model answer appear side by side with the key terms highlighted. Rate yourself with the buttons or <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>. Weak areas on the subject page show where you struggle most.</p>'],
+  ['Sync and backups','<p>Sign in with Google to sync across devices. Edits made on two devices at once are merged, and the sidebar shows whether everything has synced. In Data &amp; sync you can export a backup file, import one, and restore the last version Blurt replaced.</p>']
+];
+function renderSettingsHelp(){
+  const el=document.getElementById('settingsHelp');if(!el)return;
+  el.innerHTML=`<div class="help-tour"><div><strong>New to Blurt, or want a refresher?</strong><div class="settings-text" style="margin:2px 0 0">A two-minute walkthrough of everything.</div></div><button class="btn btn-primary btn-sm" onclick="closeSettings();openTour()">Take the tour</button></div>
+    ${HELP_GUIDES.map(([t,b])=>`<details class="help-guide"><summary>${t}</summary><div class="help-body">${b}</div></details>`).join('')}`;
+}
+
+// ── Tour ──
+const TOUR=[
+  {title:'Welcome to Blurt',body:'Blurting is a revision method: write down everything you remember about a question, <em>then</em> check it against the answer. Gaps you find this way stick far better than rereading notes.<br><br>Blurt organises your revision like this:',
+   art:`<div class="ta-tree"><span class="ta-pill s">Subject<small>Chemistry</small></span><span class="ta-arrow">→</span><span class="ta-pill">Topic<small>4 Atoms</small></span><span class="ta-arrow">→</span><span class="ta-pill">Subtopic<small>4.1 Structure</small></span><span class="ta-arrow">→</span><span class="ta-pill c">Cards<small>Q &amp; A</small></span></div>`},
+  {title:'Make cards fast',body:'Add cards one at a time with <b>+ Card</b>, or paste a whole list with <b>Bulk add</b>: columns from a spreadsheet, Q:/A: pairs, or your exam board’s <b>specification</b>, which becomes one card per spec point.',
+   art:`<div class="ta-bulk"><div class="ta-paste">4.1.1&nbsp;&nbsp;What is an atom?&nbsp;&nbsp;Smallest part…<br>4.1.2&nbsp;&nbsp;What is an isotope?&nbsp;&nbsp;Same element…</div><span class="ta-arrow">→</span><div class="ta-cards"><div class="ta-card"><small>4.1.1</small>What is an atom?</div><div class="ta-card"><small>4.1.2</small>What is an isotope?</div></div></div>`},
+  {title:'Blurt, then check',body:'Every card has a box to write in. Blurt your answer, press <b>Show answer</b>, and save a good attempt with <b>Save note</b> to keep it under the card.',
+   art:`<div class="ta-card big"><small>4.1.2</small><b>What is an isotope?</b><div class="ta-input">Atoms with different neutrons…</div><div class="ta-btns"><span>Show answer</span><span class="g">Save note</span></div></div>`},
+  {title:'Study sessions mark side by side',body:'<b>Study</b> runs through the topics you pick. After you reveal an answer, it sits beside yours with key terms you <span class="kw hit">covered</span> and <span class="kw miss">missed</span> highlighted. Rate yourself <b>Got it / Almost / Missed it</b>; weak areas collect the ones to revisit.',
+   art:`<div class="ta-cols"><div class="ta-col"><small>Your answer</small>Atoms of the same element with more neutrons</div><div class="ta-col m"><small>Model answer</small>Atoms of the same <span class="kw hit">element</span> with different numbers of <span class="kw hit">neutrons</span> and the same <span class="kw miss">protons</span></div></div><div class="ta-rate"><span class="g">Got it</span><span class="a sug">Almost</span><span class="m">Missed it</span></div>`},
+  {title:'Find, move and tidy',body:'Search everything with <kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd>. Move or copy a card from its Edit panel, archive finished subjects, and undo any delete straight away.',
+   art:`<div class="ta-search"><span>🔍 isotope</span><div><mark>Isotope</mark>s: same element, different neutrons<small>Chemistry › 4 Atoms › 4.1 Structure</small></div></div>`},
+  {title:'Work from the keyboard',body:'<kbd>J</kbd>/<kbd>K</kbd> select cards, <kbd>A</kbd> shows the answer, <kbd>W</kbd> writes a blurt, <kbd>N</kbd> adds a card and <kbd>S</kbd> starts studying. Press <kbd>?</kbd> any time for the full list. You can change every shortcut in Settings.<br><br>Sign in (bottom of the sidebar) to sync between your devices. Help is always in <b>Settings › Help &amp; guides</b>.',
+   art:`<div class="ta-keys"><kbd>J</kbd><kbd>K</kbd><kbd>A</kbd><kbd>W</kbd><kbd>N</kbd><kbd>S</kbd><kbd>/</kbd><kbd>?</kbd></div>`}
+];
+let _tourStep=0;
+function openTour(){
+  let m=document.getElementById('tourModal');
+  if(!m){m=document.createElement('div');m.id='tourModal';m.className='tm-overlay';document.body.appendChild(m);
+    m.addEventListener('mousedown',e=>{if(e.target===m)closeTour();});
+    m.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();tourGo(1);}else if(e.key==='ArrowLeft'){e.preventDefault();tourGo(-1);}});}
+  _tourStep=0;renderTour();m.hidden=false;
+}
+function closeTour(){const m=document.getElementById('tourModal');if(m)m.hidden=true;}
+function tourGo(d){const n=_tourStep+d;if(n<0)return;if(n>=TOUR.length){closeTour();return;}_tourStep=n;renderTour();}
+function renderTour(){
+  const s=TOUR[_tourStep],last=_tourStep===TOUR.length-1,m=document.getElementById('tourModal');
+  m.innerHTML=`<div class="tm-box tour-box" role="dialog" aria-label="Tour">
+    <div class="tour-art">${s.art}</div>
+    <div class="tour-text"><div class="tour-step">${_tourStep+1} of ${TOUR.length}</div><div class="tour-title">${s.title}</div><div class="tour-body">${s.body}</div></div>
+    <div class="tm-foot"><div class="tour-dots">${TOUR.map((_,i)=>`<span class="${i===_tourStep?'on':''}" onclick="_tourStep=${i};renderTour()"></span>`).join('')}</div><span class="spacer"></span>
+      ${last?'':'<button class="btn" onclick="closeTour()">Skip</button>'}
+      ${_tourStep?'<button class="btn" onclick="tourGo(-1)">Back</button>':''}
+      <button class="btn btn-primary" id="tourNext" onclick="tourGo(1)">${last?'Start revising':'Next'}</button></div></div>`;
+  const b=m.querySelector('#tourNext');if(b)b.focus();
+}
+// Show the tour once per device: straight away for a new user, as an offer for existing ones.
+function maybeShowTour(){
+  let seen=null;try{seen=localStorage.getItem('blurt-tour-seen');localStorage.setItem('blurt-tour-seen','1');}catch(e){}
+  if(seen)return;
+  if(!hasContent(state))setTimeout(openTour,300);
+  else toast('New: side-by-side marking, bulk add, search, undo and more.',{action:{label:'Take the tour',fn:openTour},ms:12000});
+}
+
+// ── Small screens ──
+function isNarrow(){return window.matchMedia('(max-width:760px)').matches;}
 load();
 </script>
 <script>

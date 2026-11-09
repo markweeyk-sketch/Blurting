@@ -17,7 +17,7 @@ This is a **single-page, zero-build, static web app**. There is no bundler,
 package manager, or server-side code — everything runs in the browser from
 plain files.
 
-- **UI / logic** — one hand-written `index.html` (~2400 lines) containing all
+- **UI / logic** — one hand-written `index.html` (~3200 lines) containing all
   HTML, CSS, and vanilla JavaScript. No framework.
 - **Rich text** — [Quill 1.3.7](https://quilljs.com/), loaded from a CDN, for
   editing card answers and blurt notes.
@@ -105,6 +105,16 @@ Key functions in `index.html`, grouped by area:
   summaries queue in `syncMeta.pendingSessions` until they upload. Writes over
   `CLOUD_LIMIT` (~1 MB, Firestore's per-doc cap) are refused with a visible
   "too large" status.
+- **Several tabs** — `Tabs`: tabs announce every storage write over a
+  BroadcastChannel and the others pull it (`Tabs.pull`). Every write goes
+  through `Store.tx` and bumps the stored `ver`; if another tab wrote since this
+  tab last read (`_storeVer`), the write merges (`mergeStates`) instead of
+  replacing, so storage only ever grows a superset and a tab with no unsaved
+  changes can just take it. Only the leader tab (holder of the `blurt-sync` Web
+  Lock) talks to the cloud; it pushes edits made in any tab, broadcasts its sync
+  status, and the next tab takes over when it closes (`Tabs.takeOver`). Other
+  tabs only add queued sessions (deduped by id, `uploadedSessions`) and a dirty
+  flag to `meta` (`Tabs.mergeMeta`).
 - **Backups** — `exportData()`, `onImportFile` → `applyImport` (merge or
   replace), `restoreBackup`; all in Settings › Data & sync
   (`renderSettingsData`, which also shows the size meter).
@@ -114,6 +124,39 @@ Key functions in `index.html`, grouped by area:
 - **Sanitizing** — `renderAnswer` passes stored HTML through `sanitizeRich`
   (tag/attribute/URL allowlist). Values interpolated into inline `onclick`
   strings must go through `escAttr(jsStr(...))`.
+- **Displaying rich text** — Quill stores nested lists flat (`<li class="ql-indent-N">`);
+  `sanitizeRich` calls `nestQuillLists` to rebuild real nested `<ul>/<ol>` for
+  display. Containers showing answers/notes need the `rich` class, whose CSS
+  is written to match the editor's list overrides (`.ql-snow .ql-editor li…`).
+  Stored HTML stays in Quill's flat format (the editor needs it).
+- **Keyboard shortcuts** — `HOTKEYS` defines every shortcut with a scope:
+  `editor` (Quill bindings via `editorBindings`, need a modifier, matched by
+  `code`), `app` (subject page, not while typing) and `session`; all matched
+  with `matchHotkey` in the single global keydown handler and editable in
+  Settings. `_kbCard` / `setCardFocus` is the keyboard-selected card.
+- **Study sessions (side by side)** — after `revealSessionAnswer`, the model
+  answer column appears beside the blurt; `updateKeyTerms` →
+  `highlightKeyTerms` marks key terms (stopwords skipped, light stemming via
+  `stemWord`/`stemsMatch`) and suggests a rating; both toggled by
+  `state.studyPrefs`.
+- **Undo / archive / move** — deletes go through `removeWithUndo` (toast
+  Undo re-inserts by id path via `resolveList`). `subject.archived` hides a
+  subject under "Archived" in the sidebar. Moving a card/subtopic/topic uses
+  `moveItem`, which gives the item a **new id** and tombstones the old one so
+  merges can't leave copies in two places; "Save as copy" is `saveCard(true)`.
+- **Bulk add** — `openBulk` modal: `parseBulkCards` (tab/`|` columns, `Q:`/`A:`
+  blocks, blank-line blocks; `answerToHtml` turns `-`/`1.` lines into Quill
+  list HTML) and `parseSpec` (numbered spec lines; numbers that prefix others
+  are headings → subtopics). `planBulk` computes exactly what `commitBulk`
+  will add (also used for the preview), skipping spec points already present.
+- **Search** — `openSearch` (`/`, Ctrl/Cmd+K, sidebar icon): `searchAll` over
+  every subject, `goToResult` opens the section and selects the card.
+- **Settings & help** — tabbed modal (`openSettings(tab)`): shortcuts, study
+  prefs, data & sync, help guides (`HELP_GUIDES`). `openTour` / `TOUR` is the
+  walkthrough, shown once per device by `maybeShowTour`
+  (localStorage `blurt-tour-seen`).
+- **Small screens** — below 760px (`isNarrow()`), the sidebar becomes an
+  overlay drawer, columns stack and the session rating bar sticks to the bottom.
 - **Content CRUD** — `saveSubject/Topic/Subtopic/Card`,
   `deleteSubject/Topic/Subtopic/Card`, edited through side panels
   (`openPanel`, `buildSubjectPanel`, `buildTopicPanel`, `buildSubtopicPanel`,
