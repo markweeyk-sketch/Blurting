@@ -395,7 +395,12 @@ body.has-offline-banner .app{padding-top:38px}
 .sidebar-scrim{display:none}
 
 /* ── Keyboard selection & search flash ── */
-.card.kb-focus{border-color:#534AB7;box-shadow:0 0 0 2px rgba(83,74,183,.18)}
+.card.kb-focus{border-color:var(--focus,#534AB7);box-shadow:0 0 0 2px var(--focus-ring,rgba(83,74,183,.18))}
+.no-card-focus .card.kb-focus{border-color:var(--border);box-shadow:none}
+.focus-swatches{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.focus-swatches .color-swatch{width:22px;height:22px}
+.focus-off{font-size:11px;color:var(--text2);border:1px solid var(--border2);background:none;border-radius:11px;padding:3px 9px;cursor:pointer}
+.focus-off.sel{border-color:var(--text);color:var(--text)}
 @keyframes cardFlash{0%,40%{box-shadow:0 0 0 4px rgba(83,74,183,.35)}100%{box-shadow:0 0 0 2px rgba(83,74,183,.18)}}
 .card.flash{animation:cardFlash 1.4s ease-out}
 kbd,.kbd-hint{display:inline-block;min-width:1.6em;padding:1px 5px;border:1px solid var(--border2);border-bottom-width:2px;border-radius:5px;font:600 10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;color:var(--text2);background:var(--bg)}
@@ -475,35 +480,89 @@ code{font:11.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg
 .search-empty span{display:block;margin-top:6px;font-size:11px}
 mark{background:rgba(232,163,59,.35);color:inherit;border-radius:2px;padding:0 1px}
 
-/* ── Settings ── */
-#settingsModal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.35);align-items:center;justify-content:center;padding:16px}
-.settings-box{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:14px;width:760px;max-width:100%;height:min(640px,90vh);display:flex;flex-direction:column;overflow:hidden}
-.settings-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
-.settings-layout{flex:1;min-height:0;display:flex}
-.settings-nav{width:180px;flex-shrink:0;padding:12px 8px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:2px;background:var(--bg2)}
-.settings-nav button{text-align:left;padding:8px 10px;border:none;background:none;border-radius:7px;cursor:pointer;font-size:12.5px;color:var(--text2)}
-.settings-nav button:hover{color:var(--text);background:var(--bg3)}
-.settings-nav button.active{background:var(--bg);color:var(--text);font-weight:600;box-shadow:0 0 0 1px var(--border)}
-.settings-body{flex:1;overflow:auto;padding:18px 22px}
-.settings-body>section{display:none}
-.settings-body>section.active{display:block}
-.hotkey-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+/* ── Settings (full page) ── */
+#settingsModal{position:fixed;inset:0;z-index:300;background:var(--bg2);color:var(--text)}
+.settings-nav{width:var(--sidebar-w);flex-shrink:0;background:var(--bg3);border-right:1px solid var(--border);padding:16px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.settings-back{display:flex;align-items:center;gap:8px;padding:7px 10px;margin-bottom:14px;border:none;background:none;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--text3);text-align:left}
+.settings-back:hover{color:var(--text);background:var(--bg)}
+.settings-nav-title{font-size:16px;font-weight:600;letter-spacing:-.3px;padding:0 10px 12px}
+.settings-nav button[data-tab]{display:flex;align-items:center;gap:10px;padding:8px 10px;border:none;background:none;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text2);text-align:left;transition:background .15s,color .15s}
+.settings-nav button[data-tab] svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+.settings-nav button[data-tab]:hover{background:var(--bg);color:var(--text)}
+.settings-nav button[data-tab].active{background:var(--bg);color:var(--text);font-weight:500}
+.settings-body{flex:1;min-width:0;overflow-y:auto}
+.settings-inner{max-width:700px;margin:0 auto;padding:44px 32px 96px}
+.settings-inner>section{display:none}
+.settings-inner>section.active{display:block;animation:settingsIn .18s ease-out}
+@keyframes settingsIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.settings-h1{font-size:22px;font-weight:600;letter-spacing:-.4px}
+.settings-lead{font-size:13px;color:var(--text2);line-height:1.5;margin:6px 0 28px}
+.settings-group{margin-bottom:28px}
+.settings-group-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.settings-group-desc{font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:10px}
+.settings-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.settings-card>*+*{border-top:1px solid var(--border)}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 16px;font-size:13px}
+.settings-row-text{min-width:0}
+.settings-row-title{font-size:13px;color:var(--text)}
+.settings-row-desc{font-size:12px;color:var(--text3);line-height:1.5;margin-top:2px}
+.settings-row .btn{flex-shrink:0}
+.settings-row.block{display:block}
+.settings-foot{display:flex;justify-content:flex-end;margin-top:10px}
+.seg{display:inline-flex;padding:2px;border-radius:8px;background:var(--bg3);flex-shrink:0}
+.seg button{border:none;background:none;padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;color:var(--text2)}
+.seg button.active{background:var(--bg);color:var(--text);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--border)}
+.hotkey-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 16px}
 .hotkey-name{font-size:13px;color:var(--text)}
-.hotkey-desc{font-size:11px;color:var(--text3);margin-top:1px}
-.setting-switch{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px}
+.hotkey-desc{font-size:12px;color:var(--text3);margin-top:2px}
+.setting-switch{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:13px}
 .setting-switch input{position:absolute;opacity:0;pointer-events:none}
-.setting-switch .settings-text{display:block;margin:3px 0 0}
-.switch{flex-shrink:0;width:32px;height:18px;border-radius:9px;background:var(--border2);position:relative;transition:background .15s;margin-top:1px}
-.switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.setting-switch .settings-row-desc{display:block}
+.switch{order:2;flex-shrink:0;width:34px;height:20px;border-radius:10px;background:var(--border2);position:relative;transition:background .15s}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
 .setting-switch input:checked+.switch{background:var(--green)}
 .setting-switch input:checked+.switch::after{transform:translateX(14px)}
 .setting-switch input:focus-visible+.switch{outline:2px solid #534AB7;outline-offset:2px}
-.help-tour{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);margin-bottom:12px;font-size:13px}
-.help-guide{border-bottom:1px solid var(--border)}
-.help-guide summary{cursor:pointer;padding:11px 0;font-size:13px;font-weight:600;color:var(--text)}
-.help-body{font-size:12.5px;line-height:1.6;color:var(--text2);padding:0 0 12px}
+.help-tour{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;border-radius:12px;background:var(--bg);border:1px solid var(--border);margin-bottom:28px;font-size:13px}
+.help-guide summary{cursor:pointer;padding:13px 16px;font-size:13px;font-weight:500;color:var(--text);list-style:none;display:flex;justify-content:space-between;align-items:center}
+.help-guide summary::-webkit-details-marker{display:none}
+.help-guide summary::after{content:'';width:7px;height:7px;border-right:1.5px solid var(--text3);border-bottom:1.5px solid var(--text3);transform:rotate(45deg) translateY(-2px);transition:transform .15s;flex-shrink:0;margin-left:12px}
+.help-guide[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.help-guide summary:hover{background:var(--bg2)}
+.help-body{font-size:12.5px;line-height:1.65;color:var(--text2);padding:0 16px 14px}
 .help-body p{margin:0 0 8px}
 
+.ql-prescript{display:inline-block}
+.ql-prescript>span{display:inline-flex;flex-direction:column;align-items:flex-end;vertical-align:.72em;font-size:.68em;line-height:1.05;margin-right:.08em}
+.ql-prescript sup,.ql-prescript sub{vertical-align:baseline;font-size:inherit;line-height:inherit;min-height:1.05em}
+.ql-editor .ql-prescript{cursor:pointer;border-radius:3px}
+.ql-editor .ql-prescript:hover{background:var(--bg3)}
+.prescript-pop{position:absolute;z-index:20;display:flex;gap:10px;align-items:stretch;padding:8px;background:var(--bg);border:1px solid var(--border2);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.14)}
+.pp-fields{display:flex;flex-direction:column;gap:4px}
+.pp-fields input{width:64px;padding:4px 7px;font-size:12px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);outline:none}
+.pp-fields input:focus{border-color:var(--text3)}
+.pp-side{display:flex;flex-direction:column;justify-content:space-between;gap:6px}
+.pp-hint{font-size:11px;color:var(--text3);white-space:nowrap}
+.pp-btns{display:flex;gap:4px;justify-content:flex-end}
+/* ── Location picker ── */
+.loc-btn{display:flex;align-items:center;gap:8px;width:100%;text-align:left;cursor:pointer;min-height:38px}
+.loc-btn .loc-path{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.loc-btn.open{border-color:var(--text3)}
+.loc-muted{color:var(--text3)}
+.loc-caret{flex-shrink:0;width:7px;height:7px;border-right:1.5px solid var(--text3);border-bottom:1.5px solid var(--text3);transform:rotate(45deg) translate(-2px,-2px)}
+.loc-pop{position:fixed;z-index:700;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--border2);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.16);overflow:hidden}
+.loc-find{border:none;border-bottom:1px solid var(--border);background:transparent;padding:10px 12px;font-size:13px;outline:none;flex-shrink:0}
+.loc-items{overflow-y:auto;padding:4px 0 6px}
+.loc-head{display:flex;align-items:center;gap:7px;padding:9px 12px 4px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.loc-item{position:relative;display:flex;align-items:baseline;gap:8px;margin:0 4px;padding:7px 10px 7px 26px;border-radius:7px;font-size:13px;cursor:pointer;color:var(--text)}
+.loc-item.sub{padding-left:44px;color:var(--text2)}
+.loc-item.sub::before{content:'';position:absolute;left:31px;top:0;bottom:50%;width:8px;border-left:1px solid var(--border2);border-bottom:1px solid var(--border2);border-bottom-left-radius:4px}
+.loc-item.active{background:var(--bg2);color:var(--text)}
+.loc-item.sel .loc-name{font-weight:600}
+.loc-item.sel::after{content:'✓';position:absolute;left:10px;font-size:11px;color:var(--green)}
+.loc-item.sub.sel::after{left:auto;right:12px}
+.loc-note{font-size:11px;color:var(--text3)}
+.loc-empty{padding:16px 12px;font-size:12px;color:var(--text3);text-align:center}
 /* ── Tour ── */
 .tour-box{width:560px}
 .tour-art{background:var(--bg3);padding:26px 20px;display:flex;align-items:center;justify-content:center;min-height:170px;border-bottom:1px solid var(--border)}
@@ -565,10 +624,16 @@ mark{background:rgba(232,163,59,.35);color:inherit;border-radius:2px;padding:0 1
   .bulk-grid{grid-template-columns:1fr;overflow:auto}
   .bulk-left{border-right:none;border-bottom:1px solid var(--border);overflow:visible}
   .bulk-right{overflow:visible}
-  .bulk-box,.settings-box{height:94vh}
-  .settings-layout{flex-direction:column}
-  .settings-nav{width:auto;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);padding:8px}
-  .settings-nav button{white-space:nowrap}
+  .bulk-box{height:94vh}
+  #settingsModal{flex-direction:column}
+  .settings-nav{width:auto;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);padding:8px;gap:4px;flex-shrink:0}
+  .settings-nav-title{display:none}
+  .settings-back{margin:0 4px 0 0;padding:8px}
+  .settings-back span+span{display:none}
+  .settings-nav button[data-tab]{white-space:nowrap;padding:7px 10px}
+  .settings-nav button[data-tab] svg{display:none}
+  .settings-inner{padding:24px 16px 80px}
+  .settings-row,.setting-switch,.hotkey-row{padding:12px 14px}
   .search-overlay{padding-top:4vh}
   .tour-art{min-height:140px;padding:18px 12px}
   .ta-cols{grid-template-columns:1fr}
@@ -725,22 +790,23 @@ function updateAccountUI(user){
 <input type="file" id="importFile" accept="application/json,.json" hidden onchange="onImportFile(this)">
 <input type="file" id="imageFile" accept="image/*" multiple hidden>
 
-<div id="settingsModal" style="display:none" onmousedown="if(event.target===this)closeSettings()">
-  <div class="settings-box" role="dialog" aria-label="Settings">
-    <div class="settings-head"><div class="tm-title">Settings</div><button class="panel-close" onclick="closeSettings()">✕</button></div>
-    <div class="settings-layout">
-      <nav class="settings-nav">
-        <button data-tab="shortcuts" onclick="settingsTab('shortcuts')">Keyboard shortcuts</button>
-        <button data-tab="study" onclick="settingsTab('study')">Study</button>
-        <button data-tab="data" onclick="settingsTab('data')">Data &amp; sync</button>
-        <button data-tab="help" onclick="settingsTab('help')">Help &amp; guides</button>
-      </nav>
-      <div class="settings-body">
-        <section data-tab="shortcuts"><div id="settingsHotkeyRows"></div></section>
-        <section data-tab="study" id="settingsStudy"></section>
-        <section data-tab="data"><div class="settings-section">Data &amp; sync</div><div id="settingsData"></div></section>
-        <section data-tab="help" id="settingsHelp"></section>
-      </div>
+<div id="settingsModal" style="display:none" role="dialog" aria-label="Settings">
+  <nav class="settings-nav">
+    <button class="settings-back" onclick="closeSettings()"><span aria-hidden="true">←</span><span>Back to Blurt</span></button>
+    <div class="settings-nav-title">Settings</div>
+    <button data-tab="general" onclick="settingsTab('general')"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>General</button>
+    <button data-tab="study" onclick="settingsTab('study')"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5 10 3l7 2.5L10 8 3 5.5Z"/><path d="M6 7v4.5c0 1.2 1.8 2.5 4 2.5s4-1.3 4-2.5V7"/></svg>Study</button>
+    <button data-tab="shortcuts" onclick="settingsTab('shortcuts')"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="5" width="15" height="10" rx="2"/><path d="M5.5 8h1M9.5 8h1M13.5 8h1M6 12h8"/></svg>Keyboard shortcuts</button>
+    <button data-tab="data" onclick="settingsTab('data')"><svg viewBox="0 0 20 20" aria-hidden="true"><ellipse cx="10" cy="5" rx="6" ry="2.5"/><path d="M4 5v10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V5M4 10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5"/></svg>Data &amp; sync</button>
+    <button data-tab="help" onclick="settingsTab('help')"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M7.8 7.8a2.3 2.3 0 1 1 3 2.2c-.5.2-.8.6-.8 1.1v.6M10 14.2v.1"/></svg>Help &amp; guides</button>
+  </nav>
+  <div class="settings-body">
+    <div class="settings-inner">
+      <section data-tab="general" id="settingsGeneral"></section>
+      <section data-tab="study"><h1 class="settings-h1">Study</h1><p class="settings-lead">How study sessions mark your answers.</p><div id="settingsStudy"></div></section>
+      <section data-tab="shortcuts"><h1 class="settings-h1">Keyboard shortcuts</h1><p class="settings-lead">Click a shortcut, then press the keys you want. Esc cancels.</p><div id="settingsHotkeyRows"></div></section>
+      <section data-tab="data"><h1 class="settings-h1">Data &amp; sync</h1><p class="settings-lead">Everything is saved on this device. Sign in from the sidebar to sync between devices.</p><div id="settingsData"></div></section>
+      <section data-tab="help"><h1 class="settings-h1">Help &amp; guides</h1><p class="settings-lead">Short guides to everything Blurt can do.</p><div id="settingsHelp"></div></section>
     </div>
   </div>
 </div>
@@ -849,6 +915,7 @@ function normalizeState(s){
   if(!s.theme)s.theme='light';
   if(s.sidebarOpen===undefined)s.sidebarOpen=true;
   if(!s.sortOrder)s.sortOrder='az';
+  if(s.focusColor!=='none'&&!/^#[0-9a-f]{6}$/i.test(s.focusColor||''))s.focusColor='#534AB7';
   if(!s.activeSpFilter)s.activeSpFilter=null;
   if(!s.deleted||typeof s.deleted!=='object')s.deleted={};
   s.hotkeys=Object.assign(defaultHotkeys(),s.hotkeys||{});
@@ -1312,13 +1379,13 @@ function renderSyncStatus(){
   if(_persistErr)html="<strong>Couldn't save on this device.</strong> Storage may be full. Export a backup from Settings now so nothing is lost.";
   else if(Sync.user&&syncMeta.dirty&&s==='offline')html="<strong>You're offline.</strong> Your changes are saved on this device and will sync when you reconnect. Until then they won't show on your other devices.";
   else if(Sync.user&&syncMeta.dirty&&s==='error')html=`<strong>Your changes aren't reaching the cloud.</strong> They're saved on this device and Blurt keeps retrying.${Sync.detail?' '+esc(Sync.detail):''} <button class="btn btn-sm" onclick="Sync.push()">Retry now</button>`;
-  else if(Sync.user&&s==='toolarge')html=`<strong>Your data is too big to sync</strong> (${fmtKB(jsonBytes(cloudJSON(state)))} of ${fmtKB(CLOUD_LIMIT)}), usually because of images. It's saved on this device. <button class="btn btn-sm" onclick="openSettings()">Free up space</button>`;
+  else if(Sync.user&&s==='toolarge')html=`<strong>Your data is too big to sync</strong> (${fmtKB(jsonBytes(cloudJSON(state)))} of ${fmtKB(CLOUD_LIMIT)}), usually because of images. It's saved on this device. <button class="btn btn-sm" onclick="openSettings('data')">Free up space</button>`;
   banner.style.display=html?'flex':'none';
   banner.classList.toggle('error',!!html&&s!=='offline');
   document.getElementById('offlineBannerText').innerHTML=html;
   document.body.classList.toggle('has-offline-banner',!!html);
 }
-function onSyncRowClick(){if(Sync.status==='error')Sync.push();else if(Sync.status==='toolarge')openSettings();}
+function onSyncRowClick(){if(Sync.status==='error')Sync.push();else if(Sync.status==='toolarge')openSettings('data');}
 function fmtKB(b){return b>=1e6?(b/1e6).toFixed(2)+' MB':Math.max(1,Math.round(b/1e3))+' KB';}
 
 let _toastTimer=null;
@@ -1445,17 +1512,22 @@ async function renderSettingsData(){
   const bytes=jsonBytes(cloudJSON(state)),pct=Math.round(bytes/CLOUD_LIMIT*100),img=imageStats();
   let backup=null;try{backup=await Store.get('backup');}catch(e){}
   el.innerHTML=`
-    <div class="settings-text" style="margin-bottom:2px">${Sync.user?'Cloud space used':'Size of your data'} (cloud sync fits about 1 MB)</div>
-    <div class="meter"><div class="meter-fill${pct>=100?' over':pct>=80?' warn':''}" style="width:${Math.min(100,pct)}%"></div></div>
-    <div class="meter-label">${fmtKB(bytes)} of ${fmtKB(CLOUD_LIMIT)} · ${pct}%${img.count?` · ${img.count} image${img.count!==1?'s':''} use ${fmtKB(img.bytes)}`:''}</div>
-    ${img.big?`<div class="settings-actions"><button class="btn btn-sm" onclick="shrinkImages(this)">Shrink ${img.big} large image${img.big!==1?'s':''}</button></div>`:''}
-    <div class="settings-text" style="margin:16px 0 0">Save everything to a file, or load one. When you import, you choose whether to merge or replace.</div>
-    <div class="settings-actions">
-      <button class="btn btn-sm" onclick="exportData()">Export backup</button>
-      <button class="btn btn-sm" onclick="document.getElementById('importFile').click()">Import backup…</button>
-    </div>
-    ${backup&&backup.state?`<div class="settings-text" style="margin:16px 0 0">Saved version: <strong>${esc(backup.reason)}</strong> · ${esc(new Date(backup.at).toLocaleString())} · ${countCards(backup.state)} cards</div>
-    <div class="settings-actions"><button class="btn btn-sm" onclick="confirmRestore()">Restore this version</button></div>`:''}`;
+    <div class="settings-group"><div class="settings-group-title">Storage</div>
+      <div class="settings-group-desc">Cloud sync fits about 1 MB. Images take up most of the space.</div>
+      <div class="settings-card">
+        <div class="settings-row block">
+          <div class="settings-row-title">${Sync.user?'Cloud space used':'Size of your data'}</div>
+          <div class="meter"><div class="meter-fill${pct>=100?' over':pct>=80?' warn':''}" style="width:${Math.min(100,pct)}%"></div></div>
+          <div class="meter-label">${fmtKB(bytes)} of ${fmtKB(CLOUD_LIMIT)} · ${pct}%${img.count?` · ${img.count} image${img.count!==1?'s':''} use ${fmtKB(img.bytes)}`:''}</div>
+        </div>
+        ${img.big?`<div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">${img.big} large image${img.big!==1?'s':''}</div><div class="settings-row-desc">Shrinking scales them to 1400px and recompresses them. The originals are replaced.</div></div><button class="btn btn-sm" onclick="shrinkImages(this)">Shrink</button></div>`:''}
+      </div></div>
+    <div class="settings-group"><div class="settings-group-title">Backups</div>
+      <div class="settings-card">
+        <div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Export a backup</div><div class="settings-row-desc">Saves everything to a file on this device.</div></div><button class="btn btn-sm" onclick="exportData()">Export</button></div>
+        <div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Import a backup</div><div class="settings-row-desc">You choose whether to merge it with your data or replace it.</div></div><button class="btn btn-sm" onclick="document.getElementById('importFile').click()">Import…</button></div>
+        ${backup&&backup.state?`<div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Saved version</div><div class="settings-row-desc">${esc(backup.reason)} · ${esc(new Date(backup.at).toLocaleString())} · ${countCards(backup.state)} cards</div></div><button class="btn btn-sm" onclick="confirmRestore()">Restore</button></div>`:''}
+      </div></div>`;
 }
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1506,8 +1578,17 @@ function sanitizeRich(html){
   return out;
 }
 
+// Colour of the outline around the selected card (Settings › General), or 'none'.
+function applyFocusColor(){
+  const r=document.documentElement,c=state.focusColor||'#534AB7';
+  r.classList.toggle('no-card-focus',c==='none');
+  if(c==='none')return;
+  const n=parseInt(c.slice(1),16);
+  r.style.setProperty('--focus',c);r.style.setProperty('--focus-ring',`rgba(${n>>16},${n>>8&255},${n&255},.18)`);
+}
+function setFocusColor(c){state.focusColor=c;applyFocusColor();save();renderSettingsGeneral();}
 function toggleTheme(){state.theme=state.theme==='dark'?'light':'dark';applyTheme();save();}
-function applyTheme(){document.documentElement.setAttribute('data-theme',state.theme);document.getElementById('themeBtn').textContent=state.theme==='dark'?'☀':'☾';}
+function applyTheme(){document.documentElement.setAttribute('data-theme',state.theme);applyFocusColor();document.getElementById('themeBtn').textContent=state.theme==='dark'?'☀':'☾';}
 function toggleSidebar(){state.sidebarOpen=!state.sidebarOpen;applySidebar();saveUI();}
 function applySidebar(){document.getElementById('sidebar').classList.toggle('collapsed',!state.sidebarOpen);}
 
@@ -1875,8 +1956,9 @@ function openPanel(type,editId,topicId,subtopicId){
   else if(type==='card')buildCardPanel(editId,topicId,subtopicId);
   const bd=document.getElementById('panelBackdrop');
   bd.classList.add('open');
-  bd.addEventListener('click',_backdropClick);
+  bd.addEventListener('mousedown',_backdropDown);bd.addEventListener('click',_backdropClick);
   const body=document.getElementById('panelBody');
+  panel.snap=panelSnapshot();
   body.onkeydown=_panelKeydown;
   // Stop Chrome from offering autofill / form-history suggestions on the fields.
   body.querySelectorAll('input').forEach(i=>{
@@ -1906,6 +1988,9 @@ function _panelFields(){
 
 // Enter saves the panel; Up/Down arrows move between fields.
 function _panelKeydown(e){
+  // Enter saves from dropdowns too (an open dropdown list takes the Enter itself);
+  // arrows in a dropdown change its value, so they don't move between fields.
+  if(e.target.tagName==='SELECT'){if(e.key==='Enter'){e.preventDefault();_savePanel();}return;}
   if(e.target.tagName!=='INPUT')return;
   if(e.key==='Enter'){e.preventDefault();_savePanel();return;}
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){
@@ -1921,12 +2006,29 @@ function _panelKeydown(e){
 }
 
 function closePanel(){
+  closeLocPick();closePrescript();
   const bd=document.getElementById('panelBackdrop');
   bd.classList.remove('open');
-  bd.removeEventListener('click',_backdropClick);
+  bd.removeEventListener('mousedown',_backdropDown);bd.removeEventListener('click',_backdropClick);
 }
-
-function _backdropClick(e){if(e.target===document.getElementById('panelBackdrop'))closePanel();}
+// Everything typed into the panel, to tell whether closing it would lose anything.
+function panelSnapshot(){
+  const body=document.getElementById('panelBody');
+  return JSON.stringify([[...body.querySelectorAll('input,select,textarea')].map(i=>i.type==='checkbox'?i.checked:i.value),
+    _answerQuill&&body.contains(_answerQuill.root)?_answerQuill.getContents():null,panel.selColor||null]);
+}
+// Clicking outside or Esc: close, but ask first if there are unsaved changes.
+function requestClosePanel(){
+  if(!document.getElementById('panelBackdrop').classList.contains('open'))return;
+  if(panelSnapshot()===panel.snap){closePanel();return;}
+  showChoice({title:'Discard your changes?',text:"You've changed this but haven't saved it.",
+    buttons:[{label:'Keep editing'},{label:'Discard',cls:'btn-danger',fn:closePanel}]});
+}
+// Only a click that starts AND ends on the backdrop closes the panel, so
+// selecting text and letting go outside the panel doesn't.
+let _backdropDownHit=false;
+function _backdropDown(e){_backdropDownHit=e.target===e.currentTarget;}
+function _backdropClick(e){if(_backdropDownHit&&e.target===e.currentTarget)requestClosePanel();_backdropDownHit=false;}
 function setPanelColor(c){panel.selColor=c;document.querySelectorAll('.color-swatch').forEach(s=>s.classList.toggle('sel',s.dataset.color===c));}
 
 function buildSubjectPanel(editId){
@@ -1971,7 +2073,7 @@ function buildSubtopicPanel(editId,topicId){
       <input class="field-input" id="p-stname" placeholder="e.g. 3.1 CPU & Memory" value="${st?esc(st.name):''}">
       ${st?'':`<div class="field-hint">Adding to: ${t?esc(t.name):'–'}</div>`}</div>
     ${st?`<div class="field"><label class="field-label">Topic</label>
-      <select class="field-input" id="p-st-loc">${locationOptions(`${sub.id}|${topicId}|`,true)}</select>
+      ${locationPicker('p-st-loc',`${sub.id}|${topicId}|`,true)}
       <div class="field-hint">Choose another topic to move this subtopic and its cards there</div></div>`:''}`;
   document.getElementById('panelFooter').innerHTML=`
     ${st?`<button class="btn btn-danger" onclick="deleteSubtopic('${topicId}','${st.id}');closePanel()">Delete</button><span class="spacer"></span>`:''}
@@ -1996,7 +2098,7 @@ function buildCardPanel(editId,topicId,subtopicId){
     <div class="field"><label class="field-label">Model answer</label>
       <div class="quill-answer-wrap"><div id="p-ans-editor"></div></div></div>
     <div class="field"><label class="field-label">Location</label>
-      <select class="field-input" id="p-loc">${locationOptions(`${state.activeSubId}|${topicId}|${subtopicId||''}`,false)}</select>
+      ${locationPicker('p-loc',`${state.activeSubId}|${topicId}|${subtopicId||''}`,false)}
       ${c?'<div class="field-hint">Choose somewhere else to move this card</div>':''}</div>`;
   document.getElementById('panelFooter').innerHTML=`
     ${c?`<button class="btn btn-danger" onclick="deleteCard('${topicId}','${c.id}','${subtopicId||''}');closePanel()">Delete</button><button class="btn" onclick="saveCard(true)" title="Adds a new card from this form and leaves the original unchanged">Save as copy</button><span class="spacer"></span>`:''}
@@ -2007,8 +2109,8 @@ function buildCardPanel(editId,topicId,subtopicId){
     placeholder:'The ALU performs arithmetic and logic operations...',
     modules:{
       toolbar:{
-        container:[['bold','italic','underline'],[{list:'ordered'},{list:'bullet'}],[{indent:'-1'},{indent:'+1'}],['image','table']],
-        handlers:{table:function(){openInsertTable(this.quill);},image:function(){pickImages(this.quill);}}
+        container:[['bold','italic','underline'],[{script:'sub'},{script:'super'},'prescript'],[{list:'ordered'},{list:'bullet'}],[{indent:'-1'},{indent:'+1'}],['image','table']],
+        handlers:{table:function(){openInsertTable(this.quill);},image:function(){pickImages(this.quill);},prescript:function(){openPrescript(this.quill);}}
       },
       keyboard:{bindings:editorBindings(()=>saveCard(),()=>{const h=document.getElementById('p-hint');if(h)h.focus();})}
     }
@@ -2016,6 +2118,9 @@ function buildCardPanel(editId,topicId,subtopicId){
   attachTableSupport(_answerQuill);attachImageSupport(_answerQuill);
   const tblBtn=_answerQuill.getModule('toolbar').container.querySelector('.ql-table');
   if(tblBtn)tblBtn.title=`Insert table (${hotkeyLabel(state.hotkeys.insertTable)})`;
+  const tb=_answerQuill.getModule('toolbar').container;
+  [['.ql-script[value=sub]','Subscript','subscript'],['.ql-script[value=super]','Superscript','superscript'],['.ql-prescript','Prescript, e.g. ¹⁴₆C','prescript']]
+    .forEach(([q,l,k])=>{const b=tb.querySelector(q);if(b)b.title=`${l} (${hotkeyLabel(state.hotkeys[k])})`;});
   if(c&&c.answer){
     if(c.answer.trim().startsWith('<'))_answerQuill.clipboard.dangerouslyPasteHTML(c.answer);
     else _answerQuill.setText(c.answer);
@@ -2098,6 +2203,9 @@ function defaultHotkeys(){
     bulletList:{code:56,key:'8',shortKey:true,shiftKey:true,altKey:false},
     orderedList:{code:55,key:'7',shortKey:true,shiftKey:true,altKey:false},
     insertTable:{code:84,key:'T',shortKey:true,shiftKey:false,altKey:true},
+    subscript:{code:188,key:',',shortKey:true,shiftKey:false,altKey:false},
+    superscript:{code:190,key:'.',shortKey:true,shiftKey:false,altKey:false},
+    prescript:{code:190,key:'.',shortKey:true,shiftKey:true,altKey:false},
     search:k('/'),newCard:k('n'),bulkAdd:k('b'),study:k('s'),nextCard:k('j'),prevCard:k('k'),
     toggleAnswer:k('a'),writeBlurt:k('w'),editCard:k('e'),toggleSidebar:k('['),showHelp:k('?'),
     reveal:k(' '),rateGot:k('1'),rateAlmost:k('2'),rateMissed:k('3')
@@ -2124,7 +2232,10 @@ function editorBindings(onEnter,onArrowUpTop){
     saveEnter:{key:13,shiftKey:false,handler:function(){if(onEnter)onEnter();return false;}},
     bulletList:Object.assign(hkToBinding(hk.bulletList),{handler:function(range,context){this.quill.format('list',context.format.list==='bullet'?false:'bullet','user');return false;}}),
     orderedList:Object.assign(hkToBinding(hk.orderedList),{handler:function(range,context){this.quill.format('list',context.format.list==='ordered'?false:'ordered','user');return false;}}),
-    insertTable:Object.assign(hkToBinding(hk.insertTable),{handler:function(){openInsertTable(this.quill);return false;}})
+    insertTable:Object.assign(hkToBinding(hk.insertTable),{handler:function(){openInsertTable(this.quill);return false;}}),
+    subscript:Object.assign(hkToBinding(hk.subscript),{handler:function(range,context){this.quill.format('script',context.format.script==='sub'?false:'sub','user');return false;}}),
+    superscript:Object.assign(hkToBinding(hk.superscript),{handler:function(range,context){this.quill.format('script',context.format.script==='super'?false:'super','user');return false;}}),
+    prescript:Object.assign(hkToBinding(hk.prescript),{handler:function(){openPrescript(this.quill);return false;}})
   };
   // ArrowUp at the very start of the editor jumps back up to the field above.
   if(onArrowUpTop)b.exitUp={key:38,handler:function(range){if(range&&range.index===0&&range.length===0){onArrowUpTop();return false;}return true;}};
@@ -2135,12 +2246,12 @@ function editorBindings(onEnter,onArrowUpTop){
 let _hkRecordHandler=null;
 function renderHotkeyRows(){
   if(!state.hotkeys)state.hotkeys=defaultHotkeys();
-  document.getElementById('settingsHotkeyRows').innerHTML=`<div class="settings-text">Click a shortcut, then press the keys you want. Esc cancels.</div>`+HOTKEY_GROUPS.map(g=>`
-    <div class="settings-section" style="margin-top:18px">${g.title}</div><div class="settings-text">${g.text}</div>
-    ${Object.entries(HOTKEYS).filter(([,d])=>d.scope===g.scope).map(([k,d])=>`
+  document.getElementById('settingsHotkeyRows').innerHTML=HOTKEY_GROUPS.map(g=>`
+    <div class="settings-group"><div class="settings-group-title">${g.title}</div><div class="settings-group-desc">${g.text}</div>
+    <div class="settings-card">${Object.entries(HOTKEYS).filter(([,d])=>d.scope===g.scope).map(([k,d])=>`
       <div class="hotkey-row"><div><div class="hotkey-name">${d.label}</div>${d.desc?`<div class="hotkey-desc">${d.desc}</div>`:''}</div>
-      <button class="hotkey-btn" id="hk-${k}" onclick="startRecordHotkey('${k}',this)">${esc(hotkeyLabel(state.hotkeys[k]))}</button></div>`).join('')}`).join('')
-    +'<div class="settings-actions" style="margin-top:16px"><button class="btn btn-sm" onclick="resetAllHotkeys()">Reset all to defaults</button></div>';
+      <button class="hotkey-btn" id="hk-${k}" onclick="startRecordHotkey('${k}',this)">${esc(hotkeyLabel(state.hotkeys[k]))}</button></div>`).join('')}</div></div>`).join('')
+    +'<div class="settings-foot"><button class="btn btn-sm" onclick="resetAllHotkeys()">Reset all to defaults</button></div>';
 }
 function sameHotkey(a,b){return!!a&&!!b&&normKey(a.key)===normKey(b.key)&&!!a.shortKey===!!b.shortKey&&!!a.altKey===!!b.altKey&&!!a.shiftKey===!!b.shiftKey;}
 function resetAllHotkeys(){state.hotkeys=defaultHotkeys();save();renderHotkeyRows();if(state.activeSubId&&!_session)rerenderKeepingDrafts();}
@@ -2238,6 +2349,59 @@ class TableBlot extends BlockEmbed{
 TableBlot.blotName='table';TableBlot.tagName='table';TableBlot.className='blurt-table';
 Quill.register(TableBlot);
 Quill.import('ui/icons').table='<svg viewBox="0 0 18 18"><rect class="ql-stroke" x="3" y="3" width="12" height="12" rx="1"/><line class="ql-stroke" x1="3" x2="15" y1="7" y2="7"/><line class="ql-stroke" x1="3" x2="15" y1="11" y2="11"/><line class="ql-stroke" x1="9" x2="9" y1="7" y2="15"/></svg>';
+
+// ---- Prescripts ----
+// Numbers stacked before a symbol, as in nuclide notation (¹⁴₆C): an inline
+// embed holding a superscript over a subscript. Clicking one in an editor edits it.
+const InlineEmbed=Quill.import('blots/embed');
+class PrescriptBlot extends InlineEmbed{
+  static create(v){
+    const node=super.create();
+    const sup=document.createElement('sup'),sub=document.createElement('sub');
+    sup.textContent=(v&&v.sup)||'';sub.textContent=(v&&v.sub)||'';
+    node.append(sup,sub);return node;
+  }
+  static value(node){const t=s=>((node.querySelector(s)||{}).textContent||'').replace(/\uFEFF/g,'');return{sup:t('sup'),sub:t('sub')};}
+}
+PrescriptBlot.blotName='prescript';PrescriptBlot.tagName='span';PrescriptBlot.className='ql-prescript';
+Quill.register(PrescriptBlot);
+Quill.import('ui/icons').prescript='<svg viewBox="0 0 18 18"><text x="1.5" y="7.5" font-size="6.5" class="ql-fill" font-family="sans-serif">a</text><text x="1.5" y="15.5" font-size="6.5" class="ql-fill" font-family="sans-serif">b</text><text x="7" y="14" font-size="11" class="ql-fill" font-family="sans-serif" font-weight="600">X</text></svg>';
+function openPrescript(quill,node){
+  closePrescript();
+  const range=quill.getSelection(true)||{index:quill.getLength()-1,length:0};
+  const blot=node?Quill.find(node):null;
+  const index=blot?quill.getIndex(blot):range.index;
+  const cur=blot?PrescriptBlot.value(node):{sup:'',sub:''};
+  const pop=document.createElement('div');pop.id='prescriptPop';pop.className='prescript-pop';
+  pop.innerHTML=`<div class="pp-fields"><input id="pp-sup" placeholder="Top" value="${escAttr(cur.sup)}" aria-label="Top number (e.g. mass number)"><input id="pp-sub" placeholder="Bottom" value="${escAttr(cur.sub)}" aria-label="Bottom number (e.g. atomic number)"></div>
+    <div class="pp-side"><div class="pp-hint">e.g. 14 over 6 for ¹⁴₆C</div><div class="pp-btns">${blot?'<button class="btn btn-sm" data-a="del">Remove</button>':''}<button class="btn btn-sm btn-primary" data-a="ok">${blot?'Update':'Insert'}</button></div></div>`;
+  quill.container.style.position=quill.container.style.position||'relative';
+  quill.container.appendChild(pop);
+  const b=quill.getBounds(index),cw=quill.container.clientWidth;
+  pop.style.top=(b.bottom+6)+'px';pop.style.left=Math.max(4,Math.min(b.left-8,cw-pop.offsetWidth-4))+'px';
+  const [top,bot]=[pop.querySelector('#pp-sup'),pop.querySelector('#pp-sub')];
+  const done=act=>{
+    const v={sup:top.value.trim(),sub:bot.value.trim()};
+    closePrescript();
+    if(act==='cancel'){quill.focus();return;}
+    if(blot)quill.deleteText(index,1,'user');
+    if(act==='ok'&&(v.sup||v.sub)){quill.insertEmbed(index,'prescript',v,'user');quill.setSelection(index+1,0,'user');}
+    else quill.setSelection(index,0,'user');
+  };
+  pop.addEventListener('mousedown',e=>{if(e.target.tagName!=='INPUT')e.preventDefault();});
+  pop.addEventListener('click',e=>{const a=e.target.dataset&&e.target.dataset.a;if(a)done(a);});
+  pop.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();e.stopPropagation();done('ok');}
+    else if(e.key==='Escape'){e.preventDefault();e.stopPropagation();done('cancel');}
+  });
+  // Close when focus leaves the popover (clicking back into the text, etc.).
+  pop.addEventListener('focusout',e=>{if(!pop.contains(e.relatedTarget))setTimeout(()=>{if(document.getElementById('prescriptPop')===pop&&!pop.contains(document.activeElement))closePrescript();},0);});
+  (cur.sup||!cur.sub?top:bot).focus();top.select();
+}
+function closePrescript(){const p=document.getElementById('prescriptPop');if(p)p.remove();}
+function attachPrescriptSupport(quill){
+  quill.root.addEventListener('click',e=>{const n=e.target.closest&&e.target.closest('.ql-prescript');if(n&&quill.root.contains(n))openPrescript(quill,n);});
+}
 
 function reflowCells(flat,n){
   const rows=[];
@@ -2399,6 +2563,7 @@ function openInsertTable(q){
 
 // Wire paste detection and click-to-edit into an editor.
 function attachTableSupport(quill){
+  attachPrescriptSupport(quill);
   quill.root.addEventListener('paste',e=>{
     const cd=e.clipboardData;if(!cd)return;
     // HTML tables (websites, spreadsheets) are converted by Quill's own paste,
@@ -2810,7 +2975,10 @@ const HOTKEYS={
   rateMissed:{scope:'session',label:'Rate: Missed it'},
   bulletList:{scope:'editor',label:'Bullet list'},
   orderedList:{scope:'editor',label:'Numbered list'},
-  insertTable:{scope:'editor',label:'Insert table'}
+  insertTable:{scope:'editor',label:'Insert table'},
+  subscript:{scope:'editor',label:'Subscript',desc:'Press once, type (e.g. the 2 in H₂O), press again to go back'},
+  superscript:{scope:'editor',label:'Superscript',desc:'For charges and powers: Na⁺, x²'},
+  prescript:{scope:'editor',label:'Prescript',desc:'Numbers stacked before a symbol, like ¹⁴₆C. Click one to change it'}
 };
 const HOTKEY_GROUPS=[
   {scope:'app',title:'Subject page',text:"Work when you're not typing in a box. Click a card (or use the next/previous keys) to select it."},
@@ -2836,7 +3004,8 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     for(const[id,close]of[['searchModal',closeSearch],['bulkModal',closeBulk],['tourModal',closeTour],['settingsModal',closeSettings],['studySetupModal',cancelStudySetup]])
       if(visible(id)){close();return;}
-    closePanel();return;
+    if(visible('choiceModal')||visible('tableModal'))return;
+    requestClosePanel();return;
   }
   if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch();return;}
   const hk=state.hotkeys;
@@ -3002,23 +3171,92 @@ function toggleArchivedList(){state.showArchived=!state.showArchived;saveUI();re
 
 // ── Moving & copying ──
 // <option>s for every topic and subtopic, grouped by subject. value = "subId|tid|stid".
-function locationOptions(cur,topicsOnly){
-  let h='';
+// ── Location picker ──
+// A "where does this go" field: subjects as headings, topics under them and
+// subtopics on a tree line beneath their topic. The value ("sub|tid|stid", stid
+// empty for a topic's general cards) lives in a hidden input with the given id,
+// which fires its onchange when the user picks something.
+function locationList(topicsOnly){
+  const out=[];
   sortedSubjects().filter(s=>!s.archived||s.id===state.activeSubId).forEach(s=>{
     const ts=sortedTopics(s.topics);if(!ts.length)return;
-    h+=`<optgroup label="${escAttr(s.name)}">`;
+    out.push({head:true,s});
     ts.forEach(t=>{
-      const v=`${s.id}|${t.id}|`;
-      h+=`<option value="${v}"${v===cur?' selected':''}>${esc(t.name)}${topicsOnly?'':' (general cards)'}</option>`;
-      if(!topicsOnly)sortedSubtopics(t.subtopics).forEach(st=>{
-        const v2=`${s.id}|${t.id}|${st.id}`;
-        h+=`<option value="${v2}"${v2===cur?' selected':''}>\u00a0\u00a0\u00a0${esc(t.name)} › ${esc(st.name)}</option>`;
-      });
+      out.push({v:`${s.id}|${t.id}|`,s,t});
+      if(!topicsOnly)sortedSubtopics(t.subtopics).forEach(st=>out.push({v:`${s.id}|${t.id}|${st.id}`,s,t,st}));
     });
-    h+='</optgroup>';
   });
-  return h;
+  return out;
 }
+function locationLabel(v,topicsOnly){
+  const it=locationList(topicsOnly).find(x=>x.v===v);
+  if(!it)return'<span class="loc-muted">Choose a place</span>';
+  return`<span class="subject-dot" style="background:${escAttr(it.s.color)}"></span><span class="loc-path"><span class="loc-muted">${esc(it.s.name)} ›</span> ${esc(it.t.name)}${it.st?` <span class="loc-muted">›</span> ${esc(it.st.name)}`:topicsOnly?'':' <span class="loc-muted">· general cards</span>'}</span>`;
+}
+function locationPicker(id,cur,topicsOnly,onchange){
+  return`<div class="loc-pick"><input type="hidden" id="${id}" value="${escAttr(cur)}"${onchange?` onchange="${escAttr(onchange)}"`:''}>
+    <button type="button" class="field-input loc-btn" data-topics-only="${topicsOnly?1:''}" onclick="openLocPick(this)" onkeydown="locBtnKey(event,this)" aria-haspopup="listbox">${locationLabel(cur,topicsOnly)}<span class="loc-caret" aria-hidden="true"></span></button></div>`;
+}
+// On the closed picker, Enter saves the form like any other field; Space, ↓ or ↑ open it.
+function locBtnKey(e,btn){
+  if(e.key==='Enter'&&btn.closest('#panelBody')){e.preventDefault();e.stopPropagation();_savePanel();}
+  else if(e.key===' '||e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();openLocPick(btn);}
+}
+let _locPick=null;
+function openLocPick(btn){
+  closeLocPick();
+  const input=btn.parentNode.querySelector('input[type=hidden]'),topicsOnly=!!btn.dataset.topicsOnly;
+  const items=locationList(topicsOnly);
+  const pop=document.createElement('div');pop.className='loc-pop';pop.setAttribute('role','listbox');
+  pop.innerHTML=`<input class="loc-find" placeholder="Find a topic…" aria-label="Find a place"><div class="loc-items"></div>`;
+  document.body.appendChild(pop);
+  const r=btn.getBoundingClientRect(),below=innerHeight-r.bottom;
+  pop.style.left=r.left+'px';pop.style.width=Math.max(r.width,260)+'px';
+  const h=Math.min(360,Math.max(below,r.top)-16);pop.style.maxHeight=h+'px';
+  if(below>=Math.min(360,r.top)||below>240)pop.style.top=(r.bottom+4)+'px';else pop.style.bottom=(innerHeight-r.top+4)+'px';
+  const find=pop.querySelector('.loc-find'),list=pop.querySelector('.loc-items');
+  let shown=[],active=0;
+  const render=()=>{
+    const q=find.value.trim().toLowerCase();
+    const hit=it=>!q||[it.s.name,it.t&&it.t.name,it.st&&it.st.name].some(n=>n&&n.toLowerCase().includes(q));
+    // keep a subject heading only if something under it matches
+    const vis=items.filter(it=>!it.head&&hit(it));
+    shown=vis;
+    if(active>=shown.length)active=Math.max(0,shown.length-1);
+    let html='',lastSub=null;
+    vis.forEach((it,i)=>{
+      if(it.s!==lastSub){lastSub=it.s;html+=`<div class="loc-head"><span class="subject-dot" style="background:${escAttr(it.s.color)}"></span>${esc(it.s.name)}</div>`;}
+      html+=`<div class="loc-item${it.st?' sub':''}${i===active?' active':''}${it.v===input.value?' sel':''}" data-i="${i}" role="option" aria-selected="${it.v===input.value}">
+        <span class="loc-name">${esc(it.st?it.st.name:it.t.name)}</span>${!it.st&&!topicsOnly?'<span class="loc-note">general cards</span>':''}</div>`;
+    });
+    list.innerHTML=html||'<div class="loc-empty">Nothing matches</div>';
+    const a=list.querySelector('.loc-item.active');if(a)a.scrollIntoView({block:'nearest'});
+  };
+  const pick=i=>{
+    const it=shown[i];if(!it)return;
+    const changed=input.value!==it.v;input.value=it.v;
+    btn.innerHTML=locationLabel(it.v,topicsOnly)+'<span class="loc-caret" aria-hidden="true"></span>';
+    closeLocPick();btn.focus();
+    if(changed)input.dispatchEvent(new Event('change'));
+  };
+  find.addEventListener('input',()=>{active=0;render();});
+  find.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();active=Math.max(0,Math.min(shown.length-1,active+(e.key==='ArrowDown'?1:-1)));render();}
+    else if(e.key==='Enter'){e.preventDefault();e.stopPropagation();pick(active);}
+    else if(e.key==='Escape'||e.key==='Tab'){e.preventDefault();e.stopPropagation();closeLocPick();btn.focus();}
+  });
+  list.addEventListener('mousedown',e=>e.preventDefault());
+  list.addEventListener('click',e=>{const el=e.target.closest('.loc-item');if(el)pick(+el.dataset.i);});
+  list.addEventListener('mousemove',e=>{const el=e.target.closest('.loc-item');if(el&&+el.dataset.i!==active){active=+el.dataset.i;list.querySelectorAll('.loc-item.active').forEach(x=>x.classList.remove('active'));el.classList.add('active');}});
+  active=Math.max(0,items.filter(it=>!it.head).findIndex(it=>it.v===input.value));
+  render();btn.classList.add('open');find.focus();
+  const away=e=>{if(!pop.contains(e.target)&&e.target!==btn&&!btn.contains(e.target))closeLocPick();};
+  const onScroll=e=>{if(!pop.contains(e.target))closeLocPick();};
+  setTimeout(()=>{document.addEventListener('mousedown',away,true);},0);
+  window.addEventListener('scroll',onScroll,true);window.addEventListener('resize',closeLocPick);
+  _locPick={pop,btn,off:()=>{document.removeEventListener('mousedown',away,true);window.removeEventListener('scroll',onScroll,true);window.removeEventListener('resize',closeLocPick);}};
+}
+function closeLocPick(){if(!_locPick)return;_locPick.off();_locPick.pop.remove();_locPick.btn.classList.remove('open');_locPick=null;}
 function parseLoc(v){const[sub,tid,stid]=String(v||'').split('|');return{kind:'cards',sub,tid,stid:stid||null};}
 // Moving gives the item a new id (and records the old one as deleted) so a
 // merge with another device's older copy can't leave it in both places.
@@ -3122,7 +3360,7 @@ function openBulk(tid,stid,mode){
   renderBulk();m.hidden=false;
   setTimeout(()=>{const ta=document.getElementById('bulkText');if(ta)ta.focus();},30);
 }
-function closeBulk(){const m=document.getElementById('bulkModal');if(m){m.hidden=true;m.innerHTML='';}_bulk=null;}
+function closeBulk(){closeLocPick();const m=document.getElementById('bulkModal');if(m){m.hidden=true;m.innerHTML='';}_bulk=null;}
 function bulkMode(mode){_bulk.text[_bulk.mode]=document.getElementById('bulkText').value;_bulk.mode=mode;renderBulk();document.getElementById('bulkText').focus();}
 function bulkExample(key){const ta=document.getElementById('bulkText');ta.value=BULK_EXAMPLES[key];_bulk.text[_bulk.mode]=ta.value;renderBulkPreview();ta.focus();}
 function renderBulk(){
@@ -3149,8 +3387,8 @@ function renderBulk(){
     </div>
     <div class="bulk-grid">
       <div class="bulk-left">
-        <label class="field-label" for="bulkLoc">Add to</label>
-        <select class="field-input" id="bulkLoc" onchange="_bulk.loc=this.value;renderBulkPreview()">${locationOptions(b.loc,false)}</select>
+        <label class="field-label">Add to</label>
+        ${locationPicker('bulkLoc',b.loc,false,"_bulk.loc=this.value;renderBulkPreview()")}
         ${qa?'':`<label class="tm-check bulk-check"><input type="checkbox" id="bulkHeadings" ${b.headings?'checked':''} onchange="_bulk.headings=this.checked;renderBulkPreview()"> Turn headings into subtopics</label>`}
         <textarea class="field-input bulk-text" id="bulkText" spellcheck="false" placeholder="${qa?'Paste your questions and answers here…':'Paste your specification points here…'}" oninput="clearTimeout(_bulkTimer);_bulkTimer=setTimeout(renderBulkPreview,150)">${esc(b.text[b.mode])}</textarea>
         <details class="bulk-help" ${b.text[b.mode]?'':'open'}><summary>How to format it</summary>${help}</details>
@@ -3346,8 +3584,8 @@ function goToResult(r){
 
 // ── Settings (tabbed) ──
 function openSettings(tab){
-  renderHotkeyRows();renderSettingsData();renderSettingsStudy();renderSettingsHelp();
-  settingsTab(tab||'shortcuts');
+  renderSettingsGeneral();renderHotkeyRows();renderSettingsData();renderSettingsStudy();renderSettingsHelp();
+  settingsTab(tab||'general');
   document.getElementById('settingsModal').style.display='flex';
 }
 function closeSettings(){cancelRecordHotkey();document.getElementById('settingsModal').style.display='none';}
@@ -3355,27 +3593,43 @@ function settingsTab(tab){
   document.querySelectorAll('#settingsModal [data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));
   const body=document.querySelector('#settingsModal .settings-body');if(body)body.scrollTop=0;
 }
+function renderSettingsGeneral(){
+  const el=document.getElementById('settingsGeneral');if(!el)return;
+  const seg=(cur,opts)=>`<div class="seg">${opts.map(([v,label,fn])=>`<button class="${cur===v?'active':''}" onclick="${fn};renderSettingsGeneral()">${label}</button>`).join('')}</div>`;
+  el.innerHTML=`<h1 class="settings-h1">General</h1><p class="settings-lead">How Blurt looks and how your subjects are listed.</p>
+    <div class="settings-group"><div class="settings-card">
+      <div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Theme</div></div>
+        ${seg(state.theme,[['light','Light',"state.theme!=='light'&&toggleTheme()"],['dark','Dark',"state.theme!=='dark'&&toggleTheme()"]])}</div>
+      <div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Selected card highlight</div><div class="settings-row-desc">The outline around the card you clicked or picked with J/K.</div></div>
+        <div class="focus-swatches">${PALETTE.map(p=>`<span class="color-swatch${state.focusColor===p.c?' sel':''}" style="background:${p.c}" title="${p.c}" role="button" tabindex="0" onclick="setFocusColor('${p.c}')" onkeydown="if(event.key==='Enter')setFocusColor('${p.c}')"></span>`).join('')}<button class="focus-off${state.focusColor==='none'?' sel':''}" onclick="setFocusColor('none')">Off</button></div></div>
+      <div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Subject order</div><div class="settings-row-desc">In the sidebar. Topics and cards are always in number order.</div></div>
+        ${seg(state.sortOrder,[['az','A–Z',"setSortOrder('az')"],['new','Newest first',"setSortOrder('new')"]])}</div>
+    </div></div>`;
+}
 function setStudyPref(k,v){state.studyPrefs=Object.assign({},state.studyPrefs,{[k]:v});save();renderSettingsStudy();}
 function renderSettingsStudy(){
   const p=state.studyPrefs||{},el=document.getElementById('settingsStudy');if(!el)return;
-  const sw=(k,label,text)=>`<label class="setting-switch"><input type="checkbox" ${p[k]!==false?'checked':''} onchange="setStudyPref('${k}',this.checked)"><span class="switch"></span><span><strong>${label}</strong><span class="settings-text">${text}</span></span></label>`;
-  el.innerHTML=`<div class="settings-section">When you reveal an answer</div>
+  const sw=(k,label,text)=>`<label class="setting-switch"><input type="checkbox" ${p[k]!==false?'checked':''} onchange="setStudyPref('${k}',this.checked)"><span class="switch"></span><span class="settings-row-text"><span class="settings-row-title">${label}</span><span class="settings-row-desc">${text}</span></span></label>`;
+  el.innerHTML=`<div class="settings-group"><div class="settings-group-title">When you reveal an answer</div>
+    <div class="settings-group-desc">Your answer and the model answer sit side by side on wide screens, and stacked on phones.</div>
+    <div class="settings-card">
     ${sw('highlightTerms','Highlight key terms','Words from the model answer that appear in what you wrote turn <span class="kw hit">green</span>; the ones you left out turn <span class="kw miss">amber</span>. Small words like “the” and “because” are ignored, and different endings still count (“molecules” matches “molecule”).')}
     ${sw('suggestRating','Suggest a rating','Based on how many key terms you covered: 80% or more suggests Got it, 50% or more Almost, otherwise Missed it. It only outlines a button; you still choose.')}
-    <div class="settings-text" style="margin-top:14px">Your answer and the model answer sit side by side on wide screens, and stacked on phones.</div>`;
+    </div></div>`;
 }
 const HELP_GUIDES=[
   ['Adding lots of cards at once','<p>Press <b>Bulk add</b> on a topic or subtopic (or the <kbd>B</kbd> key). Paste your questions and answers as columns from a spreadsheet, as <code>Q:</code>/<code>A:</code> pairs, or as blocks separated by blank lines. The preview on the right shows exactly what will be added before anything changes, and the confirmation has an Undo button.</p>'],
   ['Importing a specification','<p>In Bulk add, choose <b>Import a specification</b> and paste the spec points from your exam board. Lines starting with numbers like <code>4.1.2</code> become cards with that spec point. Headings such as <code>4.1 Atomic structure</code> become subtopics, unless you untick “Turn headings into subtopics”. Spec points already in that place are skipped, so you can paste the same spec again after adding to it.</p><p>The cards start without answers. Fill them in to study them.</p>'],
   ['Finding anything','<p>Press <kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> (or the magnifier at the top of the sidebar) to search every subject at once: questions, answers, your notes, hints, spec points and topic names. Use ↑ ↓ and Enter to jump straight to a card.</p>'],
   ['Moving, copying and archiving','<p><b>Move a card</b>: edit it and change “Location”. <b>Copy a card</b>: edit it and press “Save as copy”, which keeps the original as it was. Topics and subtopics can be moved the same way from their edit panels.</p><p><b>Archive a subject</b> you have finished with from its Edit panel. It moves to “Archived” at the bottom of the sidebar, still searchable, and can be brought back any time.</p><p>Deleted something by mistake? Every delete shows an <b>Undo</b> button for a few seconds.</p>'],
+  ['Formulas and equations','<p>In any answer or note: <kbd>Ctrl</kbd>+<kbd>,</kbd> starts subscript (type the 2 in H₂O, press it again to stop), <kbd>Ctrl</kbd>+<kbd>.</kbd> does the same for superscript (Na⁺, x²). <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> adds a <b>prescript</b>, numbers stacked before a symbol like ¹⁴₆C: type the top number, Tab, the bottom number, Enter, then the symbol. Click a prescript to change or remove it. The buttons are also on the answer toolbar, and the keys can be changed in Keyboard shortcuts.</p>'],
   ['Study sessions','<p>Press <b>Study</b>, pick topics, then for each card write everything you remember and press <b>Show answer</b> (Space, or Ctrl/Cmd+Enter while typing). Your answer and the model answer appear side by side with the key terms highlighted. Rate yourself with the buttons or <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>. Weak areas on the subject page show where you struggle most.</p>'],
   ['Sync and backups','<p>Sign in with Google to sync across devices. Edits made on two devices at once are merged, and the sidebar shows whether everything has synced. In Data &amp; sync you can export a backup file, import one, and restore the last version Blurt replaced.</p>']
 ];
 function renderSettingsHelp(){
   const el=document.getElementById('settingsHelp');if(!el)return;
-  el.innerHTML=`<div class="help-tour"><div><strong>New to Blurt, or want a refresher?</strong><div class="settings-text" style="margin:2px 0 0">A two-minute walkthrough of everything.</div></div><button class="btn btn-primary btn-sm" onclick="closeSettings();openTour()">Take the tour</button></div>
-    ${HELP_GUIDES.map(([t,b])=>`<details class="help-guide"><summary>${t}</summary><div class="help-body">${b}</div></details>`).join('')}`;
+  el.innerHTML=`<div class="help-tour"><div class="settings-row-text"><div class="settings-row-title"><strong>New to Blurt, or want a refresher?</strong></div><div class="settings-row-desc">A two-minute walkthrough of everything.</div></div><button class="btn btn-primary btn-sm" onclick="closeSettings();openTour()">Take the tour</button></div>
+    <div class="settings-card">${HELP_GUIDES.map(([t,b])=>`<details class="help-guide"><summary>${t}</summary><div class="help-body">${b}</div></details>`).join('')}</div>`;
 }
 
 // ── Tour ──

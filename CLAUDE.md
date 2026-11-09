@@ -151,12 +151,25 @@ Key functions in `index.html`, grouped by area:
   will add (also used for the preview), skipping spec points already present.
 - **Search** — `openSearch` (`/`, Ctrl/Cmd+K, sidebar icon): `searchAll` over
   every subject, `goToResult` opens the section and selects the card.
-- **Settings & help** — tabbed modal (`openSettings(tab)`): shortcuts, study
-  prefs, data & sync, help guides (`HELP_GUIDES`). `openTour` / `TOUR` is the
+- **Settings & help** — full-page view (`#settingsModal`, `openSettings(tab)`):
+  general (theme, subject order), study prefs, shortcuts, data & sync, help
+  guides (`HELP_GUIDES`). Content is grouped as `.settings-group` › `.settings-card` › rows. `openTour` / `TOUR` is the
   walkthrough, shown once per device by `maybeShowTour`
   (localStorage `blurt-tour-seen`).
 - **Small screens** — below 760px (`isNarrow()`), the sidebar becomes an
   overlay drawer, columns stack and the session rating bar sticks to the bottom.
+- **Formulas** — sub/superscript are Quill's `script` format (editor hotkeys
+  `subscript`/`superscript`). A prescript (¹⁴₆C) is `PrescriptBlot`, an inline
+  embed `<span class="ql-prescript">` holding a sup over a sub; `openPrescript`
+  is the little editor (also opened by clicking one, via `attachPrescriptSupport`).
+- **Location picker** — `locationPicker(id,cur,topicsOnly,onchange)` replaces
+  dropdowns for "where does this go" (card/subtopic panels, bulk add): a button
+  plus a hidden input `id` holding "sub|tid|stid"; `openLocPick` shows the
+  filterable tree (`locationList`). Enter on the closed button saves the panel.
+- **Selected card highlight** — `state.focusColor` (hex or "none", synced),
+  applied as `--focus`/`--focus-ring` by `applyFocusColor`.
+- **Edit panel** — closes only on a click that starts and ends on the backdrop;
+  closing with changes (`panelSnapshot` vs `panel.snap`) asks first (`requestClosePanel`).
 - **Content CRUD** — `saveSubject/Topic/Subtopic/Card`,
   `deleteSubject/Topic/Subtopic/Card`, edited through side panels
   (`openPanel`, `buildSubjectPanel`, `buildTopicPanel`, `buildSubtopicPanel`,
