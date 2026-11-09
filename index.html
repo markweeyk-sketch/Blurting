@@ -929,6 +929,12 @@ function normalizeState(s){
   if(!s.activeSpFilter)s.activeSpFilter=null;
   if(!s.deleted||typeof s.deleted!=='object')s.deleted={};
   s.hotkeys=Object.assign(defaultHotkeys(),s.hotkeys||{});
+  // Reveal used to default to Space, which can't work while you're typing your answer.
+  const hv=s.hotkeysV||1,plain=(h,key)=>h&&h.key===key&&!h.shortKey&&!h.altKey;
+  if(hv<2&&plain(s.hotkeys.reveal,' '))s.hotkeys.reveal=defaultHotkeys().reveal;
+  // Next/previous card swapped (K is to the right of J): move saves still on the old defaults.
+  if(hv<3&&plain(s.hotkeys.nextCard,'j')&&plain(s.hotkeys.prevCard,'k')){const d=defaultHotkeys();s.hotkeys.nextCard=d.nextCard;s.hotkeys.prevCard=d.prevCard;}
+  s.hotkeysV=3;
   s.studyPrefs=Object.assign({highlightTerms:true,suggestRating:true},s.studyPrefs);
   const fixId=x=>{if(!SAFE_ID.test(String(x.id||'')))x.id=uid();};
   const list=a=>(Array.isArray(a)?a:[]).filter(x=>x&&typeof x==='object');
@@ -2220,9 +2226,9 @@ function defaultHotkeys(){
     subscript:{code:188,key:',',shortKey:true,shiftKey:false,altKey:false},
     superscript:{code:190,key:'.',shortKey:true,shiftKey:false,altKey:false},
     prescript:{code:190,key:'.',shortKey:true,shiftKey:true,altKey:false},
-    search:k('/'),newCard:k('n'),bulkAdd:k('b'),study:k('s'),nextCard:k('j'),prevCard:k('k'),
+    search:k('/'),newCard:k('n'),bulkAdd:k('b'),study:k('s'),nextCard:k('k'),prevCard:k('j'),
     toggleAnswer:k('a'),writeBlurt:k('w'),editCard:k('e'),toggleSidebar:k('['),showHelp:k('?'),
-    reveal:k(' '),rateGot:k('1'),rateAlmost:k('2'),rateMissed:k('3')
+    reveal:{key:'Enter',code:null,shortKey:true,shiftKey:false,altKey:false},rateGot:k('1'),rateAlmost:k('2'),rateMissed:k('3')
   };
 }
 function hkToBinding(hk){const h=hk||{};return{key:h.code,shortKey:!!h.shortKey,shiftKey:!!h.shiftKey,altKey:!!h.altKey};}
@@ -2983,7 +2989,7 @@ const HOTKEYS={
   editCard:{scope:'app',label:'Edit selected card'},
   toggleSidebar:{scope:'app',label:'Show / hide the sidebar'},
   showHelp:{scope:'app',label:'Show these shortcuts'},
-  reveal:{scope:'session',label:'Reveal the answer',desc:'Ctrl/Cmd+Enter also works while typing'},
+  reveal:{scope:'session',label:'Reveal the answer',desc:'Works while you type your answer if it uses Ctrl/Cmd or Alt. Space also works once you click out of the box'},
   rateGot:{scope:'session',label:'Rate: Got it'},
   rateAlmost:{scope:'session',label:'Rate: Almost'},
   rateMissed:{scope:'session',label:'Rate: Missed it'},
@@ -2996,7 +3002,7 @@ const HOTKEYS={
 };
 const HOTKEY_GROUPS=[
   {scope:'app',title:'Subject page',text:"Work when you're not typing in a box. Click a card (or use the next/previous keys) to select it."},
-  {scope:'session',title:'Study session',text:'Rating keys work once the answer is showing and you have clicked out of your answer box.'},
+  {scope:'session',title:'Study session',text:'Showing the answer takes you out of your answer box, so the rating keys work straight away.'},
   {scope:'editor',title:'Answer & note editors',text:'Work while typing in an editor, so they need Ctrl/Cmd or Alt.'}
 ];
 function normKey(k){return k&&k.length===1?k.toLowerCase():k;}
@@ -3024,9 +3030,12 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&e.key.toLowerCase()==='k'){e.preventDefault();openSearch();return;}
   const hk=state.hotkeys;
   if(_session){
-    if(!_session.revealed&&(e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();revealSessionAnswer();return;}
+    // Reveal works while typing your answer when it uses Ctrl/Cmd/Alt (a plain key
+    // would just type). Ctrl/Cmd+Enter always works; Space does once you click out.
+    const withMod=hk.reveal&&(hk.reveal.shortKey||hk.reveal.altKey);
+    if(!_session.revealed&&!overlayOpen()&&((withMod&&matchHotkey(e,hk.reveal))||((e.ctrlKey||e.metaKey)&&e.key==='Enter'))){e.preventDefault();revealSessionAnswer();return;}
     if(isTyping()||overlayOpen())return;
-    if(!_session.revealed&&matchHotkey(e,hk.reveal)){e.preventDefault();revealSessionAnswer();return;}
+    if(!_session.revealed&&(matchHotkey(e,hk.reveal)||(e.key===' '&&!e.ctrlKey&&!e.metaKey&&!e.altKey))){e.preventDefault();revealSessionAnswer();return;}
     if(_session.revealed&&!_session.rated){
       const r=matchHotkey(e,hk.rateGot)?'got':matchHotkey(e,hk.rateAlmost)?'almost':matchHotkey(e,hk.rateMissed)?'missed':null;
       if(r){e.preventDefault();rateCard(r);}
@@ -3661,7 +3670,7 @@ const HELP_GUIDES=[
   ['Finding anything','<p>Press <kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> (or the magnifier at the top of the sidebar) to search every subject at once: questions, answers, your notes, hints, spec points and topic names. Use ↑ ↓ and Enter to jump straight to a card.</p>'],
   ['Moving, copying and archiving','<p><b>Move a card</b>: edit it and change “Location”. <b>Copy a card</b>: edit it and press “Save as copy”, which keeps the original as it was. Topics and subtopics can be moved the same way from their edit panels.</p><p><b>Archive a subject</b> you have finished with from its Edit panel. It moves to “Archived” at the bottom of the sidebar, still searchable, and can be brought back any time.</p><p>Deleted something by mistake? Every delete shows an <b>Undo</b> button for a few seconds.</p>'],
   ['Formulas and equations','<p>In any answer or note: <kbd>Ctrl</kbd>+<kbd>,</kbd> starts subscript (type the 2 in H₂O, press it again to stop), <kbd>Ctrl</kbd>+<kbd>.</kbd> does the same for superscript (Na⁺, x²). <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> adds a <b>prescript</b>, numbers stacked before a symbol like ¹⁴₆C: type the top number, Tab, the bottom number, Enter, then the symbol. Click a prescript to change or remove it. The buttons are also on the answer toolbar, and the keys can be changed in Keyboard shortcuts.</p>'],
-  ['Study sessions','<p>Press <b>Study</b>, pick topics, then for each card write everything you remember and press <b>Show answer</b> (Space, or Ctrl/Cmd+Enter while typing). Your answer and the model answer appear side by side with the key terms highlighted. Rate yourself with the buttons or <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>. Weak areas on the subject page show where you struggle most.</p>'],
+  ['Study sessions','<p>Press <b>Study</b>, pick topics, then for each card write everything you remember and press <b>Show answer</b> (<kbd>Ctrl</kbd>+<kbd>Enter</kbd>, or <kbd>Cmd</kbd>+<kbd>Enter</kbd> on a Mac, straight from your answer box). Your answer and the model answer appear side by side with the key terms highlighted. Rate yourself with the buttons or <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>. Weak areas on the subject page show where you struggle most.</p>'],
   ['Sync and backups','<p>Sign in with Google to sync across devices. Edits made on two devices at once are merged, and the sidebar shows whether everything has synced. In Data &amp; sync you can export a backup file, import one, and restore the last version Blurt replaced.</p>']
 ];
 function renderSettingsHelp(){
