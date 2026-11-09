@@ -399,7 +399,7 @@ body.has-offline-banner .app{padding-top:38px}
 .no-card-focus .card.kb-focus{border-color:var(--border);box-shadow:none}
 .focus-swatches{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 .focus-swatches .color-swatch{width:22px;height:22px}
-.focus-off{font-size:11px;color:var(--text2);border:1px solid var(--border2);background:none;border-radius:11px;padding:3px 9px;cursor:pointer}
+.focus-off{font-size:11px;color:var(--text2);border:1px solid var(--border2);background:none;border-radius:11px;padding:3px 9px;cursor:pointer;transition:border-color .15s,color .15s}
 .focus-off.sel{border-color:var(--text);color:var(--text)}
 @keyframes cardFlash{0%,40%{box-shadow:0 0 0 4px rgba(83,74,183,.35)}100%{box-shadow:0 0 0 2px rgba(83,74,183,.18)}}
 .card.flash{animation:cardFlash 1.4s ease-out}
@@ -493,6 +493,10 @@ mark{background:rgba(232,163,59,.35);color:inherit;border-radius:2px;padding:0 1
 .settings-body{flex:1;min-width:0;overflow-y:auto}
 .settings-inner{max-width:700px;margin:0 auto;padding:44px 32px 96px}
 .settings-inner>section{display:none}
+#settingsModal{animation:settingsPageIn .22s cubic-bezier(.2,.8,.2,1)}
+#settingsModal.closing{animation:settingsPageOut .18s ease-in forwards;pointer-events:none}
+@keyframes settingsPageIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+@keyframes settingsPageOut{from{opacity:1;transform:none}to{opacity:0;transform:scale(.985)}}
 .settings-inner>section.active{display:block;animation:settingsIn .18s ease-out}
 @keyframes settingsIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .settings-h1{font-size:22px;font-weight:600;letter-spacing:-.4px}
@@ -509,17 +513,22 @@ mark{background:rgba(232,163,59,.35);color:inherit;border-radius:2px;padding:0 1
 .settings-row .btn{flex-shrink:0}
 .settings-row.block{display:block}
 .settings-foot{display:flex;justify-content:flex-end;margin-top:10px}
-.seg{display:inline-flex;padding:2px;border-radius:8px;background:var(--bg3);flex-shrink:0}
-.seg button{border:none;background:none;padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;color:var(--text2)}
-.seg button.active{background:var(--bg);color:var(--text);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--border)}
+.seg{position:relative;display:inline-flex;padding:2px;border-radius:8px;background:var(--bg3);flex-shrink:0}
+.seg-thumb{position:absolute;top:2px;bottom:2px;left:0;width:0;border-radius:6px;background:var(--bg);box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 1px var(--border);transition:transform .22s cubic-bezier(.3,.7,.2,1),width .22s cubic-bezier(.3,.7,.2,1),background .25s}
+.seg.no-anim .seg-thumb{transition:none}
+.seg button{position:relative;z-index:1;border:none;background:none;padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;color:var(--text2);transition:color .2s}
+.seg button.active{color:var(--text);font-weight:500}
 .hotkey-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 16px}
 .hotkey-name{font-size:13px;color:var(--text)}
 .hotkey-desc{font-size:12px;color:var(--text3);margin-top:2px}
 .setting-switch{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-size:13px}
 .setting-switch input{position:absolute;opacity:0;pointer-events:none}
 .setting-switch .settings-row-desc{display:block}
-.switch{order:2;flex-shrink:0;width:34px;height:20px;border-radius:10px;background:var(--border2);position:relative;transition:background .15s}
-.switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch{order:2;flex-shrink:0;width:34px;height:20px;border-radius:10px;background:var(--border2);position:relative;transition:background .2s}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .22s cubic-bezier(.3,.7,.2,1.3),width .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.setting-switch:active .switch::after{width:20px}
+.setting-switch input:checked+.switch::after{transform:translateX(14px)}
+.setting-switch:active input:checked+.switch::after{transform:translateX(10px)}
 .setting-switch input:checked+.switch{background:var(--green)}
 .setting-switch input:checked+.switch::after{transform:translateX(14px)}
 .setting-switch input:focus-visible+.switch{outline:2px solid #534AB7;outline-offset:2px}
@@ -563,6 +572,7 @@ mark{background:rgba(232,163,59,.35);color:inherit;border-radius:2px;padding:0 1
 .loc-item.sub.sel::after{left:auto;right:12px}
 .loc-note{font-size:11px;color:var(--text3)}
 .loc-empty{padding:16px 12px;font-size:12px;color:var(--text3);text-align:center}
+@media (prefers-reduced-motion:reduce){#settingsModal,#settingsModal.closing,.settings-inner>section.active{animation-duration:1ms}.seg-thumb,.switch,.switch::after{transition:none}}
 /* ── Tour ── */
 .tour-box{width:560px}
 .tour-art{background:var(--bg3);padding:26px 20px;display:flex;align-items:center;justify-content:center;min-height:170px;border-bottom:1px solid var(--border)}
@@ -1586,7 +1596,11 @@ function applyFocusColor(){
   const n=parseInt(c.slice(1),16);
   r.style.setProperty('--focus',c);r.style.setProperty('--focus-ring',`rgba(${n>>16},${n>>8&255},${n&255},.18)`);
 }
-function setFocusColor(c){state.focusColor=c;applyFocusColor();save();renderSettingsGeneral();}
+function setFocusColor(c){
+  state.focusColor=c;applyFocusColor();save();
+  document.querySelectorAll('#settingsGeneral .color-swatch').forEach(el=>el.classList.toggle('sel',el.title===c));
+  const off=document.querySelector('#settingsGeneral .focus-off');if(off)off.classList.toggle('sel',c==='none');
+}
 function toggleTheme(){state.theme=state.theme==='dark'?'light':'dark';applyTheme();save();}
 function applyTheme(){document.documentElement.setAttribute('data-theme',state.theme);applyFocusColor();document.getElementById('themeBtn').textContent=state.theme==='dark'?'☀':'☾';}
 function toggleSidebar(){state.sidebarOpen=!state.sidebarOpen;applySidebar();saveUI();}
@@ -3586,16 +3600,40 @@ function goToResult(r){
 function openSettings(tab){
   renderSettingsGeneral();renderHotkeyRows();renderSettingsData();renderSettingsStudy();renderSettingsHelp();
   settingsTab(tab||'general');
-  document.getElementById('settingsModal').style.display='flex';
+  const m=document.getElementById('settingsModal');
+  clearTimeout(_settingsCloseTimer);m.classList.remove('closing');m.style.display='flex';
+  positionSegs(true);
 }
-function closeSettings(){cancelRecordHotkey();document.getElementById('settingsModal').style.display='none';}
+// Plays the closing animation, then hides the page.
+let _settingsCloseTimer=null;
+function closeSettings(){
+  cancelRecordHotkey();
+  const m=document.getElementById('settingsModal');
+  if(m.style.display==='none'||m.classList.contains('closing'))return;
+  m.classList.add('closing');
+  _settingsCloseTimer=setTimeout(()=>{m.style.display='none';m.classList.remove('closing');},180);
+}
 function settingsTab(tab){
   document.querySelectorAll('#settingsModal [data-tab]').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));
   const body=document.querySelector('#settingsModal .settings-body');if(body)body.scrollTop=0;
+  positionSegs(true);
+}
+// Segmented controls: a thumb slides behind the active option.
+function positionSegs(instant){
+  document.querySelectorAll('#settingsModal .seg').forEach(seg=>{
+    const a=seg.querySelector('button.active'),t=seg.querySelector('.seg-thumb');if(!a||!t||!a.offsetWidth)return;
+    if(instant)seg.classList.add('no-anim');
+    t.style.width=a.offsetWidth+'px';t.style.transform=`translateX(${a.offsetLeft}px)`;
+    if(instant){void t.offsetWidth;seg.classList.remove('no-anim');}
+  });
+}
+function segPick(btn){
+  btn.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===btn));
+  positionSegs(false);
 }
 function renderSettingsGeneral(){
   const el=document.getElementById('settingsGeneral');if(!el)return;
-  const seg=(cur,opts)=>`<div class="seg">${opts.map(([v,label,fn])=>`<button class="${cur===v?'active':''}" onclick="${fn};renderSettingsGeneral()">${label}</button>`).join('')}</div>`;
+  const seg=(cur,opts)=>`<div class="seg"><span class="seg-thumb"></span>${opts.map(([v,label,fn])=>`<button class="${cur===v?'active':''}" onclick="segPick(this);${fn}">${label}</button>`).join('')}</div>`;
   el.innerHTML=`<h1 class="settings-h1">General</h1><p class="settings-lead">How Blurt looks and how your subjects are listed.</p>
     <div class="settings-group"><div class="settings-card">
       <div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Theme</div></div>
@@ -3606,7 +3644,7 @@ function renderSettingsGeneral(){
         ${seg(state.sortOrder,[['az','A–Z',"setSortOrder('az')"],['new','Newest first',"setSortOrder('new')"]])}</div>
     </div></div>`;
 }
-function setStudyPref(k,v){state.studyPrefs=Object.assign({},state.studyPrefs,{[k]:v});save();renderSettingsStudy();}
+function setStudyPref(k,v){state.studyPrefs=Object.assign({},state.studyPrefs,{[k]:v});save();}
 function renderSettingsStudy(){
   const p=state.studyPrefs||{},el=document.getElementById('settingsStudy');if(!el)return;
   const sw=(k,label,text)=>`<label class="setting-switch"><input type="checkbox" ${p[k]!==false?'checked':''} onchange="setStudyPref('${k}',this.checked)"><span class="switch"></span><span class="settings-row-text"><span class="settings-row-title">${label}</span><span class="settings-row-desc">${text}</span></span></label>`;
