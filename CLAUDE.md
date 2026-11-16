@@ -144,9 +144,11 @@ Key functions in `index.html`, grouped by area:
   subject under "Archived" in the sidebar. Moving a card/subtopic/topic uses
   `moveItem`, which gives the item a **new id** and tombstones the old one so
   merges can't leave copies in two places; "Save as copy" is `saveCard(true)`.
-- **Bulk add** — `openBulk` modal: `parseBulkCards` (tab/`|` columns, `Q:`/`A:`
-  blocks, blank-line blocks; `answerToHtml` turns `-`/`1.` lines into Quill
-  list HTML) and `parseSpec` (numbered spec lines; numbers that prefix others
+- **Bulk add** — `openBulk` modal: `parseBulkCards` (blocks split on `---`
+  lines, checked first; tab/`|` columns; `Q:`/`A:` blocks; blank-line blocks as
+  the fallback; `bulkBlock` splits prompt/answer). `answerToHtml` turns `-`/`1.`
+  lines into Quill list HTML, a run of blank lines into one `<p><br></p>`, and
+  `**bold**`/`__underline__` into `<strong>`/`<u>` (`inlineMd` escapes first) and `parseSpec` (numbered spec lines; numbers that prefix others
   are headings → subtopics). `planBulk` computes exactly what `commitBulk`
   will add (also used for the preview), skipping spec points already present.
 - **Search** — `openSearch` (`/`, Ctrl/Cmd+K, sidebar icon): `searchAll` over

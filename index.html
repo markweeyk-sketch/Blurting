@@ -3300,18 +3300,25 @@ const SPEC_LINE=new RegExp('^\\s*('+SPEC_NUM+')[.):]?\\s+(.+)$','i');
 const SPEC_LEAD=new RegExp('^('+'(?:sp\\s*)?[A-Z]{0,2}\\d+(?:\\.\\d+)+[a-z]?'+')[.):]?\\s+(.+)$','i');
 // Answer text → the same HTML Quill produces: "-", "*", "•" or "1." lines become
 // list items, and every 2 spaces (or a tab) of indent nests one level deeper.
+// A run of blank lines becomes one empty paragraph (Quill's blank line); blank
+// lines at the start or end are dropped. **bold** and __underline__ work inline.
+function inlineMd(t){
+  // Escape first, so only the markers below can produce tags.
+  return esc(t).replace(/\*\*(?=\S)(.+?)(?<=\S)\*\*/g,'<strong>$1</strong>').replace(/(^|[^\w])__(?=\S)(.+?)(?<=\S)__(?!\w)/g,'$1<u>$2</u>');
+}
 function answerToHtml(text){
   const lines=String(text||'').replace(/\r\n?/g,'\n').replace(/\t/g,'  ').split('\n');
-  let html='',open=null;
+  let html='',open=null,gap=false;
   const close=()=>{if(open){html+=`</${open}>`;open=null;}};
   lines.forEach(l=>{
-    if(!l.trim())return;
+    if(!l.trim()){if(html)gap=true;return;}
+    if(gap){close();html+='<p><br></p>';gap=false;}
     const m=l.match(/^(\s*)([-*•–]|\d+[.)])\s+(.*)$/);
     if(m){
       const type=/\d/.test(m[2])?'ol':'ul',lvl=Math.min(8,Math.floor(m[1].length/2));
       if(open!==type){close();html+=`<${type}>`;open=type;}
-      html+=`<li${lvl?` class="ql-indent-${lvl}"`:''}>${esc(m[3].trim())}</li>`;
-    }else{close();html+=`<p>${esc(l.trim())}</p>`;}
+      html+=`<li${lvl?` class="ql-indent-${lvl}"`:''}>${inlineMd(m[3].trim())}</li>`;
+    }else{close();html+=`<p>${inlineMd(l.trim())}</p>`;}
   });
   close();return html;
 }
@@ -3321,14 +3328,26 @@ function bulkColumns(parts){
   if(parts.length>=3&&SPEC_ONLY.test(parts[0]))return bulkCard(parts[1],parts[2],parts[0],parts[3]);
   return bulkCard(parts[0],parts[1],'',parts[2]);
 }
+// A block's first non-blank line is the question (an optional leading spec
+// point is split off); everything after it, blank lines included, is the answer.
+function bulkBlock(b){
+  const ls=b.split('\n'),i=ls.findIndex(l=>l.trim());if(i<0)return null;
+  const first=ls[i].trim(),rest=ls.slice(i+1).join('\n'),m=first.match(SPEC_LEAD);
+  return m?bulkCard(m[2],rest,m[1]):bulkCard(first,rest);
+}
+const BULK_SEP=/^[ \t]*---[ \t]*$/;
 function parseBulkCards(text){
   text=String(text||'').replace(/\r\n?/g,'\n');
   const lines=text.split('\n'),rows=lines.filter(l=>l.trim());
   if(!rows.length)return{format:null,cards:[]};
+  const isQA=rows.some(l=>/^\s*Q\s*[:.)]/i.test(l));
+  // "---" lines separate cards, so answers can contain blank lines (and tabs or |).
+  if(!isQA&&lines.some(l=>BULK_SEP.test(l)))return{format:'Blocks separated by --- lines',cards:text.split('\n').reduce((bs,l)=>{if(BULK_SEP.test(l))bs.push('');else bs[bs.length-1]+=l+'\n';return bs;},['']).map(bulkBlock).filter(Boolean)};
   if(rows.some(l=>l.includes('\t')))return{format:'Columns separated by tabs (pasted from a spreadsheet or table)',cards:rows.map(l=>bulkColumns(l.split('\t')))};
-  if(rows.some(l=>/^\s*Q\s*[:.)]/i.test(l))){
+  if(isQA){
     const cards=[];let cur=null,field=null;
     lines.forEach(l=>{
+      if(BULK_SEP.test(l))return;
       const m=l.match(/^\s*(Q|A|SP|Spec|Hint|H)\s*[:.)]\s?(.*)$/i);
       if(m){
         const k=m[1].toLowerCase();
@@ -3341,10 +3360,7 @@ function parseBulkCards(text){
     return{format:'Q: / A: blocks',cards:cards.map(c=>bulkCard(c.q,c.a,c.sp,c.hint))};
   }
   if(rows.filter(l=>l.includes('|')).length>=rows.length/2)return{format:'Columns separated by |',cards:rows.map(l=>bulkColumns(l.split('|')))};
-  return{format:'Question on the first line, answer below, blank line between cards',cards:text.split(/\n\s*\n/).filter(b=>b.trim()).map(b=>{
-    const ls=b.split('\n').filter(l=>l.trim());const m=ls[0].trim().match(SPEC_LEAD);
-    return m?bulkCard(m[2],ls.slice(1).join('\n'),m[1]):bulkCard(ls[0],ls.slice(1).join('\n'));
-  })};
+  return{format:'Question on the first line, answer below, blank line between cards',cards:text.split(/\n\s*\n/).map(bulkBlock).filter(Boolean)};
 }
 // Spec lists: "4.1 Heading" lines followed by "4.1.1 Statement" lines. A number
 // that prefixes later numbers is a heading; lines without a number continue the
@@ -3369,7 +3385,7 @@ function parseSpec(text){
 const BULK_EXAMPLES={
   tabs:'4.1.1\tWhat is an atom?\tThe smallest part of an element that can exist\n4.1.2\tWhat is an isotope?\tAtoms of the same element with different numbers of neutrons\n4.1.3\tWhat charge does an electron have?\t-1',
   qa:'Q: What are the parts of an animal cell?\nA: - Nucleus\n  - contains genetic material\n- Cytoplasm\n- Cell membrane\n\nQ: What is diffusion?\nA: The net movement of particles from a higher to a lower concentration',
-  blocks:'What is an atom?\nThe smallest part of an element that can exist\n\n4.1.2 What is an isotope?\nAtoms of the same element with different numbers of neutrons\n\nWhat are the three subatomic particles?\n1. Proton\n2. Neutron\n3. Electron',
+  blocks:'What is an atom?\nThe smallest part of an element that can exist\n---\n4.1.2 What is an isotope?\nAtoms of the same element with **different numbers of neutrons**\n---\nWhat are the three subatomic particles?\n**Nucleus:**\n1. Proton\n2. Neutron\n\n**Outside the nucleus:**\n- Electron',
   spec:'4.1 Atomic structure\n4.1.1 Describe the structure of an atom in terms of protons, neutrons and electrons\n4.1.2 Explain what an isotope is\n4.2 Bonding\n4.2.1 Describe how ionic bonds form\n4.2.2 Explain why metals conduct electricity, including the\nidea of delocalised electrons'
 };
 let _bulk=null,_bulkTimer=null;
@@ -3392,8 +3408,8 @@ function renderBulk(){
       <p>Paste or type your cards using <strong>any one</strong> of these layouts. Blurt detects which one you used.</p>
       <div class="bulk-fmt"><div><strong>Columns</strong>: copy two or three columns from Excel, Google Sheets, Word or a website table. Columns are <em>question, answer</em> or <em>spec point, question, answer</em>. You can also type them with <code>|</code> between columns.</div><button class="btn btn-sm" onclick="bulkExample('tabs')">Show example</button></div>
       <div class="bulk-fmt"><div><strong>Q: / A:</strong>: start each question with <code>Q:</code> and its answer with <code>A:</code>. Answers can run over several lines. Optional <code>SP:</code> and <code>Hint:</code> lines.</div><button class="btn btn-sm" onclick="bulkExample('qa')">Show example</button></div>
-      <div class="bulk-fmt"><div><strong>Blocks</strong>: question on the first line, answer on the lines below, and a blank line between cards. Start the question with a spec point like <code>4.1.2</code> to tag it.</div><button class="btn btn-sm" onclick="bulkExample('blocks')">Show example</button></div>
-      <p class="bulk-note">In answers, lines starting with <code>-</code>, <code>*</code> or <code>1.</code> become bullet or numbered lists. Indent with two spaces to nest.</p>`
+      <div class="bulk-fmt"><div><strong>Blocks</strong>: question on the first line, answer on the lines below, and a line with just <code>---</code> between cards. Blank lines inside an answer are kept as spacing. (With no <code>---</code> lines, a blank line separates cards.) Start the question with a spec point like <code>4.1.2</code> to tag it.</div><button class="btn btn-sm" onclick="bulkExample('blocks')">Show example</button></div>
+      <p class="bulk-note">In answers, lines starting with <code>-</code>, <code>*</code> or <code>1.</code> become bullet or numbered lists. Indent with two spaces to nest. Wrap text in <code>**double stars**</code> for bold or <code>__double underscores__</code> to underline.</p>`
     :`
       <p>Paste the specification points from your exam board's spec (PDF or website). Each line that starts with a number like <code>4.1.2</code> becomes a card, with that number as its spec point and the text as its question.</p>
       <p>Lines that don't start with a number are joined to the line above, which fixes text that wrapped when you copied it from a PDF.</p>
@@ -3665,7 +3681,7 @@ function renderSettingsStudy(){
     </div></div>`;
 }
 const HELP_GUIDES=[
-  ['Adding lots of cards at once','<p>Press <b>Bulk add</b> on a topic or subtopic (or the <kbd>B</kbd> key). Paste your questions and answers as columns from a spreadsheet, as <code>Q:</code>/<code>A:</code> pairs, or as blocks separated by blank lines. The preview on the right shows exactly what will be added before anything changes, and the confirmation has an Undo button.</p>'],
+  ['Adding lots of cards at once','<p>Press <b>Bulk add</b> on a topic or subtopic (or the <kbd>B</kbd> key). Paste your questions and answers as columns from a spreadsheet, as <code>Q:</code>/<code>A:</code> pairs, or as blocks separated by <code>---</code> lines (blank lines inside an answer are kept; <code>**bold**</code> and <code>__underline__</code> work too). The preview on the right shows exactly what will be added before anything changes, and the confirmation has an Undo button.</p>'],
   ['Importing a specification','<p>In Bulk add, choose <b>Import a specification</b> and paste the spec points from your exam board. Lines starting with numbers like <code>4.1.2</code> become cards with that spec point. Headings such as <code>4.1 Atomic structure</code> become subtopics, unless you untick “Turn headings into subtopics”. Spec points already in that place are skipped, so you can paste the same spec again after adding to it.</p><p>The cards start without answers. Fill them in to study them.</p>'],
   ['Finding anything','<p>Press <kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> (or the magnifier at the top of the sidebar) to search every subject at once: questions, answers, your notes, hints, spec points and topic names. Use ↑ ↓ and Enter to jump straight to a card.</p>'],
   ['Moving, copying and archiving','<p><b>Move a card</b>: edit it and change “Location”. <b>Copy a card</b>: edit it and press “Save as copy”, which keeps the original as it was. Topics and subtopics can be moved the same way from their edit panels.</p><p><b>Archive a subject</b> you have finished with from its Edit panel. It moves to “Archived” at the bottom of the sidebar, still searchable, and can be brought back any time.</p><p>Deleted something by mistake? Every delete shows an <b>Undo</b> button for a few seconds.</p>'],
