@@ -1652,10 +1652,49 @@ function sortedSubjects(){
 // Spec points like "4.2.3": natural order (so 4.10 comes after 4.2).
 function compareSpecPoints(a,b){return naturalCompare(String(a).trim(),String(b).trim());}
 
+// A card's spec point can be a range ("7.18–7.19", "7.18-7.19", "7.18 to 7.19")
+// or a list ("7.18, 7.19"). It is stored as written (ranges with an en dash) and
+// counts as every point it covers: a range whose ends differ only in the last
+// number fills in the points between (at most 50).
+const SPEC_DOTTED='(?:sp\\s*)?[A-Z]{0,2}\\d+(?:\\.\\d+)+[a-z]?',SPEC_DOTTED2='[A-Z]{0,2}\\d+(?:\\.\\d+)+[a-z]?';
+const SPEC_JOIN='\\s*(?:,|[–—-]|\\s+to\\s+)\\s*';
+const SPEC_RANGE=new RegExp('^('+SPEC_DOTTED+')\\s*(?:[–—-]|\\s+to\\s+)\\s*('+SPEC_DOTTED2+')$','i');
+const SPEC_MULTI=new RegExp('^'+SPEC_DOTTED+'(?:'+SPEC_JOIN+SPEC_DOTTED2+')+$','i');
+const _spPoints=new Map();
+function specPointsOf(sp){
+  sp=String(sp||'').trim();if(!sp)return[];
+  if(_spPoints.has(sp))return _spPoints.get(sp);
+  let out;
+  const parts=sp.split(/\s*,\s*/).filter(Boolean);
+  if(parts.length>1&&SPEC_MULTI.test(sp))out=[...new Set(parts.flatMap(specPointsOf))];
+  else{
+    const m=sp.match(SPEC_RANGE);
+    if(!m)out=[sp];
+    else{
+      const a=m[1],b=m[2],pa=a.split('.'),pb=b.split('.'),la=pa[pa.length-1],lb=pb[pb.length-1];
+      out=[a];
+      if(pa.length===pb.length&&pa.slice(0,-1).join('.').toLowerCase()===pb.slice(0,-1).join('.').toLowerCase()&&/^\d+$/.test(la)&&/^\d+$/.test(lb)&&+lb>+la&&+lb-+la<=50)
+        for(let i=+la+1;i<+lb;i++)out.push(pa.slice(0,-1).concat(i).join('.'));
+      out.push(b);
+    }
+  }
+  _spPoints.set(sp,out);return out;
+}
+// "7.18-7.19" / "7.18 to 7.19" → "7.18–7.19"; "7.18 ,7.19" → "7.18, 7.19". Anything else is left alone.
+function normalizeSp(sp){
+  sp=String(sp||'').trim();
+  if(!SPEC_MULTI.test(sp))return sp;
+  return sp.replace(/\s*,\s*/g,', ').replace(/\s*[–—-]\s*|\s+to\s+/gi,'–');
+}
+// Does a card's spec point match a filter? Exact text, or one of the points it covers.
+function spMatches(cardSp,filter){
+  const f=String(filter||'').trim().toLowerCase();if(!f)return true;
+  const c=String(cardSp||'').trim();if(!c)return false;
+  return c.toLowerCase()===f||specPointsOf(c).some(p=>p.toLowerCase()===f);
+}
 function getSpecPoints(topic){
   const points=new Set();
-  (topic.cards||[]).forEach(c=>{if(c.sp&&c.sp.trim())points.add(c.sp.trim());});
-  (topic.subtopics||[]).forEach(st=>{(st.cards||[]).forEach(c=>{if(c.sp&&c.sp.trim())points.add(c.sp.trim());});});
+  allCards(topic).forEach(c=>specPointsOf(c.sp).forEach(p=>points.add(p)));
   return[...points].sort(compareSpecPoints);
 }
 
@@ -1780,7 +1819,7 @@ function renderMain(){
     const allC=allCards(t);
     const notedC=allC.filter(c=>c.myNote&&c.myNote.trim()).length;
     const pct=allC.length?Math.round(notedC/allC.length*100):0;
-    const filteredDc=sortCardsBySpec((t.cards||[]).filter(c=>!state.activeSpFilter||(c.sp||'').trim()===state.activeSpFilter.trim()));
+    const filteredDc=sortCardsBySpec((t.cards||[]).filter(c=>spMatches(c.sp,state.activeSpFilter)));
 
     html+=`<div class="topic-block"><div class="topic-header"><span class="topic-label">${esc(t.name)}</span><div class="topic-actions">
       <button class="btn btn-sm" onclick="openPanel('subtopic',null,'${t.id}')">+ Subtopic</button>
@@ -1799,15 +1838,13 @@ function renderMain(){
         const scAll=st.cards||[];
         // Apply both global and subtopic-level filter
         const sc=sortCardsBySpec(scAll.filter(c=>{
-          const globalMatch=!state.activeSpFilter||(c.sp||'').trim()===state.activeSpFilter.trim();
-          const localMatch=!stSpFilter||(c.sp||'').trim()===stSpFilter.trim();
-          return globalMatch&&localMatch;
+          return spMatches(c.sp,state.activeSpFilter)&&spMatches(c.sp,stSpFilter);
         }));
         const sn=scAll.filter(c=>c.myNote&&c.myNote.trim()).length;
         const sp=scAll.length?Math.round(sn/scAll.length*100):0;
 
         // Get spec points for this subtopic only
-        const stSps=[...new Set(scAll.filter(c=>c.sp&&c.sp.trim()).map(c=>c.sp.trim()))].sort(compareSpecPoints);
+        const stSps=[...new Set(scAll.flatMap(c=>specPointsOf(c.sp)))].sort(compareSpecPoints);
 
         html+=`<div class="subtopic-row" id="st-${st.id}">
           <div class="subtopic-header" onclick="toggleSubtopic('${st.id}')">
@@ -3297,6 +3334,8 @@ function afterMove(subId,what){
 const SPEC_NUM='(?:sp\\s*)?[A-Z]{0,2}\\d+(?:\\.\\d+)*[a-z]?';
 const SPEC_ONLY=new RegExp('^'+SPEC_NUM+'$','i');
 const SPEC_LINE=new RegExp('^\\s*('+SPEC_NUM+')[.):]?\\s+(.+)$','i');
+// A leading range or list: "7.18–7.19 …", "7.18-7.19 …", "7.18 to 7.19 …", "7.18, 7.19 …".
+const SPEC_LEAD_MULTI=new RegExp('^('+SPEC_DOTTED+'(?:'+SPEC_JOIN+SPEC_DOTTED2+')+)[.):]?\\s+(.+)$','i');
 const SPEC_LEAD=new RegExp('^('+'(?:sp\\s*)?[A-Z]{0,2}\\d+(?:\\.\\d+)+[a-z]?'+')[.):]?\\s+(.+)$','i');
 // Answer text → the same HTML Quill produces: "-", "*", "•" or "1." lines become
 // list items, and every 2 spaces (or a tab) of indent nests one level deeper.
@@ -3322,7 +3361,7 @@ function answerToHtml(text){
   });
   close();return html;
 }
-function bulkCard(q,a,sp,hint){return{q:String(q||'').trim(),answerText:String(a||'').trim(),sp:String(sp||'').trim(),hint:String(hint||'').trim()};}
+function bulkCard(q,a,sp,hint){return{q:String(q||'').trim(),answerText:String(a||'').trim(),sp:normalizeSp(sp),hint:String(hint||'').trim()};}
 function bulkColumns(parts){
   parts=parts.map(p=>p.trim());
   if(parts.length>=3&&SPEC_ONLY.test(parts[0]))return bulkCard(parts[1],parts[2],parts[0],parts[3]);
@@ -3332,7 +3371,7 @@ function bulkColumns(parts){
 // point is split off); everything after it, blank lines included, is the answer.
 function bulkBlock(b){
   const ls=b.split('\n'),i=ls.findIndex(l=>l.trim());if(i<0)return null;
-  const first=ls[i].trim(),rest=ls.slice(i+1).join('\n'),m=first.match(SPEC_LEAD);
+  const first=ls[i].trim(),rest=ls.slice(i+1).join('\n'),m=first.match(SPEC_LEAD_MULTI)||first.match(SPEC_LEAD);
   return m?bulkCard(m[2],rest,m[1]):bulkCard(first,rest);
 }
 const BULK_SEP=/^[ \t]*---[ \t]*$/;
@@ -3408,7 +3447,7 @@ function renderBulk(){
       <p>Paste or type your cards using <strong>any one</strong> of these layouts. Blurt detects which one you used.</p>
       <div class="bulk-fmt"><div><strong>Columns</strong>: copy two or three columns from Excel, Google Sheets, Word or a website table. Columns are <em>question, answer</em> or <em>spec point, question, answer</em>. You can also type them with <code>|</code> between columns.</div><button class="btn btn-sm" onclick="bulkExample('tabs')">Show example</button></div>
       <div class="bulk-fmt"><div><strong>Q: / A:</strong>: start each question with <code>Q:</code> and its answer with <code>A:</code>. Answers can run over several lines. Optional <code>SP:</code> and <code>Hint:</code> lines.</div><button class="btn btn-sm" onclick="bulkExample('qa')">Show example</button></div>
-      <div class="bulk-fmt"><div><strong>Blocks</strong>: question on the first line, answer on the lines below, and a line with just <code>---</code> between cards. Blank lines inside an answer are kept as spacing. (With no <code>---</code> lines, a blank line separates cards.) Start the question with a spec point like <code>4.1.2</code> to tag it.</div><button class="btn btn-sm" onclick="bulkExample('blocks')">Show example</button></div>
+      <div class="bulk-fmt"><div><strong>Blocks</strong>: question on the first line, answer on the lines below, and a line with just <code>---</code> between cards. Blank lines inside an answer are kept as spacing. (With no <code>---</code> lines, a blank line separates cards.) Start the question with a spec point like <code>4.1.2</code> to tag it. A range like <code>7.18–7.19</code> (or <code>7.18-7.19</code>, <code>7.18 to 7.19</code>, <code>7.18, 7.19</code>) tags the card with each of those points, so it shows up when you filter by any of them.</div><button class="btn btn-sm" onclick="bulkExample('blocks')">Show example</button></div>
       <p class="bulk-note">In answers, lines starting with <code>-</code>, <code>*</code> or <code>1.</code> become bullet or numbered lists. Indent with two spaces to nest. Wrap text in <code>**double stars**</code> for bold or <code>__double underscores__</code> to underline.</p>`
     :`
       <p>Paste the specification points from your exam board's spec (PDF or website). Each line that starts with a number like <code>4.1.2</code> becomes a card, with that number as its spec point and the text as its question.</p>
@@ -3457,7 +3496,7 @@ function planBulk(){
   if(b.headings&&loc.stid&&items.some(i=>i.heading))plan.notes.push('Headings are skipped when adding into a subtopic. Choose a topic to turn them into subtopics.');
   const t=state.subjects.find(s=>s.id===loc.sub).topics.find(t=>t.id===loc.tid);
   const subFor=new Map();
-  const existingSp=list=>new Set((list||[]).map(c=>(c.sp||'').trim().toLowerCase()).filter(Boolean));
+  const existingSp=list=>new Set((list||[]).flatMap(c=>specPointsOf(c.sp)).map(p=>p.toLowerCase()));
   const spSeen=new Map();
   items.forEach(it=>{
     if(it.heading)return;
@@ -3561,9 +3600,10 @@ function searchAll(query){
     section(null,t.name);
     const scan=(c,st)=>{
       const a=plainText(c.answer),n=plainText(c.myNote);
-      const hay=[c.sp,c.q,c.hint,a,n,t.name,st&&st.name,sub.name].join(' ').toLowerCase();
+      const sps=c.sp?specPointsOf(c.sp).join(' '):'';
+      const hay=[c.sp,sps,c.q,c.hint,a,n,t.name,st&&st.name,sub.name].join(' ').toLowerCase();
       if(!terms.every(x=>hay.includes(x)))return;
-      let score=0;terms.forEach(x=>{score+=has(c.q,x)||has(c.sp,x)?4:has(a,x)?2:1;});
+      let score=0;terms.forEach(x=>{score+=has(c.q,x)||has(c.sp,x)||has(sps,x)?4:has(a,x)?2:1;});
       res.push({type:'card',sub,t,st,c,a,n,score:score-(sub.archived?1:0)});
     };
     sortedSubtopics(t.subtopics).forEach(st=>{section(st,st.name);sortCardsBySpec(st.cards||[]).forEach(c=>scan(c,st));});

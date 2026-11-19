@@ -184,7 +184,11 @@ Key functions in `index.html`, grouped by area:
   `naturalCompare` (numeric, case-insensitive), `compareNames` (ignores a
   leading "Topic/Unit/Chapter…" label; numbered names first) via
   `sortedTopics` / `sortedSubtopics`, `compareSpecPoints` / `sortCardsBySpec`
-  for cards, and `sortedSubjects` (A–Z, or newest first via `createdAt`).
+  for cards, and `sortedSubjects`. A card's `sp` may be a range or list
+  ("7.18–7.19", "7.18, 7.19"); `specPointsOf` expands it, and filters, chips
+  (`getSpecPoints`), search and the spec-import duplicate check go through it /
+  `spMatches` rather than comparing `sp` strings. Bulk add normalises ranges
+  with `normalizeSp` (`SPEC_LEAD_MULTI` spots a leading range) (A–Z, or newest first via `createdAt`).
   Within a topic, subtopics come first, then general cards. Don't iterate
   `sub.topics` / `t.subtopics` directly for anything that is displayed.
 - **Study sessions** — `openStudySetup` → `startSession` builds a card queue
