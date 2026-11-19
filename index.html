@@ -1124,9 +1124,18 @@ const Tabs={
     return out;
   }
 };
+// Saved versions (newest first). Older saves had a single 'backup' key, read as a one-item list.
+const BACKUP_KEEP=8;
+const backupList=(l,b)=>Array.isArray(l)?l:(b&&b.state?[b]:[]);
+async function getBackups(){try{const{backups,backup}=await Store.getMany(['backups','backup']);return backupList(backups,backup);}catch(e){return[];}}
 async function saveBackup(s,reason){
-  try{await Store.put({backup:{at:Date.now(),reason,state:JSON.parse(JSON.stringify(s))}});}catch(e){console.error('[Blurt] backup failed',e);}
+  if(!hasContent(s))return;
+  const entry={at:Date.now(),reason,state:JSON.parse(JSON.stringify(s))};
+  try{await Store.tx((get,set)=>get('backups',l=>get('backup',b=>{set('backups',[entry,...backupList(l,b)].slice(0,BACKUP_KEEP));set('backup',null);})));}
+  catch(e){console.error('[Blurt] backup failed',e);}
 }
+// Card ids in a copy of the data.
+function cardIds(s){const ids=new Set();eachCard(s||{},c=>ids.add(c.id));return ids;}
 
 // ── Cloud sync ──
 // The cloud doc (users/{uid}) carries a revision id. This device remembers the
@@ -1166,7 +1175,10 @@ const Sync={
       // Cloud is where this device left it (or empty): push anything outstanding.
       if(!c.exists){syncMeta.synced=true;syncMeta.baseRev=null;if(hasContent(state))syncMeta.dirty=true;}
       if(syncMeta.dirty)this.schedule(0);else this.setStatus('synced');
-    }else if(!syncMeta.dirty||!hasContent(state))adoptCloud(c);
+    }else if(!hasContent(state)||(!syncMeta.dirty&&c.rev))adoptCloud(c);
+    // No rev: written by an old version of Blurt (one still open, or cached, on
+    // another device), which overwrites the cloud with whatever it had. Merge so
+    // nothing this device has is lost, then push the result back up.
     else mergeWithCloud(c);
     this.flushSessions();
   },
@@ -1246,6 +1258,12 @@ function deviceLabel(){
 }
 
 function adoptCloud(c){
+  // Taking the cloud copy should only ever add to this device's data. If it would
+  // drop cards (deleted elsewhere, or a bad write), keep what was here first.
+  if(hasContent(state)){
+    const theirs=cardIds(c.state),gone=[...cardIds(state)].filter(id=>!theirs.has(id)).length;
+    if(gone)saveBackup(cloudState(state),`This device, before taking changes from ${c.device||'another device'} that removed ${gone} card${gone!==1?'s':''}`);
+  }
   replaceState(c.state);
   syncMeta.synced=true;syncMeta.baseRev=c.rev;syncMeta.dirty=false;_editSeq++;
   persistNow();Sync.setStatus('synced');
@@ -1363,8 +1381,8 @@ async function applyImport(inc,name,replace){
   toast(replace?'Replaced your data with the backup.':'Merged the backup into your data.',{action:{label:'Undo',fn:restoreBackup}});
   if(document.getElementById('settingsModal').style.display==='flex')renderSettingsData();
 }
-async function restoreBackup(){
-  let b;try{b=await Store.get('backup');}catch(e){}
+async function restoreBackup(i){
+  const b=(await getBackups())[i||0];
   if(!b||!b.state){toast('There is no saved version to restore.');return;}
   const cur=cloudState(state);
   touchAll(b.state);replaceState(b.state);
@@ -1373,9 +1391,9 @@ async function restoreBackup(){
   toast('Restored the saved version.');
   if(document.getElementById('settingsModal').style.display==='flex')renderSettingsData();
 }
-function confirmRestore(){
-  showChoice({title:'Restore saved version?',text:'This replaces your current data (on every synced device) with the saved version. Your current data becomes the new saved version, so you can switch back.',
-    buttons:[{label:'Cancel'},{label:'Restore',cls:'btn-primary',fn:restoreBackup}]});
+function confirmRestore(i){
+  showChoice({title:'Restore saved version?',text:'This replaces your current data (on every synced device) with the saved version. Your current data is saved as a version too, so you can switch back.',
+    buttons:[{label:'Cancel'},{label:'Restore',cls:'btn-primary',fn:()=>restoreBackup(i)}]});
 }
 
 // ── Sync status, toasts and small dialogs ──
@@ -1526,7 +1544,7 @@ async function shrinkImages(btn){
 async function renderSettingsData(){
   const el=document.getElementById('settingsData');if(!el)return;
   const bytes=jsonBytes(cloudJSON(state)),pct=Math.round(bytes/CLOUD_LIMIT*100),img=imageStats();
-  let backup=null;try{backup=await Store.get('backup');}catch(e){}
+  const backups=await getBackups();
   el.innerHTML=`
     <div class="settings-group"><div class="settings-group-title">Storage</div>
       <div class="settings-group-desc">Cloud sync fits about 1 MB. Images take up most of the space.</div>
@@ -1542,8 +1560,10 @@ async function renderSettingsData(){
       <div class="settings-card">
         <div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Export a backup</div><div class="settings-row-desc">Saves everything to a file on this device.</div></div><button class="btn btn-sm" onclick="exportData()">Export</button></div>
         <div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Import a backup</div><div class="settings-row-desc">You choose whether to merge it with your data or replace it.</div></div><button class="btn btn-sm" onclick="document.getElementById('importFile').click()">Import…</button></div>
-        ${backup&&backup.state?`<div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">Saved version</div><div class="settings-row-desc">${esc(backup.reason)} · ${esc(new Date(backup.at).toLocaleString())} · ${countCards(backup.state)} cards</div></div><button class="btn btn-sm" onclick="confirmRestore()">Restore</button></div>`:''}
-      </div></div>`;
+      </div></div>
+    ${backups.length?`<div class="settings-group"><div class="settings-group-title">Saved versions</div>
+      <div class="settings-group-desc">Blurt keeps a copy of your data before anything replaces or removes a lot of it: deleting a topic, merging or taking changes from another device, importing or restoring. The newest ${BACKUP_KEEP} are kept on this device.</div>
+      <div class="settings-card">${backups.map((b,i)=>`<div class="settings-row"><div class="settings-row-text"><div class="settings-row-title">${esc(new Date(b.at).toLocaleString())} · ${countCards(b.state)} cards</div><div class="settings-row-desc">${esc(b.reason)}</div></div><button class="btn btn-sm" onclick="confirmRestore(${i})">Restore</button></div>`).join('')}</div></div>`:''}`;
 }
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -2658,14 +2678,26 @@ function initBlurtEditors(){
   });
 }
 
+// Deleting something that holds cards asks first (Cancel is focused, so a stray
+// Enter can't confirm it) and keeps a saved version of the data from just before.
+function confirmBigDelete(what,n,go){
+  if(!n){go();return;}
+  showChoice({title:'Delete '+what.kind+'?',text:`<strong>${esc(what.name)}</strong> has ${n} card${n!==1?'s':''}. Deleting it deletes ${n!==1?'them':'it'} on all your devices.<br><br>You can undo straight after, and a copy is kept in Settings › Data &amp; sync › Saved versions.`,
+    buttons:[{label:'Cancel'},{label:`Delete ${n} card${n!==1?'s':''}`,cls:'btn-danger',fn:()=>{saveBackup(cloudState(state),`Before deleting the ${what.kind} “${clip(what.name,40)}” (${n} card${n!==1?'s':''})`);go();}}]});
+}
+function topicCardCount(t){return allCards(t).length;}
 function deleteSubject(id){
   const sub=state.subjects.find(s=>s.id===id);if(!sub)return;
-  if(!confirm(`Delete “${sub.name}” and everything in it?`))return;
-  removeWithUndo({kind:'subjects'},id,`“${clip(sub.name,40)}”`);
-  const wasActive=state.activeSubId===id;
-  if(wasActive){state.activeSubId=null;state.activeTopicId=null;}
-  save();renderSidebar();
-  if(wasActive)showHome('Subject deleted');
+  const n=(sub.topics||[]).reduce((a,t)=>a+topicCardCount(t),0);
+  const go=()=>{
+    removeWithUndo({kind:'subjects'},id,`“${clip(sub.name,40)}”`);
+    const wasActive=state.activeSubId===id;
+    if(wasActive){state.activeSubId=null;state.activeTopicId=null;}
+    save();renderSidebar();
+    if(wasActive)showHome('Subject deleted');
+  };
+  if(n)confirmBigDelete({kind:'subject',name:sub.name},n,go);
+  else showChoice({title:'Delete subject?',text:`Delete <strong>${esc(sub.name)}</strong>? It has no cards.`,buttons:[{label:'Cancel'},{label:'Delete',cls:'btn-danger',fn:go}]});
 }
 function showHome(title){
   document.getElementById('topbarTitle').textContent='Welcome to Blurt';
@@ -2676,15 +2708,19 @@ function showHome(title){
 function deleteTopic(tid){
   const sub=activeSubject();if(!sub)return;
   const t=(sub.topics||[]).find(t=>t.id===tid);if(!t)return;
-  removeWithUndo({kind:'topics',sub:sub.id},tid,`topic “${clip(t.name,40)}”`);
-  if(state.activeTopicId===tid)state.activeTopicId=null;
-  save();renderMain();
+  confirmBigDelete({kind:'topic',name:t.name},topicCardCount(t),()=>{
+    removeWithUndo({kind:'topics',sub:sub.id},tid,`topic “${clip(t.name,40)}”`);
+    if(state.activeTopicId===tid)state.activeTopicId=null;
+    save();renderMain();
+  });
 }
 function deleteSubtopic(tid,stid){
   const sub=activeSubject();if(!sub)return;
   const t=(sub.topics||[]).find(t=>t.id===tid),st=t&&(t.subtopics||[]).find(s=>s.id===stid);if(!st)return;
-  removeWithUndo({kind:'subtopics',sub:sub.id,tid},stid,`subtopic “${clip(st.name,40)}”`);
-  save();renderMain();
+  confirmBigDelete({kind:'subtopic',name:st.name},(st.cards||[]).length,()=>{
+    removeWithUndo({kind:'subtopics',sub:sub.id,tid},stid,`subtopic “${clip(st.name,40)}”`);
+    save();renderMain();
+  });
 }
 function deleteCard(tid,cid,stid){
   const sub=activeSubject();if(!sub)return;
@@ -3727,7 +3763,7 @@ const HELP_GUIDES=[
   ['Moving, copying and archiving','<p><b>Move a card</b>: edit it and change “Location”. <b>Copy a card</b>: edit it and press “Save as copy”, which keeps the original as it was. Topics and subtopics can be moved the same way from their edit panels.</p><p><b>Archive a subject</b> you have finished with from its Edit panel. It moves to “Archived” at the bottom of the sidebar, still searchable, and can be brought back any time.</p><p>Deleted something by mistake? Every delete shows an <b>Undo</b> button for a few seconds.</p>'],
   ['Formulas and equations','<p>In any answer or note: <kbd>Ctrl</kbd>+<kbd>,</kbd> starts subscript (type the 2 in H₂O, press it again to stop), <kbd>Ctrl</kbd>+<kbd>.</kbd> does the same for superscript (Na⁺, x²). <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> adds a <b>prescript</b>, numbers stacked before a symbol like ¹⁴₆C: type the top number, Tab, the bottom number, Enter, then the symbol. Click a prescript to change or remove it. The buttons are also on the answer toolbar, and the keys can be changed in Keyboard shortcuts.</p>'],
   ['Study sessions','<p>Press <b>Study</b>, pick topics, then for each card write everything you remember and press <b>Show answer</b> (<kbd>Ctrl</kbd>+<kbd>Enter</kbd>, or <kbd>Cmd</kbd>+<kbd>Enter</kbd> on a Mac, straight from your answer box). Your answer and the model answer appear side by side with the key terms highlighted. Rate yourself with the buttons or <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>. Weak areas on the subject page show where you struggle most.</p>'],
-  ['Sync and backups','<p>Sign in with Google to sync across devices. Edits made on two devices at once are merged, and the sidebar shows whether everything has synced. In Data &amp; sync you can export a backup file, import one, and restore the last version Blurt replaced.</p>']
+  ['Sync and backups','<p>Sign in with Google to sync across devices. Edits made on two devices at once are merged, and the sidebar shows whether everything has synced. In Data &amp; sync you can export a backup file, import one, and restore one of the saved versions Blurt keeps before anything replaces or removes a lot of your data (deleting a topic, taking changes from another device, importing).</p>']
 ];
 function renderSettingsHelp(){
   const el=document.getElementById('settingsHelp');if(!el)return;

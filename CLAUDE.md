@@ -100,7 +100,13 @@ Key functions in `index.html`, grouped by area:
   `adoptCloud`; device with edits → `mergeWithCloud` (`mergeStates`: per-item
   newest `updatedAt`/`noteAt` wins, histories combine, tombstones respected).
   Whatever gets replaced is saved via `saveBackup` and can be restored
-  (`restoreBackup`, toast "Undo", Settings). Failed writes retry with backoff;
+  (`restoreBackup(i)`, toast "Undo", Settings). Saved versions are a list
+  (IDB key `backups`, newest first, `BACKUP_KEEP`; the old single `backup` key
+  is read as a one-item list by `getBackups`). `adoptCloud` saves one first if
+  the cloud copy would remove any card, and a cloud doc **without a `rev`** (an
+  old app version's blind write) is always merged, never adopted. Deleting a
+  subject/topic/subtopic with cards goes through `confirmBigDelete` (in-app
+  dialog, Cancel focused, saved version first). Failed writes retry with backoff;
   `renderSyncStatus` drives the sidebar indicator and the top banner. Session
   summaries queue in `syncMeta.pendingSessions` until they upload. Writes over
   `CLOUD_LIMIT` (~1 MB, Firestore's per-doc cap) are refused with a visible
